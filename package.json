@@ -2,9 +2,8 @@
   "name": "tangentsdk",
   "version": "1.0.0",
   "description": "TypeScript SDK for Tangent Cash",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
-  "index": "dist/index.js",
   "scripts": {
     "build": "tsc"
   },
