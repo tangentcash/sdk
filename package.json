@@ -4,7 +4,7 @@
   "description": "TypeScript SDK for Tangent Cash",
   "main": "index.js",
   "license": "MIT",
-  "index": "src/index.ts",
+  "index": "dist/index.js",
   "scripts": {
     "build": "tsc"
   },
