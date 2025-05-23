@@ -1,4 +1,4 @@
-import { AssetId, ByteUtil, Chain, Hashing, Pubkey, Pubkeyhash, Seckey, Recsighash, Uint256 } from "./algorithm";
+import { AssetId, ByteUtil, Chain, Hashing, Pubkey, Pubkeyhash, Seckey, Recsighash, Uint256, Subpubkeyhash } from "./algorithm";
 import { TextUtil } from "./text";
 import BigNumber from "bignumber.js";
 BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
@@ -405,6 +405,16 @@ export class SchemaUtil {
                     stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
+                case 'subpubkeyhash': {
+                    if (!value) {
+                        stream.writeString('');
+                        break;
+                    }
+                    else if (!(value instanceof Subpubkeyhash))
+                        throw new TypeError('field ' + field + ' is not of type subpubkeyhash');
+                    stream.writeBinaryStringOptimized(value.data);
+                    break;
+                }
                 case 'assetid': {
                     if (!(value instanceof AssetId))
                         throw new TypeError('field ' + field + ' is not of type assetid');
@@ -487,6 +497,11 @@ export class SchemaUtil {
                     value = stream.readBinaryString(subtype);
                     if (value != null)
                         value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
+                    break;
+                case 'subpubkeyhash':
+                    value = stream.readBinaryString(subtype);
+                    if (value != null)
+                        value = new Subpubkeyhash(value.length == Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, new Array(Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
                     break;
                 case 'assetid':
                     value = stream.readInteger(subtype);

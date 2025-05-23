@@ -58,6 +58,7 @@ Chain.size = {
     SECKEY: 32,
     PUBKEY: 33,
     PUBKEYHASH: 20,
+    SUBPUBKEYHASH: 40,
     ASSETID: 32,
     MESSAGE: 0xffffff
 };
@@ -410,6 +411,24 @@ export class Pubkeyhash {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
+export class Subpubkeyhash {
+    constructor(data) {
+        let result = null;
+        if (data != null) {
+            if (typeof data == 'string')
+                result = ByteUtil.hexStringToUint8Array(data);
+            else if (data instanceof Uint8Array)
+                result = data;
+        }
+        if (!result || result.length != Chain.size.SUBPUBKEYHASH)
+            this.data = new Uint8Array(Chain.size.SUBPUBKEYHASH);
+        else
+            this.data = result;
+    }
+    equals(value) {
+        return ByteUtil.uint8ArrayCompare(this.data, value.data);
+    }
+}
 export class AssetId {
     constructor(data) {
         if (typeof data == 'number') {
@@ -722,25 +741,20 @@ export class Signing {
     }
     static decodeAddress(value) {
         const result = this.decodeSubaddress(value);
-        return result ? result.publicKeyHash : null;
+        return result ? new Pubkeyhash(result.data.slice(0, Chain.size.PUBKEYHASH)) : null;
     }
     static decodeSubaddress(value) {
         let result = Segwit.decode(Chain.props.ADDRESS_PREFIX, value);
-        if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.PUBKEYHASH * 2))
+        if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.SUBPUBKEYHASH))
             return null;
-        let out = {
-            publicKeyHash: new Pubkeyhash(),
-            derivationHash: null
-        };
-        out.publicKeyHash.data = result.program.slice(0, Chain.size.PUBKEYHASH);
-        if (result.program.length == Chain.size.PUBKEYHASH * 2) {
-            out.derivationHash = new Pubkeyhash();
-            out.derivationHash.data = result.program.slice(Chain.size.PUBKEYHASH);
-            for (let i = 0; i < out.publicKeyHash.data.length; i++) {
-                out.publicKeyHash.data[i] ^= out.derivationHash.data[i];
+        let subPublicKeyHash = new Subpubkeyhash();
+        subPublicKeyHash.data = result.program.length == Chain.size.SUBPUBKEYHASH ? result.program : Uint8Array.from([...result.program, new Array(Chain.size.SUBPUBKEYHASH - result.program.length).fill(0)]);
+        if (result.program.length > Chain.size.PUBKEYHASH) {
+            for (let i = 0; i < subPublicKeyHash.data.length; i++) {
+                subPublicKeyHash.data[i] ^= subPublicKeyHash.data[i + Chain.size.PUBKEYHASH];
             }
         }
-        return out;
+        return subPublicKeyHash;
     }
     static encodeAddress(publicKeyHash) {
         return this.encodeSubaddress(publicKeyHash);

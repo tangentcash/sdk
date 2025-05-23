@@ -21,6 +21,7 @@ export declare class Chain {
         SECKEY: number;
         PUBKEY: number;
         PUBKEYHASH: number;
+        SUBPUBKEYHASH: number;
         ASSETID: number;
         MESSAGE: number;
     };
@@ -101,6 +102,11 @@ export declare class Pubkeyhash {
     constructor(data?: string | Uint8Array);
     equals(value: Pubkeyhash): boolean;
 }
+export declare class Subpubkeyhash {
+    data: Uint8Array;
+    constructor(data?: string | Uint8Array);
+    equals(value: Pubkeyhash): boolean;
+}
 export declare class AssetId {
     id: number | string;
     handle: string;
@@ -150,10 +156,7 @@ export declare class Signing {
     static decodePublicKey(value: string): Seckey | null;
     static encodePublicKey(publicKey: Pubkey): string | null;
     static decodeAddress(value: string): Pubkeyhash | null;
-    static decodeSubaddress(value: string): {
-        publicKeyHash: Pubkeyhash;
-        derivationHash: Pubkeyhash | null;
-    } | null;
+    static decodeSubaddress(value: string): Subpubkeyhash | null;
     static encodeAddress(publicKeyHash: Pubkeyhash): string | null;
     static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null;
     static derivationHashOf(data: Uint8Array): Pubkeyhash;
