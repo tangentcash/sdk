@@ -774,12 +774,12 @@ export class Signing {
         return publicKeyHash ? this.encodeAddress(publicKeyHash) : null;
     }
     static maskAddressOf(address, derivation) {
-        const publicKeyHash = this.decodeAddress(address);
-        if (!publicKeyHash)
+        const subPublicKeyHash = this.decodeSubaddress(address);
+        if (!subPublicKeyHash)
             return null;
         else if (!derivation)
-            return new Subpubkeyhash(Uint8Array.from([...publicKeyHash.data, ...new Array(Chain.size.PUBKEYHASH).fill(0)]));
-        const subaddress = Signing.encodeSubaddress(publicKeyHash, Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
+            return subPublicKeyHash;
+        const subaddress = Signing.encodeSubaddress(new Pubkeyhash(subPublicKeyHash.data.slice(0, Chain.size.PUBKEYHASH)), Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
         return subaddress ? Signing.decodeSubaddress(subaddress) : null;
     }
     static derivationHashOf(data) {
