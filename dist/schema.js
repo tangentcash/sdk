@@ -90,7 +90,7 @@ export var Transactions;
         class One extends Ledger.Transaction {
             constructor() {
                 super(...arguments);
-                this.to = 'pubkeyhash';
+                this.to = 'subpubkeyhash';
                 this.value = 'decimal';
             }
             getType() { return One.typename; }
@@ -101,7 +101,7 @@ export var Transactions;
             constructor() {
                 super(...arguments);
                 this.to = [
-                    'to', 'pubkeyhash',
+                    'to', 'subpubkeyhash',
                     'value', 'decimal'
                 ];
             }

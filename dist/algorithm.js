@@ -769,6 +769,19 @@ export class Signing {
         }
         return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, data);
     }
+    static baseAddressOf(address) {
+        const publicKeyHash = this.decodeAddress(address);
+        return publicKeyHash ? this.encodeAddress(publicKeyHash) : null;
+    }
+    static maskAddressOf(address, derivation) {
+        const publicKeyHash = this.decodeAddress(address);
+        if (!publicKeyHash)
+            return null;
+        else if (!derivation)
+            return new Subpubkeyhash(publicKeyHash.data.slice(0, Chain.size.PUBKEYHASH));
+        const subaddress = Signing.encodeSubaddress(publicKeyHash, Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
+        return subaddress ? Signing.decodeSubaddress(subaddress) : null;
+    }
     static derivationHashOf(data) {
         const result = new Pubkeyhash();
         result.data = Hashing.hash160(data);

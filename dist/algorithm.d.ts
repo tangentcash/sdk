@@ -159,6 +159,8 @@ export declare class Signing {
     static decodeSubaddress(value: string): Subpubkeyhash | null;
     static encodeAddress(publicKeyHash: Pubkeyhash): string | null;
     static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null;
+    static baseAddressOf(address: string): string | null;
+    static maskAddressOf(address: string, derivation: string | null): Subpubkeyhash | null;
     static derivationHashOf(data: Uint8Array): Pubkeyhash;
 }
 export declare class Hashing {
