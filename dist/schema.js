@@ -90,9 +90,8 @@ export var Transactions;
         class One extends Ledger.Transaction {
             constructor() {
                 super(...arguments);
-                this.memo = 'string';
-                this.value = 'decimal';
                 this.to = 'pubkeyhash';
+                this.value = 'decimal';
             }
             getType() { return One.typename; }
         }
@@ -102,9 +101,8 @@ export var Transactions;
             constructor() {
                 super(...arguments);
                 this.to = [
-                    'memo', 'uint32',
-                    'value', 'decimal',
-                    'to', 'pubkeyhash'
+                    'to', 'pubkeyhash',
+                    'value', 'decimal'
                 ];
             }
             getType() { return Many.typename; }

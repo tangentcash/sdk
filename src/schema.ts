@@ -70,9 +70,8 @@ export namespace Transactions {
   export namespace Transfer {
     export class One extends Ledger.Transaction {
       static typename: string = 'transfer';
-      memo: string = 'string';
-      value: string = 'decimal';
       to: string = 'pubkeyhash';
+      value: string = 'decimal';
   
       getType() { return One.typename; }
     }
@@ -80,9 +79,8 @@ export namespace Transactions {
     export class Many extends Ledger.Transaction {
       static typename: string = 'transfer';
       to: string[] = [
-        'memo', 'uint32',
-        'value', 'decimal',
-        'to', 'pubkeyhash'
+        'to', 'pubkeyhash',
+        'value', 'decimal'
       ];
   
       getType() { return Many.typename; }

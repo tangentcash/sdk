@@ -50,9 +50,8 @@ export declare namespace Transactions {
     namespace Transfer {
         class One extends Ledger.Transaction {
             static typename: string;
-            memo: string;
-            value: string;
             to: string;
+            value: string;
             getType(): string;
         }
         class Many extends Ledger.Transaction {
