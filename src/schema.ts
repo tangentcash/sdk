@@ -70,7 +70,7 @@ export namespace Transactions {
   export namespace Transfer {
     export class One extends Ledger.Transaction {
       static typename: string = 'transfer';
-      to: string = 'pubkeyhash';
+      to: string = 'subpubkeyhash';
       value: string = 'decimal';
   
       getType() { return One.typename; }
@@ -79,7 +79,7 @@ export namespace Transactions {
     export class Many extends Ledger.Transaction {
       static typename: string = 'transfer';
       to: string[] = [
-        'to', 'pubkeyhash',
+        'to', 'subpubkeyhash',
         'value', 'decimal'
       ];
   
