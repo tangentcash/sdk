@@ -728,22 +728,32 @@ export class Signing {
         let result = Segwit.decode(Chain.props.ADDRESS_PREFIX, value);
         if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.PUBKEYHASH * 2))
             return null;
-        let data = {
+        let out = {
             publicKeyHash: new Pubkeyhash(),
             derivationHash: null
         };
-        data.publicKeyHash.data = result.program.slice(0, Chain.size.PUBKEYHASH);
+        out.publicKeyHash.data = result.program.slice(0, Chain.size.PUBKEYHASH);
         if (result.program.length == Chain.size.PUBKEYHASH * 2) {
-            data.derivationHash = new Pubkeyhash();
-            data.derivationHash.data = result.program.slice(Chain.size.PUBKEYHASH);
+            out.derivationHash = new Pubkeyhash();
+            out.derivationHash.data = result.program.slice(Chain.size.PUBKEYHASH);
+            for (let i = 0; i < out.publicKeyHash.data.length; i++) {
+                out.publicKeyHash.data[i] ^= out.derivationHash.data[i];
+            }
         }
-        return data;
+        return out;
     }
     static encodeAddress(publicKeyHash) {
         return this.encodeSubaddress(publicKeyHash);
     }
     static encodeSubaddress(publicKeyHash, derivationHash) {
-        return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, derivationHash != null ? Uint8Array.from([...publicKeyHash.data, ...derivationHash.data]) : publicKeyHash.data);
+        let data = publicKeyHash.data;
+        if (derivationHash != null) {
+            data = Uint8Array.from([...publicKeyHash.data, ...derivationHash.data]);
+            for (let i = 0; i < publicKeyHash.data.length; i++) {
+                data[i] ^= derivationHash.data[i];
+            }
+        }
+        return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, data);
     }
     static derivationHashOf(data) {
         const result = new Pubkeyhash();
