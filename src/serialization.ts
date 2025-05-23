@@ -538,27 +538,27 @@ export class SchemaUtil {
         case 'recsighash':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Recsighash(value.length == Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, new Array(Chain.size.RECSIGHASH - value.length).fill(0)]));
+            value = new Recsighash(value.length == Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.RECSIGHASH - value.length).fill(0)]));
           break;
         case 'seckey':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Seckey(value.length == Chain.size.SECKEY ? value : Uint8Array.from([...value, new Array(Chain.size.SECKEY - value.length).fill(0)]));
+            value = new Seckey(value.length == Chain.size.SECKEY ? value : Uint8Array.from([...value, ...new Array(Chain.size.SECKEY - value.length).fill(0)]));
           break;
         case 'pubkey':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Pubkey(value.length == Chain.size.PUBKEY ? value : Uint8Array.from([...value, new Array(Chain.size.PUBKEY - value.length).fill(0)]));
+            value = new Pubkey(value.length == Chain.size.PUBKEY ? value : Uint8Array.from([...value, ...new Array(Chain.size.PUBKEY - value.length).fill(0)]));
           break;
         case 'pubkeyhash':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
+            value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
           break;
         case 'subpubkeyhash':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Subpubkeyhash(value.length == Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, new Array(Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
+            value = new Subpubkeyhash(value.length == Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
           break;
         case 'assetid':
           value = stream.readInteger(subtype);
