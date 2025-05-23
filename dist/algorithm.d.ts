@@ -150,7 +150,13 @@ export declare class Signing {
     static decodePublicKey(value: string): Seckey | null;
     static encodePublicKey(publicKey: Pubkey): string | null;
     static decodeAddress(value: string): Pubkeyhash | null;
+    static decodeSubaddress(value: string): {
+        publicKeyHash: Pubkeyhash;
+        derivationHash: Pubkeyhash | null;
+    } | null;
     static encodeAddress(publicKeyHash: Pubkeyhash): string | null;
+    static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null;
+    static derivationHashOf(data: Uint8Array): Pubkeyhash;
 }
 export declare class Hashing {
     static hash32(data: Uint8Array): number;

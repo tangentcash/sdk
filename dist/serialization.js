@@ -87,6 +87,12 @@ export class Stream {
         }
         return this;
     }
+    writeBinaryStringOptimized(value) {
+        let size = value.length;
+        while (size > 0 && !value[size - 1])
+            --size;
+        return size > 0 ? this.writeBinaryString(value.slice(0, size)) : this.writeString('');
+    }
     writeDecimal(value) {
         if (value.isNaN()) {
             let type = Viewable.DecimalNaN;
@@ -374,19 +380,19 @@ export class SchemaUtil {
                 case 'recsighash': {
                     if (!(value instanceof Recsighash))
                         throw new TypeError('field ' + field + ' is not of type recsighash');
-                    stream.writeBinaryString(value.data);
+                    stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'seckey': {
                     if (!(value instanceof Seckey))
                         throw new TypeError('field ' + field + ' is not of type seckey');
-                    stream.writeBinaryString(value.data);
+                    stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'pubkey': {
                     if (!(value instanceof Pubkey))
                         throw new TypeError('field ' + field + ' is not of type pubkey');
-                    stream.writeBinaryString(value.data);
+                    stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'pubkeyhash': {
@@ -396,12 +402,7 @@ export class SchemaUtil {
                     }
                     else if (!(value instanceof Pubkeyhash))
                         throw new TypeError('field ' + field + ' is not of type pubkeyhash');
-                    let nonZero = 0;
-                    value.data.forEach((v) => { nonZero += v != 0 ? 1 : 0; });
-                    if (nonZero > 0)
-                        stream.writeBinaryString(value.data);
-                    else
-                        stream.writeString('');
+                    stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'assetid': {
@@ -470,22 +471,22 @@ export class SchemaUtil {
                 case 'recsighash':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Recsighash(value);
+                        value = new Recsighash(value.length == Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, new Array(Chain.size.RECSIGHASH - value.length).fill(0)]));
                     break;
                 case 'seckey':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Seckey(value);
+                        value = new Seckey(value.length == Chain.size.SECKEY ? value : Uint8Array.from([...value, new Array(Chain.size.SECKEY - value.length).fill(0)]));
                     break;
                 case 'pubkey':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Pubkey(value);
+                        value = new Pubkey(value.length == Chain.size.PUBKEY ? value : Uint8Array.from([...value, new Array(Chain.size.PUBKEY - value.length).fill(0)]));
                     break;
                 case 'pubkeyhash':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Pubkeyhash(value);
+                        value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
                     break;
                 case 'assetid':
                     value = stream.readInteger(subtype);

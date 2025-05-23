@@ -28,6 +28,7 @@ export declare class Stream {
     rewind(offset?: number): Stream;
     writeString(value: string): Stream;
     writeBinaryString(value: Uint8Array): Stream;
+    writeBinaryStringOptimized(value: Uint8Array): Stream;
     writeDecimal(value: BigNumber): Stream;
     writeInteger(value: Uint256 | number): Stream;
     writeBoolean(value: boolean): Stream;
