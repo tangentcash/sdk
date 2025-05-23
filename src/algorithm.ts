@@ -835,7 +835,7 @@ export class Signing {
     if (!publicKeyHash)
       return null;
     else if (!derivation)
-      return new Subpubkeyhash(publicKeyHash.data.slice(0, Chain.size.PUBKEYHASH));
+      return new Subpubkeyhash(Uint8Array.from([publicKeyHash.data.slice(0, Chain.size.PUBKEYHASH), new Array(Chain.size.PUBKEYHASH).fill(0)]));
 
     const subaddress = Signing.encodeSubaddress(publicKeyHash, Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
     return subaddress ? Signing.decodeSubaddress(subaddress) : null;
