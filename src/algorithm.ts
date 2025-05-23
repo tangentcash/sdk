@@ -773,16 +773,35 @@ export class Signing {
     return Segwit.encode(Chain.props.PUBKEY_PREFIX, Chain.props.PUBKEY_VERSION, publicKey.data);
   }
   static decodeAddress(value: string): Pubkeyhash | null {
+    const result = this.decodeSubaddress(value);
+    return result ? result.publicKeyHash : null;
+  }
+  static decodeSubaddress(value: string): { publicKeyHash: Pubkeyhash, derivationHash: Pubkeyhash | null } | null {
     let result = Segwit.decode(Chain.props.ADDRESS_PREFIX, value);
-    if (!result || result.version != Chain.props.ADDRESS_VERSION || result.program.length != Chain.size.PUBKEYHASH)
+    if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.PUBKEYHASH * 2))
       return null;
 
-    let publicKeyHash = new Pubkeyhash();
-    publicKeyHash.data = result.program;
-    return publicKeyHash;
+    let data: { publicKeyHash: Pubkeyhash, derivationHash: Pubkeyhash | null } = {
+      publicKeyHash: new Pubkeyhash(),
+      derivationHash: null
+    };
+    data.publicKeyHash.data = result.program.slice(0, Chain.size.PUBKEYHASH);
+    if (result.program.length == Chain.size.PUBKEYHASH * 2) {
+      data.derivationHash = new Pubkeyhash();
+      data.derivationHash.data = result.program.slice(Chain.size.PUBKEYHASH);
+    }
+    return data;
   }
   static encodeAddress(publicKeyHash: Pubkeyhash): string | null {
-    return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, publicKeyHash.data);
+    return this.encodeSubaddress(publicKeyHash);
+  }
+  static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null {
+    return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, derivationHash != null ? Uint8Array.from([...publicKeyHash.data, ...derivationHash.data]) : publicKeyHash.data);
+  }
+  static derivationHashOf(data: Uint8Array): Pubkeyhash {
+    const result = new Pubkeyhash();
+    result.data = Hashing.hash160(data);
+    return result;
   }
 }
 
