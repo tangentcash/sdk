@@ -774,8 +774,9 @@ export class RPC {
     }
     static clearCache() {
         if (this.onCacheKeys != null && this.onCacheStore != null) {
-            for (let key in this.onCacheKeys()) {
-                this.onCacheStore(key);
+            const keys = this.onCacheKeys();
+            for (let key in keys) {
+                this.onCacheStore(keys[key]);
             }
         }
     }
