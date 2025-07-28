@@ -66,6 +66,10 @@ export var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
+    class ValidatorProduction {
+    }
+    ValidatorProduction.typename = 'validator_production';
+    States.ValidatorProduction = ValidatorProduction;
     class DepositoryBalance {
     }
     DepositoryBalance.typename = 'depository_balance';
@@ -110,6 +114,31 @@ export var Transactions;
         Many.typename = 'transfer';
         Transfer.Many = Many;
     })(Transfer = Transactions.Transfer || (Transactions.Transfer = {}));
+    let Refuel;
+    (function (Refuel) {
+        class One extends Ledger.Transaction {
+            constructor() {
+                super(...arguments);
+                this.to = 'subpubkeyhash';
+                this.value = 'uint256';
+            }
+            getType() { return One.typename; }
+        }
+        One.typename = 'refuel';
+        Refuel.One = One;
+        class Many extends Ledger.Transaction {
+            constructor() {
+                super(...arguments);
+                this.to = [
+                    'to', 'subpubkeyhash',
+                    'value', 'uint256'
+                ];
+            }
+            getType() { return Many.typename; }
+        }
+        Many.typename = 'refuel';
+        Refuel.Many = Many;
+    })(Refuel = Transactions.Refuel || (Transactions.Refuel = {}));
     class Rollup extends Ledger.Transaction {
         getType() { return Rollup.typename; }
     }

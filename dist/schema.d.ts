@@ -33,6 +33,9 @@ export declare namespace States {
     class AccountBalance {
         static typename: string;
     }
+    class ValidatorProduction {
+        static typename: string;
+    }
     class DepositoryBalance {
         static typename: string;
     }
@@ -48,6 +51,19 @@ export declare namespace States {
 }
 export declare namespace Transactions {
     namespace Transfer {
+        class One extends Ledger.Transaction {
+            static typename: string;
+            to: string;
+            value: string;
+            getType(): string;
+        }
+        class Many extends Ledger.Transaction {
+            static typename: string;
+            to: string[];
+            getType(): string;
+        }
+    }
+    namespace Refuel {
         class One extends Ledger.Transaction {
             static typename: string;
             to: string;

@@ -25,6 +25,7 @@ export type SummaryState = {
             supply: BigNumber;
             reserve: BigNumber;
         }>>;
+        refuels: Record<string, BigNumber>;
         fees: Record<string, Record<string, {
             asset: AssetId;
             fee: BigNumber;

@@ -98,6 +98,7 @@ export class EventResolver {
         const result = {
             account: {
                 balances: {},
+                refuels: {},
                 fees: {}
             },
             depository: {
@@ -178,6 +179,19 @@ export class EventResolver {
                         const feeState = result.account.fees[ownerAddress][asset.handle];
                         balanceState.supply = balanceState.supply.plus(fee);
                         feeState.fee = feeState.fee.plus(fee);
+                    }
+                    break;
+                }
+                case Types.ValidatorProduction: {
+                    if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && event.args[2] instanceof BigNumber) {
+                        const [from, mint_or_burn, value] = event.args;
+                        const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
+                        if (!result.account.refuels[fromAddress])
+                            result.account.refuels[fromAddress] = new BigNumber(0);
+                        if (mint_or_burn)
+                            result.account.refuels[fromAddress] = result.account.refuels[fromAddress].plus(value);
+                        else
+                            result.account.refuels[fromAddress] = result.account.refuels[fromAddress].minus(value);
                     }
                     break;
                 }
