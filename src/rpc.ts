@@ -23,7 +23,8 @@ export type ClearCallback = () => any;
 export type SummaryState = {
   account: {
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber, reserve: BigNumber }>>,
-    fees: Record<string, Record<string, { asset: AssetId, fee: BigNumber }>>,
+    refuels: Record<string, BigNumber>,
+    fees: Record<string, Record<string, { asset: AssetId, fee: BigNumber }>>
   },
   depository: {
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber }>>,
@@ -177,6 +178,7 @@ export class EventResolver {
     const result: SummaryState = {
       account: {
         balances: { },
+        refuels: { },
         fees: { }
       },
       depository: {
@@ -264,6 +266,19 @@ export class EventResolver {
             const feeState = result.account.fees[ownerAddress][asset.handle];
             balanceState.supply = balanceState.supply.plus(fee);
             feeState.fee = feeState.fee.plus(fee);
+          }
+          break;
+        }
+        case Types.ValidatorProduction: {
+          if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && event.args[2] instanceof BigNumber) {
+            const [from, mint_or_burn, value] = event.args;
+            const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
+            if (!result.account.refuels[fromAddress])
+              result.account.refuels[fromAddress] = new BigNumber(0);
+            if (mint_or_burn)
+              result.account.refuels[fromAddress] = result.account.refuels[fromAddress].plus(value);
+            else
+              result.account.refuels[fromAddress] = result.account.refuels[fromAddress].minus(value);
           }
           break;
         }

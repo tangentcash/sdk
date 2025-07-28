@@ -49,6 +49,10 @@ export namespace States {
     static typename: string = 'account_balance';
   }
 
+  export class ValidatorProduction {
+    static typename: string = 'validator_production';
+  }
+
   export class DepositoryBalance {
     static typename: string = 'depository_balance';
   }
@@ -81,6 +85,26 @@ export namespace Transactions {
       to: string[] = [
         'to', 'subpubkeyhash',
         'value', 'decimal'
+      ];
+  
+      getType() { return Many.typename; }
+    }
+  }
+
+  export namespace Refuel {
+    export class One extends Ledger.Transaction {
+      static typename: string = 'refuel';
+      to: string = 'subpubkeyhash';
+      value: string = 'uint256';
+  
+      getType() { return One.typename; }
+    }
+  
+    export class Many extends Ledger.Transaction {
+      static typename: string = 'refuel';
+      to: string[] = [
+        'to', 'subpubkeyhash',
+        'value', 'uint256'
       ];
   
       getType() { return Many.typename; }
