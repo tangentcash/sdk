@@ -433,6 +433,7 @@ export class EventResolver {
   static isSummaryStateEmpty(state: SummaryState, address?: string): boolean {
     if (address != null) {
       return !state.account.balances[address] &&
+        !state.account.refuels[address] &&
         !state.depository.balances[address] &&
         !Object.keys(state.depository.queues).length &&
         !Object.keys(state.depository.accounts).length &&
@@ -444,6 +445,7 @@ export class EventResolver {
         !state.errors.length;
     } else {
       return !Object.keys(state.account.balances).length &&
+        !Object.keys(state.account.refuels).length &&
         !Object.keys(state.depository.balances).length &&
         !Object.keys(state.depository.queues).length &&
         !Object.keys(state.depository.accounts).length &&

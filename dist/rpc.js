@@ -338,6 +338,7 @@ export class EventResolver {
     static isSummaryStateEmpty(state, address) {
         if (address != null) {
             return !state.account.balances[address] &&
+                !state.account.refuels[address] &&
                 !state.depository.balances[address] &&
                 !Object.keys(state.depository.queues).length &&
                 !Object.keys(state.depository.accounts).length &&
@@ -350,6 +351,7 @@ export class EventResolver {
         }
         else {
             return !Object.keys(state.account.balances).length &&
+                !Object.keys(state.account.refuels).length &&
                 !Object.keys(state.depository.balances).length &&
                 !Object.keys(state.depository.queues).length &&
                 !Object.keys(state.depository.accounts).length &&
