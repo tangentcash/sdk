@@ -525,7 +525,7 @@ export class RPC {
     const message = data.error.message ? data.error.message : '';
     const code = data.error.code ? data.error.code.toString() : '0';
     const hash = ByteUtil.uint8ArrayToHexString(Hashing.hash160(ByteUtil.byteStringToUint8Array(message + ' / ' + code)));
-    return new Error(`${message} (E${hash.substring(0, 8).toUpperCase()})`);
+    return new Error(`${message} — E${hash.substring(0, 8).toUpperCase()}`);
   }
   private static fetchResult(hash: string, data: any): any[] | undefined {    
     if (Array.isArray(data) || data.result === undefined) {
