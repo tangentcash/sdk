@@ -1,20 +1,60 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var _a;
-import secp256k1 from 'secp256k1';
-import sodium from 'libsodium-wrappers';
-import * as bip39 from '@scure/bip39';
-import { Base64 } from 'js-base64';
-import { wordlist } from '@scure/bip39/wordlists/english';
-import { randomBytes } from '@ethersproject/random';
-import { UInt256 } from 'uint256';
-import { bech32m } from 'bech32';
-import { sha1 } from '@noble/hashes/sha1';
-import { sha3_512 } from '@noble/hashes/sha3';
-import { blake2b } from '@noble/hashes/blake2b';
-import { ripemd160 } from '@noble/hashes/ripemd160';
-import { TextUtil } from './text';
-import BigNumber from 'bignumber.js';
-export class Chain {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ByteUtil = exports.Hashing = exports.Signing = exports.Segwit = exports.AssetId = exports.Subpubkeyhash = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Recsighash = exports.Uint256 = exports.Chain = void 0;
+const secp256k1_1 = __importDefault(require("secp256k1"));
+const libsodium_wrappers_1 = __importDefault(require("libsodium-wrappers"));
+const bip39 = __importStar(require("@scure/bip39"));
+const js_base64_1 = require("js-base64");
+const english_1 = require("@scure/bip39/wordlists/english");
+const random_1 = require("@ethersproject/random");
+const uint256_1 = require("uint256");
+const bech32_1 = require("bech32");
+const sha1_1 = require("@noble/hashes/sha1");
+const sha3_1 = require("@noble/hashes/sha3");
+const blake2b_1 = require("@noble/hashes/blake2b");
+const ripemd160_1 = require("@noble/hashes/ripemd160");
+const text_1 = require("./text");
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
+class Chain {
 }
+exports.Chain = Chain;
 _a = Chain;
 Chain.mainnet = {
     NAME: 'mainnet',
@@ -63,46 +103,46 @@ Chain.size = {
     MESSAGE: 0xffffff
 };
 Chain.props = _a.mainnet;
-export class Uint256 {
+class Uint256 {
     constructor(value, radix) {
         if (value != null) {
             if (value instanceof Uint256) {
                 if (value.value.buffer) {
                     const copy = new ArrayBuffer(value.value.buffer.byteLength);
                     new Uint8Array(copy).set(new Uint8Array(value.value.buffer));
-                    this.value = new UInt256(copy);
+                    this.value = new uint256_1.UInt256(copy);
                 }
                 else
-                    this.value = new UInt256();
+                    this.value = new uint256_1.UInt256();
             }
             else if (value instanceof Uint8Array) {
                 if (value.length != 32) {
                     const copy = new Uint8Array(32);
                     if (value.length > 0)
                         copy.set(value.slice(0, 32), 0);
-                    this.value = new UInt256(copy.buffer);
+                    this.value = new uint256_1.UInt256(copy.buffer);
                 }
                 else
-                    this.value = new UInt256(new Uint8Array(value).buffer);
+                    this.value = new uint256_1.UInt256(new Uint8Array(value).buffer);
             }
             else if (typeof value == 'string') {
                 const isHex = value.startsWith('0x') || radix == 16;
                 if (isHex) {
                     const numeric = (value.startsWith('0x') ? value.substring(2) : value);
                     const intermediate = new Uint256();
-                    intermediate.value = new UInt256(numeric, 16);
-                    this.value = new UInt256(intermediate.toHex());
+                    intermediate.value = new uint256_1.UInt256(numeric, 16);
+                    this.value = new uint256_1.UInt256(intermediate.toHex());
                 }
                 else
-                    this.value = new UInt256(value, radix);
+                    this.value = new uint256_1.UInt256(value, radix);
             }
             else if (typeof value == 'number')
-                this.value = new UInt256(value);
+                this.value = new uint256_1.UInt256(value);
             else
-                this.value = new UInt256();
+                this.value = new uint256_1.UInt256();
         }
         else
-            this.value = new UInt256();
+            this.value = new uint256_1.UInt256();
     }
     compareTo(rval) {
         return this.value.compareTo(rval instanceof Uint256 ? rval.value : rval);
@@ -339,7 +379,8 @@ export class Uint256 {
         return result;
     }
 }
-export class Recsighash {
+exports.Uint256 = Uint256;
+class Recsighash {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -357,7 +398,8 @@ export class Recsighash {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-export class Seckey {
+exports.Recsighash = Recsighash;
+class Seckey {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -375,7 +417,8 @@ export class Seckey {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-export class Pubkey {
+exports.Seckey = Seckey;
+class Pubkey {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -393,7 +436,8 @@ export class Pubkey {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-export class Pubkeyhash {
+exports.Pubkey = Pubkey;
+class Pubkeyhash {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -411,7 +455,8 @@ export class Pubkeyhash {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-export class Subpubkeyhash {
+exports.Pubkeyhash = Pubkeyhash;
+class Subpubkeyhash {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -429,7 +474,8 @@ export class Subpubkeyhash {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-export class AssetId {
+exports.Subpubkeyhash = Subpubkeyhash;
+class AssetId {
     constructor(data) {
         if (typeof data == 'number') {
             data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
@@ -437,7 +483,7 @@ export class AssetId {
         else if (typeof data == 'string') {
             data = ByteUtil.hexStringToUint8Array(data);
         }
-        else if (data instanceof BigNumber) {
+        else if (data instanceof bignumber_js_1.default) {
             data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
         }
         if (data instanceof Uint8Array) {
@@ -481,7 +527,7 @@ export class AssetId {
         if (token != null && token.length > 0) {
             handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
             if (contractAddress != null && contractAddress.length > 0) {
-                let hash = Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
+                let hash = js_base64_1.Base64.fromUint8Array((0, sha1_1.sha1)(text_1.TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
                 handle = (handle + ':' + hash.substring(0, Chain.size.ASSETID - (handle.length + 1)));
             }
         }
@@ -490,7 +536,8 @@ export class AssetId {
         return new AssetId(ByteUtil.byteStringToUint8Array(handle));
     }
 }
-export class Segwit {
+exports.AssetId = AssetId;
+class Segwit {
     static tweak(outputBits, input, inputBits, padding) {
         let bits = 0;
         let value = 0;
@@ -525,7 +572,7 @@ export class Segwit {
             return null;
         data = Uint8Array.from([version, ...data]);
         try {
-            return bech32m.encode(prefix, data);
+            return bech32_1.bech32m.encode(prefix, data);
         }
         catch {
             return null;
@@ -533,7 +580,7 @@ export class Segwit {
     }
     static decode(prefix, address) {
         try {
-            let program = bech32m.decode(address);
+            let program = bech32_1.bech32m.decode(address);
             if (program.words.length == 0 || program.words.length > 65)
                 return null;
             if (program.prefix != prefix)
@@ -550,17 +597,18 @@ export class Segwit {
         }
     }
 }
-export class Signing {
+exports.Segwit = Segwit;
+class Signing {
     static messageHash(signableMessage) {
         return new Uint256(Hashing.hash256(new Uint8Array([...new Uint256(Chain.props.MESSAGE_MAGIC).toUint8Array(), ...ByteUtil.byteStringToUint8Array(signableMessage)])));
     }
     static mnemonicgen(strength = 256) {
-        return bip39.generateMnemonic(wordlist, strength);
+        return bip39.generateMnemonic(english_1.wordlist, strength);
     }
     static keygen() {
         let key = new Seckey();
         while (true) {
-            let data = randomBytes(key.data.length);
+            let data = (0, random_1.randomBytes)(key.data.length);
             if (!data || data.length != key.data.length)
                 break;
             key.data = Uint8Array.from(data);
@@ -574,7 +622,7 @@ export class Signing {
         if (recoveryId > 4)
             return null;
         try {
-            const result = secp256k1.ecdsaRecover(signature.data.slice(0, 64), recoveryId, hash.toUint8Array(), true);
+            const result = secp256k1_1.default.ecdsaRecover(signature.data.slice(0, 64), recoveryId, hash.toUint8Array(), true);
             if (!result)
                 return null;
             return new Pubkey(result);
@@ -591,7 +639,7 @@ export class Signing {
     }
     static sign(hash, secretKey) {
         try {
-            const result = secp256k1.ecdsaSign(hash.toUint8Array(), secretKey.data);
+            const result = secp256k1_1.default.ecdsaSign(hash.toUint8Array(), secretKey.data);
             const signature = new Recsighash();
             signature.data = Uint8Array.from([...result.signature, result.recid]);
             return signature;
@@ -602,18 +650,18 @@ export class Signing {
     }
     static verify(hash, publicKey, signature) {
         try {
-            return secp256k1.ecdsaVerify(signature.data.slice(0, 64), hash.toUint8Array(), publicKey.data);
+            return secp256k1_1.default.ecdsaVerify(signature.data.slice(0, 64), hash.toUint8Array(), publicKey.data);
         }
         catch {
             return false;
         }
     }
     static verifyMnemonic(mnemonic) {
-        return bip39.validateMnemonic(mnemonic, wordlist);
+        return bip39.validateMnemonic(mnemonic, english_1.wordlist);
     }
     static verifySecretKey(secretKey) {
         try {
-            return secp256k1.privateKeyVerify(secretKey.data);
+            return secp256k1_1.default.privateKeyVerify(secretKey.data);
         }
         catch {
             return false;
@@ -621,7 +669,7 @@ export class Signing {
     }
     static verifyPublicKey(publicKey) {
         try {
-            return secp256k1.publicKeyVerify(publicKey.data);
+            return secp256k1_1.default.publicKeyVerify(publicKey.data);
         }
         catch {
             return false;
@@ -645,7 +693,7 @@ export class Signing {
         return secretKey;
     }
     static derivePublicKey(secretKey) {
-        return new Pubkey(secp256k1.publicKeyCreate(secretKey.data, true));
+        return new Pubkey(secp256k1_1.default.publicKeyCreate(secretKey.data, true));
     }
     static derivePublicKeyHash(publicKey) {
         let publicKeyHash = new Pubkeyhash();
@@ -654,9 +702,9 @@ export class Signing {
     }
     static async deriveCipherKeypair(secretKey, nonce) {
         try {
-            await sodium.ready;
+            await libsodium_wrappers_1.default.ready;
             const seed = Hashing.hash256(new Uint8Array([...secretKey.data, ...nonce.toUint8Array()]));
-            const keypair = sodium.crypto_box_seed_keypair(seed);
+            const keypair = libsodium_wrappers_1.default.crypto_box_seed_keypair(seed);
             return {
                 cipherSecretKey: new Seckey(keypair.privateKey),
                 cipherPublicKey: new Pubkey(new Uint8Array([...keypair.publicKey, 0]))
@@ -676,15 +724,15 @@ export class Signing {
             body[i] ^= salt[i % salt.length];
         body = new Uint8Array([...body, ...Hashing.hash256(plaintext)]);
         try {
-            await sodium.ready;
+            await libsodium_wrappers_1.default.ready;
             const seed = Hashing.hash256(entropy);
-            const ephemeralKeypair = sodium.crypto_box_seed_keypair(seed);
+            const ephemeralKeypair = libsodium_wrappers_1.default.crypto_box_seed_keypair(seed);
             const nonceBytes = 24;
-            const state = sodium.crypto_generichash_init(null, nonceBytes);
-            sodium.crypto_generichash_update(state, ephemeralKeypair.publicKey);
-            sodium.crypto_generichash_update(state, cipherPublicKey.data.slice(0, 32));
-            const nonce = sodium.crypto_generichash_final(state, nonceBytes);
-            const ciphertext = sodium.crypto_box_easy(body, nonce, cipherPublicKey.data.slice(0, 32), ephemeralKeypair.privateKey);
+            const state = libsodium_wrappers_1.default.crypto_generichash_init(null, nonceBytes);
+            libsodium_wrappers_1.default.crypto_generichash_update(state, ephemeralKeypair.publicKey);
+            libsodium_wrappers_1.default.crypto_generichash_update(state, cipherPublicKey.data.slice(0, 32));
+            const nonce = libsodium_wrappers_1.default.crypto_generichash_final(state, nonceBytes);
+            const ciphertext = libsodium_wrappers_1.default.crypto_box_easy(body, nonce, cipherPublicKey.data.slice(0, 32), ephemeralKeypair.privateKey);
             return Uint8Array.from([...ephemeralKeypair.publicKey, ...ciphertext]);
         }
         catch (ex) {
@@ -693,8 +741,8 @@ export class Signing {
     }
     static async privateDecrypt(cipherSecretKey, cipherPublicKey, ciphertext) {
         try {
-            await sodium.ready;
-            const body = sodium.crypto_box_seal_open(ciphertext, cipherPublicKey.data.slice(0, 32), cipherSecretKey.data);
+            await libsodium_wrappers_1.default.ready;
+            const body = libsodium_wrappers_1.default.crypto_box_seal_open(ciphertext, cipherPublicKey.data.slice(0, 32), cipherSecretKey.data);
             if (!body || body.length < 96)
                 return null;
             let saltBodySize = body.length - 32;
@@ -788,23 +836,25 @@ export class Signing {
         return result;
     }
 }
-export class Hashing {
+exports.Signing = Signing;
+class Hashing {
     static hash32(data) {
-        const buffer = sha1(data);
+        const buffer = (0, sha1_1.sha1)(data);
         const view = new DataView(buffer.buffer);
         return view.getUint32(0, true);
     }
     static hash160(data) {
-        return ripemd160(data);
+        return (0, ripemd160_1.ripemd160)(data);
     }
     static hash256(data) {
-        return blake2b(data, { dkLen: 32 });
+        return (0, blake2b_1.blake2b)(data, { dkLen: 32 });
     }
     static hash512(data) {
-        return sha3_512(data);
+        return (0, sha3_1.sha3_512)(data);
     }
 }
-export class ByteUtil {
+exports.Hashing = Hashing;
+class ByteUtil {
     static hexStringToUint8Array(data) {
         if (data.startsWith('0x'))
             data = data.substring(2);
@@ -847,3 +897,4 @@ export class ByteUtil {
         return result;
     }
 }
+exports.ByteUtil = ByteUtil;

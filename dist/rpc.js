@@ -1,26 +1,33 @@
-import BigNumber from "bignumber.js";
-import { AssetId, ByteUtil, Hashing, Pubkeyhash, Signing, Uint256 } from "./algorithm";
-import { Types } from "./types";
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.InterfaceProps = exports.NetworkType = exports.WalletType = void 0;
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
+const algorithm_1 = require("./algorithm");
+const types_1 = require("./types");
 const WEBSOCKET_TIMEOUT = 24000;
-export var WalletType;
+var WalletType;
 (function (WalletType) {
     WalletType["Mnemonic"] = "mnemonic";
     WalletType["SecretKey"] = "secretkey";
     WalletType["PublicKey"] = "publickey";
     WalletType["Address"] = "address";
-})(WalletType || (WalletType = {}));
-export var NetworkType;
+})(WalletType || (exports.WalletType = WalletType = {}));
+var NetworkType;
 (function (NetworkType) {
     NetworkType["Mainnet"] = "mainnet";
     NetworkType["Testnet"] = "testnet";
     NetworkType["Regtest"] = "regtest";
-})(NetworkType || (NetworkType = {}));
-export class InterfaceProps {
+})(NetworkType || (exports.NetworkType = NetworkType = {}));
+class InterfaceProps {
     constructor() {
         this.streaming = true;
     }
 }
-export class WalletKeychain {
+exports.InterfaceProps = InterfaceProps;
+class WalletKeychain {
     constructor() {
         this.type = null;
         this.secretKey = null;
@@ -44,10 +51,10 @@ export class WalletKeychain {
     static fromMnemonic(mnemonic) {
         if (mnemonic.length != 24)
             return null;
-        const secretKey = Signing.deriveSecretKeyFromMnemonic(mnemonic.join(' '));
+        const secretKey = algorithm_1.Signing.deriveSecretKeyFromMnemonic(mnemonic.join(' '));
         if (!secretKey)
             return null;
-        const serialized = Signing.encodeSecretKey(secretKey);
+        const serialized = algorithm_1.Signing.encodeSecretKey(secretKey);
         if (!serialized)
             return null;
         const result = this.fromSecretKey(serialized);
@@ -59,41 +66,42 @@ export class WalletKeychain {
     static fromSecretKey(secretKey) {
         const result = new WalletKeychain();
         result.type = WalletType.SecretKey;
-        result.secretKey = Signing.decodeSecretKey(secretKey);
+        result.secretKey = algorithm_1.Signing.decodeSecretKey(secretKey);
         if (!result.secretKey)
             return null;
-        result.publicKey = Signing.derivePublicKey(result.secretKey);
+        result.publicKey = algorithm_1.Signing.derivePublicKey(result.secretKey);
         if (!result.publicKey)
             return null;
-        result.publicKeyHash = Signing.derivePublicKeyHash(result.publicKey);
+        result.publicKeyHash = algorithm_1.Signing.derivePublicKeyHash(result.publicKey);
         if (!result.publicKeyHash)
             return null;
-        result.address = Signing.encodeAddress(result.publicKeyHash);
+        result.address = algorithm_1.Signing.encodeAddress(result.publicKeyHash);
         return result;
     }
     static fromPublicKey(publicKey) {
         const result = new WalletKeychain();
         result.type = WalletType.PublicKey;
-        result.publicKey = Signing.decodePublicKey(publicKey);
+        result.publicKey = algorithm_1.Signing.decodePublicKey(publicKey);
         if (!result.publicKey)
             return null;
-        result.publicKeyHash = Signing.derivePublicKeyHash(result.publicKey);
+        result.publicKeyHash = algorithm_1.Signing.derivePublicKeyHash(result.publicKey);
         if (!result.publicKeyHash)
             return null;
-        result.address = Signing.encodeAddress(result.publicKeyHash);
+        result.address = algorithm_1.Signing.encodeAddress(result.publicKeyHash);
         return result;
     }
     static fromAddress(address) {
         const result = new WalletKeychain();
         result.type = WalletType.Address;
         result.address = address;
-        result.publicKeyHash = Signing.decodeAddress(result.address);
+        result.publicKeyHash = algorithm_1.Signing.decodeAddress(result.address);
         if (!result.publicKeyHash)
             return null;
         return result;
     }
 }
-export class EventResolver {
+exports.WalletKeychain = WalletKeychain;
+class EventResolver {
     static calculateSummaryState(events) {
         const result = {
             account: {
@@ -126,55 +134,55 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.AccountBalance: {
-                    if (event.args.length >= 4 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && event.args[3] instanceof BigNumber) {
+                case types_1.Types.AccountBalance: {
+                    if (event.args.length >= 4 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && event.args[3] instanceof bignumber_js_1.default) {
                         const [assetId, from, to, value] = event.args;
-                        const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
-                        const toAddress = Signing.encodeAddress(new Pubkeyhash(to)) || to;
-                        const asset = new AssetId(assetId);
+                        const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
+                        const toAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(to)) || to;
+                        const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
                             break;
                         if (!result.account.balances[fromAddress])
                             result.account.balances[fromAddress] = {};
                         if (!result.account.balances[fromAddress][asset.handle])
-                            result.account.balances[fromAddress][asset.handle] = { asset: asset, supply: new BigNumber(0), reserve: new BigNumber(0) };
+                            result.account.balances[fromAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0), reserve: new bignumber_js_1.default(0) };
                         if (!result.account.balances[toAddress])
                             result.account.balances[toAddress] = {};
                         if (!result.account.balances[toAddress][asset.handle])
-                            result.account.balances[toAddress][asset.handle] = { asset: asset, supply: new BigNumber(0), reserve: new BigNumber(0) };
+                            result.account.balances[toAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0), reserve: new bignumber_js_1.default(0) };
                         const fromState = result.account.balances[fromAddress][asset.handle];
                         fromState.supply = fromState.supply.minus(value);
                         const toState = result.account.balances[toAddress][asset.handle];
                         toState.supply = toState.supply.plus(value);
                     }
-                    else if (event.args.length >= 4 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber && event.args[3] instanceof BigNumber) {
+                    else if (event.args.length >= 4 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof bignumber_js_1.default && event.args[3] instanceof bignumber_js_1.default) {
                         const [assetId, owner, supply, reserve] = event.args;
-                        const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
-                        const asset = new AssetId(assetId);
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
+                        const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
                             break;
                         if (!result.account.balances[ownerAddress])
                             result.account.balances[ownerAddress] = {};
                         if (!result.account.balances[ownerAddress][asset.handle])
-                            result.account.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0), reserve: new BigNumber(0) };
+                            result.account.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0), reserve: new bignumber_js_1.default(0) };
                         const ownerState = result.account.balances[ownerAddress][asset.handle];
                         ownerState.supply = ownerState.supply.plus(supply);
                         ownerState.reserve = ownerState.reserve.plus(reserve);
                     }
-                    else if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+                    else if (event.args.length >= 3 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof bignumber_js_1.default) {
                         const [assetId, owner, fee] = event.args;
-                        const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
-                        const asset = new AssetId(assetId);
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
+                        const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
                             break;
                         if (!result.account.balances[ownerAddress])
                             result.account.balances[ownerAddress] = {};
                         if (!result.account.balances[ownerAddress][asset.handle])
-                            result.account.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0), reserve: new BigNumber(0) };
+                            result.account.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0), reserve: new bignumber_js_1.default(0) };
                         if (!result.account.fees[ownerAddress])
                             result.account.fees[ownerAddress] = {};
                         if (!result.account.fees[ownerAddress][asset.handle])
-                            result.account.fees[ownerAddress][asset.handle] = { asset: asset, fee: new BigNumber(0) };
+                            result.account.fees[ownerAddress][asset.handle] = { asset: asset, fee: new bignumber_js_1.default(0) };
                         const balanceState = result.account.balances[ownerAddress][asset.handle];
                         const feeState = result.account.fees[ownerAddress][asset.handle];
                         balanceState.supply = balanceState.supply.plus(fee);
@@ -182,12 +190,12 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.ValidatorProduction: {
-                    if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && event.args[2] instanceof BigNumber) {
+                case types_1.Types.ValidatorProduction: {
+                    if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && event.args[2] instanceof bignumber_js_1.default) {
                         const [from, mint_or_burn, value] = event.args;
-                        const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
+                        const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
                         if (!result.account.refuels[fromAddress])
-                            result.account.refuels[fromAddress] = new BigNumber(0);
+                            result.account.refuels[fromAddress] = new bignumber_js_1.default(0);
                         if (mint_or_burn)
                             result.account.refuels[fromAddress] = result.account.refuels[fromAddress].plus(value);
                         else
@@ -195,32 +203,32 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.DepositoryBalance: {
-                    if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+                case types_1.Types.DepositoryBalance: {
+                    if (event.args.length >= 3 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof bignumber_js_1.default) {
                         const [assetId, owner, value] = event.args;
-                        const asset = new AssetId(assetId);
-                        const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
+                        const asset = new algorithm_1.AssetId(assetId);
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         if (!asset.handle)
                             break;
                         if (!result.depository.balances[ownerAddress])
                             result.depository.balances[ownerAddress] = {};
                         if (!result.depository.balances[ownerAddress][asset.handle])
-                            result.depository.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0) };
+                            result.depository.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
                         const state = result.depository.balances[ownerAddress][asset.handle];
                         state.supply = state.supply.plus(value);
                     }
                     break;
                 }
-                case Types.DepositoryPolicy: {
-                    if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+                case types_1.Types.DepositoryPolicy: {
+                    if (event.args.length >= 3 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof bignumber_js_1.default) {
                         const [assetId, owner, type] = event.args;
-                        const asset = new AssetId(assetId);
-                        const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
+                        const asset = new algorithm_1.AssetId(assetId);
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         if (!asset.handle)
                             break;
                         switch (type.toNumber()) {
                             case 0: {
-                                if (event.args.length >= 4 && event.args[3] instanceof BigNumber) {
+                                if (event.args.length >= 4 && event.args[3] instanceof bignumber_js_1.default) {
                                     const newAccounts = event.args[3];
                                     if (!result.depository.accounts[ownerAddress])
                                         result.depository.accounts[ownerAddress] = {};
@@ -231,16 +239,16 @@ export class EventResolver {
                                 break;
                             }
                             case 1: {
-                                if (event.args.length >= 4 && (event.args[3] instanceof BigNumber || typeof event.args[3] == 'string')) {
+                                if (event.args.length >= 4 && (event.args[3] instanceof bignumber_js_1.default || typeof event.args[3] == 'string')) {
                                     const transactionHash = event.args[3];
                                     if (!result.depository.queues[ownerAddress])
                                         result.depository.queues[ownerAddress] = {};
-                                    result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: transactionHash instanceof BigNumber ? null : transactionHash };
+                                    result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: transactionHash instanceof bignumber_js_1.default ? null : transactionHash };
                                 }
                                 break;
                             }
                             case 2: {
-                                if (event.args.length >= 6 && event.args[3] instanceof BigNumber && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
+                                if (event.args.length >= 6 && event.args[3] instanceof bignumber_js_1.default && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
                                     const [securityLevel, acceptsAccountRequests, acceptsWithdrawalRequests] = event.args.slice(3, 6);
                                     if (!result.depository.policies[ownerAddress])
                                         result.depository.policies[ownerAddress] = {};
@@ -254,10 +262,10 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.WitnessAccount: {
-                    if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && event.args[1] instanceof BigNumber) {
+                case types_1.Types.WitnessAccount: {
+                    if (event.args.length >= 3 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && event.args[1] instanceof bignumber_js_1.default) {
                         const [assetId, addressPurpose, addressAliases] = [event.args[0], event.args[1], event.args.slice(2)];
-                        const asset = new AssetId(assetId);
+                        const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
                             break;
                         let purpose;
@@ -284,10 +292,10 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.WitnessTransaction: {
-                    if (event.args.length == 2 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
+                case types_1.Types.WitnessTransaction: {
+                    if (event.args.length == 2 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
                         const [assetId, transactionId] = event.args;
-                        const asset = new AssetId(assetId);
+                        const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
                             break;
                         if (result.witness.transactions[asset.handle] != null)
@@ -297,21 +305,21 @@ export class EventResolver {
                     }
                     break;
                 }
-                case Types.Rollup: {
-                    if (event.args.length == 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && (event.args[1] instanceof BigNumber || typeof event.args[1] == 'string') && (event.args[2] instanceof BigNumber || typeof event.args[2] == 'string')) {
+                case types_1.Types.Rollup: {
+                    if (event.args.length == 3 && (event.args[0] instanceof bignumber_js_1.default || typeof event.args[0] == 'string') && (event.args[1] instanceof bignumber_js_1.default || typeof event.args[1] == 'string') && (event.args[2] instanceof bignumber_js_1.default || typeof event.args[2] == 'string')) {
                         const [transactionHash, relativeGasUse, relativeGasPaid] = event.args;
-                        result.receipts[new Uint256(transactionHash.toString()).toHex()] = {
-                            relativeGasUse: new BigNumber(relativeGasUse.toString()),
-                            relativeGasPaid: new BigNumber(relativeGasPaid.toString())
+                        result.receipts[new algorithm_1.Uint256(transactionHash.toString()).toHex()] = {
+                            relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()),
+                            relativeGasPaid: new bignumber_js_1.default(relativeGasPaid.toString())
                         };
                     }
                     break;
                 }
-                case Types.DepositoryAccount:
-                case Types.DepositoryRegrouping: {
+                case types_1.Types.DepositoryAccount:
+                case types_1.Types.DepositoryRegrouping: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
-                        const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         result.depository.participants.add(ownerAddress);
                     }
                     break;
@@ -326,8 +334,8 @@ export class EventResolver {
         const result = {};
         for (let i = 0; i < data.length; i++) {
             const item = data[i];
-            const assetId = item.asset != null && (item.asset.id instanceof BigNumber || typeof item.asset.id == 'string') ? item.asset.id : null;
-            const assetHandle = assetId != null ? new AssetId(assetId).handle || '' : '';
+            const assetId = item.asset != null && (item.asset.id instanceof bignumber_js_1.default || typeof item.asset.id == 'string') ? item.asset.id : null;
+            const assetHandle = assetId != null ? new algorithm_1.AssetId(assetId).handle || '' : '';
             if (!result[assetHandle])
                 result[assetHandle] = [item];
             else
@@ -364,12 +372,13 @@ export class EventResolver {
         }
     }
 }
-export class RPC {
+exports.EventResolver = EventResolver;
+class RPC {
     static fetchObject(data) {
         if (typeof data == 'string') {
             try {
                 if (!data.startsWith('0x')) {
-                    const numeric = new BigNumber(data, 10);
+                    const numeric = new bignumber_js_1.default(data, 10);
                     if (numeric.toString() == data)
                         return numeric;
                 }
@@ -377,7 +386,7 @@ export class RPC {
             catch { }
         }
         else if (typeof data == 'number') {
-            return new BigNumber(data);
+            return new bignumber_js_1.default(data);
         }
         else if (typeof data == 'object') {
             for (let key in data) {
@@ -396,7 +405,7 @@ export class RPC {
             return this.fetchObject(data.result);
         const message = data.error.message ? data.error.message : '';
         const code = data.error.code ? data.error.code.toString() : '0';
-        const hash = ByteUtil.uint8ArrayToHexString(Hashing.hash160(ByteUtil.byteStringToUint8Array(message + ' / ' + code)));
+        const hash = algorithm_1.ByteUtil.uint8ArrayToHexString(algorithm_1.Hashing.hash160(algorithm_1.ByteUtil.byteStringToUint8Array(message + ' / ' + code)));
         return new Error(`${message} — E${hash.substring(0, 8).toUpperCase()}`);
     }
     static fetchResult(hash, data) {
@@ -513,7 +522,7 @@ export class RPC {
     }
     static async fetch(policy, method, args) {
         const id = (++this.requests.count).toString();
-        const hash = ByteUtil.uint8ArrayToHexString(Hashing.hash512(ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
+        const hash = algorithm_1.ByteUtil.uint8ArrayToHexString(algorithm_1.Hashing.hash512(algorithm_1.ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
         const body = {
             jsonrpc: '2.0',
             id: id,
@@ -878,6 +887,7 @@ export class RPC {
         return this.fetch('no-cache', 'getestimatetransactiongas', [hexMessage]);
     }
 }
+exports.RPC = RPC;
 RPC.resolver = null;
 RPC.httpInterfaces = {
     online: new Set(),

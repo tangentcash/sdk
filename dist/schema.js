@@ -1,4 +1,7 @@
-export var Messages;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Transactions = exports.States = exports.Ledger = exports.Messages = void 0;
+var Messages;
 (function (Messages) {
     class Uniform {
         constructor() {
@@ -24,8 +27,8 @@ export var Messages;
         return { type: 'uint32', ...signingSchema };
     }
     Messages.asSigningSchema = asSigningSchema;
-})(Messages || (Messages = {}));
-export var Ledger;
+})(Messages || (exports.Messages = Messages = {}));
+var Ledger;
 (function (Ledger) {
     class Transaction extends Messages.Authentic {
         constructor() {
@@ -59,8 +62,8 @@ export var Ledger;
         }
     }
     Ledger.ConsensusTransaction = ConsensusTransaction;
-})(Ledger || (Ledger = {}));
-export var States;
+})(Ledger || (exports.Ledger = Ledger = {}));
+var States;
 (function (States) {
     class AccountBalance {
     }
@@ -86,8 +89,8 @@ export var States;
     }
     WitnessTransaction.typename = 'witness_transaction';
     States.WitnessTransaction = WitnessTransaction;
-})(States || (States = {}));
-export var Transactions;
+})(States || (exports.States = States = {}));
+var Transactions;
 (function (Transactions) {
     let Transfer;
     (function (Transfer) {
@@ -211,4 +214,4 @@ export var Transactions;
     }
     DepositoryRegrouping.typename = 'depository_regrouping';
     Transactions.DepositoryRegrouping = DepositoryRegrouping;
-})(Transactions || (Transactions = {}));
+})(Transactions || (exports.Transactions = Transactions = {}));

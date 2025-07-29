@@ -1,4 +1,7 @@
-export class TextUtil {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TextUtil = void 0;
+class TextUtil {
     static findFirstNotOf(data, alphabet, offset = 0) {
         for (let i = offset; i < data.length; ++i) {
             if (alphabet.indexOf(data[i]) == -1)
@@ -16,4 +19,5 @@ export class TextUtil {
         return /^[\x00-\x7F]*$/.test(data);
     }
 }
+exports.TextUtil = TextUtil;
 TextUtil.alphabet = '0123456789abcdefABCDEF';

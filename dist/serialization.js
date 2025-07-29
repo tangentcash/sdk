@@ -1,8 +1,14 @@
-import { AssetId, ByteUtil, Chain, Hashing, Pubkey, Pubkeyhash, Seckey, Recsighash, Uint256, Subpubkeyhash } from "./algorithm";
-import { TextUtil } from "./text";
-import BigNumber from "bignumber.js";
-BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
-export var Viewable;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SchemaUtil = exports.StreamUtil = exports.Stream = exports.Viewable = void 0;
+const algorithm_1 = require("./algorithm");
+const text_1 = require("./text");
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
+bignumber_js_1.default.config({ EXPONENTIAL_AT: 1e+9 });
+var Viewable;
 (function (Viewable) {
     Viewable[Viewable["DecimalNaN"] = 0] = "DecimalNaN";
     Viewable[Viewable["DecimalZero"] = 1] = "DecimalZero";
@@ -21,8 +27,8 @@ export var Viewable;
     Viewable[Viewable["StringMin16"] = 148] = "StringMin16";
     Viewable[Viewable["StringMax16"] = 252] = "StringMax16";
     Viewable[Viewable["Invalid"] = 255] = "Invalid";
-})(Viewable || (Viewable = {}));
-export class Stream {
+})(Viewable || (exports.Viewable = Viewable = {}));
+class Stream {
     constructor(data) {
         this.data = data || new Uint8Array();
         this.checksum = null;
@@ -39,14 +45,14 @@ export class Stream {
         return this;
     }
     writeString(value) {
-        if (TextUtil.isHexEncoding(value)) {
-            let data = ByteUtil.hexStringToUint8Array(value);
-            let source = ByteUtil.uint8ArrayToByteString(data);
+        if (text_1.TextUtil.isHexEncoding(value)) {
+            let data = algorithm_1.ByteUtil.hexStringToUint8Array(value);
+            let source = algorithm_1.ByteUtil.uint8ArrayToByteString(data);
             if (source.length > StreamUtil.getMaxStringSize()) {
                 let type = StreamUtil.getStringType(source, true);
-                let size = Math.min(Chain.size.MESSAGE, source.length);
+                let size = Math.min(algorithm_1.Chain.size.MESSAGE, source.length);
                 this.write(new Uint8Array([type]));
-                this.writeInteger(new Uint256(size));
+                this.writeInteger(new algorithm_1.Uint256(size));
                 this.write(data.slice(0, size));
             }
             else {
@@ -57,26 +63,26 @@ export class Stream {
             }
         }
         else if (value.length > StreamUtil.getMaxStringSize()) {
-            let size = Math.min(Chain.size.MESSAGE, value.length);
+            let size = Math.min(algorithm_1.Chain.size.MESSAGE, value.length);
             let type = StreamUtil.getStringType(value, false);
             this.write(new Uint8Array([type]));
-            this.writeInteger(new Uint256(size));
-            this.write(ByteUtil.utf8StringToUint8Array(value.substring(0, size)));
+            this.writeInteger(new algorithm_1.Uint256(size));
+            this.write(algorithm_1.ByteUtil.utf8StringToUint8Array(value.substring(0, size)));
         }
         else {
             let type = StreamUtil.getStringType(value, false);
             let size = StreamUtil.getStringSize(type);
             this.write(new Uint8Array([type]));
-            this.write(ByteUtil.utf8StringToUint8Array(value.substring(0, size)));
+            this.write(algorithm_1.ByteUtil.utf8StringToUint8Array(value.substring(0, size)));
         }
         return this;
     }
     writeBinaryString(value) {
         if (value.length > StreamUtil.getMaxStringSize()) {
-            let size = Math.min(Chain.size.MESSAGE, value.length);
+            let size = Math.min(algorithm_1.Chain.size.MESSAGE, value.length);
             let type = StreamUtil.getStringType(value, false);
             this.write(new Uint8Array([type]));
-            this.writeInteger(new Uint256(size));
+            this.writeInteger(new algorithm_1.Uint256(size));
             this.write(value.slice(0, size));
         }
         else {
@@ -107,14 +113,14 @@ export class Stream {
         let numeric = value.toString().split('.');
         let type = numeric.length > 1 ? (value.isNegative() ? Viewable.DecimalNeg2 : Viewable.DecimalPos2) : (value.isNegative() ? Viewable.DecimalNeg1 : Viewable.DecimalPos1);
         this.write(new Uint8Array([type]));
-        this.writeInteger(new Uint256(numeric[0].replace('-', '')));
+        this.writeInteger(new algorithm_1.Uint256(numeric[0].replace('-', '')));
         if (numeric.length > 1)
-            this.writeInteger(new Uint256(numeric[1].split('').reverse().join('')));
+            this.writeInteger(new algorithm_1.Uint256(numeric[1].split('').reverse().join('')));
         return this;
     }
     writeInteger(value) {
         if (typeof value == 'number')
-            value = new Uint256(value);
+            value = new algorithm_1.Uint256(value);
         let type = StreamUtil.getIntegerType(value);
         let size = StreamUtil.getIntegerSize(type);
         this.write(new Uint8Array([type]));
@@ -147,7 +153,7 @@ export class Stream {
             let data = this.read(size);
             if (data == null || data.length != size)
                 return size > 0 ? null : '';
-            return StreamUtil.isString16(type) ? ByteUtil.uint8ArrayToHexString(data) : ByteUtil.uint8ArrayToByteString(data);
+            return StreamUtil.isString16(type) ? algorithm_1.ByteUtil.uint8ArrayToHexString(data) : algorithm_1.ByteUtil.uint8ArrayToByteString(data);
         }
         else if (type != Viewable.StringAny10 && type != Viewable.StringAny16)
             return null;
@@ -155,12 +161,12 @@ export class Stream {
         if (subtype == null)
             return null;
         let size = this.readInteger(subtype)?.valueOf();
-        if (!size || size > Chain.size.MESSAGE)
+        if (!size || size > algorithm_1.Chain.size.MESSAGE)
             return null;
         let data = this.read(size);
         if (data == null || data.length != size)
             return size > 0 ? null : '';
-        return StreamUtil.isString16(type) ? ByteUtil.uint8ArrayToHexString(data) : ByteUtil.uint8ArrayToByteString(data);
+        return StreamUtil.isString16(type) ? algorithm_1.ByteUtil.uint8ArrayToHexString(data) : algorithm_1.ByteUtil.uint8ArrayToByteString(data);
     }
     readBinaryString(type) {
         if (StreamUtil.isString(type)) {
@@ -176,7 +182,7 @@ export class Stream {
         if (subtype == null)
             return null;
         let size = this.readInteger(subtype)?.valueOf();
-        if (!size || size > Chain.size.MESSAGE)
+        if (!size || size > algorithm_1.Chain.size.MESSAGE)
             return null;
         let data = this.read(size);
         if (data == null || data.length != size)
@@ -185,9 +191,9 @@ export class Stream {
     }
     readDecimal(type) {
         if (type == Viewable.DecimalNaN)
-            return new BigNumber(NaN);
+            return new bignumber_js_1.default(NaN);
         else if (type == Viewable.DecimalZero)
-            return new BigNumber(0);
+            return new bignumber_js_1.default(0);
         else if (type != Viewable.DecimalNeg1 && type != Viewable.DecimalNeg2 && type != Viewable.DecimalPos1 && type != Viewable.DecimalPos2)
             return null;
         let subtype = this.readType();
@@ -206,7 +212,7 @@ export class Stream {
                 return null;
             numeric += '.' + right.toString().split('').reverse().join('');
         }
-        return new BigNumber(type != Viewable.DecimalNeg1 && type != Viewable.DecimalNeg2 ? numeric.substring(1) : numeric);
+        return new bignumber_js_1.default(type != Viewable.DecimalNeg1 && type != Viewable.DecimalNeg2 ? numeric.substring(1) : numeric);
     }
     readInteger(type) {
         if (!StreamUtil.isInteger(type))
@@ -214,8 +220,8 @@ export class Stream {
         let size = StreamUtil.getIntegerSize(type);
         let data = this.read(size);
         if (data == null || data.length != size)
-            return size == 0 ? new Uint256(0) : null;
-        return new Uint256(data);
+            return size == 0 ? new algorithm_1.Uint256(0) : null;
+        return new algorithm_1.Uint256(data);
     }
     readSafeInteger(type) {
         let value = this.readInteger(type);
@@ -230,11 +236,11 @@ export class Stream {
         return this.seek >= this.data.length;
     }
     encode() {
-        return ByteUtil.uint8ArrayToHexString(this.data);
+        return algorithm_1.ByteUtil.uint8ArrayToHexString(this.data);
     }
     hash(renew = false) {
         if (renew || this.checksum == null)
-            this.checksum = new Uint256(Hashing.hash256(this.data));
+            this.checksum = new algorithm_1.Uint256(algorithm_1.Hashing.hash256(this.data));
         return this.checksum;
     }
     write(value) {
@@ -251,10 +257,11 @@ export class Stream {
         return slice;
     }
     static decode(data) {
-        return new Stream(TextUtil.isHexEncoding(data) ? ByteUtil.hexStringToUint8Array(data) : ByteUtil.byteStringToUint8Array(data));
+        return new Stream(text_1.TextUtil.isHexEncoding(data) ? algorithm_1.ByteUtil.hexStringToUint8Array(data) : algorithm_1.ByteUtil.byteStringToUint8Array(data));
     }
 }
-export class StreamUtil {
+exports.Stream = Stream;
+class StreamUtil {
     static isInteger(type) {
         return type >= Viewable.UintMin && type <= Viewable.UintMax;
     }
@@ -299,48 +306,49 @@ export class StreamUtil {
         return Viewable.StringMax10 - Viewable.StringMin10;
     }
 }
-export class SchemaUtil {
+exports.StreamUtil = StreamUtil;
+class SchemaUtil {
     static store(stream, object, schema) {
         const write = (field, type, value) => {
             switch (type) {
                 case 'uint8': {
-                    if (!(value instanceof Uint256) && typeof value != 'number')
+                    if (!(value instanceof algorithm_1.Uint256) && typeof value != 'number')
                         throw new TypeError('field ' + field + ' is not of type uint8 (number, uint256)');
-                    let numeric = (value instanceof Uint256 ? value : new Uint256(typeof value == 'number' ? value : 0));
+                    let numeric = (value instanceof algorithm_1.Uint256 ? value : new algorithm_1.Uint256(typeof value == 'number' ? value : 0));
                     if (numeric.gte(this.UINT08_MAX))
                         throw new TypeError('field ' + field + ' is out of uint8 range');
                     stream.writeInteger(numeric);
                     break;
                 }
                 case 'uint16': {
-                    if (!(value instanceof Uint256) && typeof value != 'number')
+                    if (!(value instanceof algorithm_1.Uint256) && typeof value != 'number')
                         throw new TypeError('field ' + field + ' is not of type uint16 (number, uint256)');
-                    let numeric = (value instanceof Uint256 ? value : new Uint256(typeof value == 'number' ? value : 0));
+                    let numeric = (value instanceof algorithm_1.Uint256 ? value : new algorithm_1.Uint256(typeof value == 'number' ? value : 0));
                     if (numeric.gte(this.UINT16_MAX))
                         throw new TypeError('field ' + field + ' is out of uint16 range');
                     stream.writeInteger(numeric);
                     break;
                 }
                 case 'uint32': {
-                    if (!(value instanceof Uint256) && typeof value != 'number')
+                    if (!(value instanceof algorithm_1.Uint256) && typeof value != 'number')
                         throw new TypeError('field ' + field + ' is not of type uint32 (number, uint256)');
-                    let numeric = (value instanceof Uint256 ? value : new Uint256(typeof value == 'number' ? value : 0));
+                    let numeric = (value instanceof algorithm_1.Uint256 ? value : new algorithm_1.Uint256(typeof value == 'number' ? value : 0));
                     if (numeric.gte(this.UINT32_MAX))
                         throw new TypeError('field ' + field + ' is out of uint32 range');
                     stream.writeInteger(numeric);
                     break;
                 }
                 case 'uint64': {
-                    if (!(value instanceof Uint256) && typeof value != 'number')
+                    if (!(value instanceof algorithm_1.Uint256) && typeof value != 'number')
                         throw new TypeError('field ' + field + ' is not of type uint64 (number, uint256)');
-                    let numeric = (value instanceof Uint256 ? value : new Uint256(typeof value == 'number' ? value : 0));
+                    let numeric = (value instanceof algorithm_1.Uint256 ? value : new algorithm_1.Uint256(typeof value == 'number' ? value : 0));
                     if (numeric.gte(this.UINT64_MAX))
                         throw new TypeError('field ' + field + ' is out of uint64 range');
                     stream.writeInteger(numeric);
                     break;
                 }
                 case 'uint128': {
-                    if (!(value instanceof Uint256))
+                    if (!(value instanceof algorithm_1.Uint256))
                         throw new TypeError('field ' + field + ' is not of type uint128 (uint256)');
                     if (value.gte(this.UINT128_MAX))
                         throw new TypeError('field ' + field + ' is out of uint128 range');
@@ -348,13 +356,13 @@ export class SchemaUtil {
                     break;
                 }
                 case 'uint256': {
-                    if (!(value instanceof Uint256))
+                    if (!(value instanceof algorithm_1.Uint256))
                         throw new TypeError('field ' + field + ' is not of type uint256');
                     stream.writeInteger(value);
                     break;
                 }
                 case 'decimal': {
-                    if (!(value instanceof BigNumber))
+                    if (!(value instanceof bignumber_js_1.default))
                         throw new TypeError('field ' + field + ' is not of type decimal (bignumber)');
                     stream.writeDecimal(value);
                     break;
@@ -378,19 +386,19 @@ export class SchemaUtil {
                     break;
                 }
                 case 'recsighash': {
-                    if (!(value instanceof Recsighash))
+                    if (!(value instanceof algorithm_1.Recsighash))
                         throw new TypeError('field ' + field + ' is not of type recsighash');
                     stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'seckey': {
-                    if (!(value instanceof Seckey))
+                    if (!(value instanceof algorithm_1.Seckey))
                         throw new TypeError('field ' + field + ' is not of type seckey');
                     stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'pubkey': {
-                    if (!(value instanceof Pubkey))
+                    if (!(value instanceof algorithm_1.Pubkey))
                         throw new TypeError('field ' + field + ' is not of type pubkey');
                     stream.writeBinaryStringOptimized(value.data);
                     break;
@@ -400,7 +408,7 @@ export class SchemaUtil {
                         stream.writeString('');
                         break;
                     }
-                    else if (!(value instanceof Pubkeyhash))
+                    else if (!(value instanceof algorithm_1.Pubkeyhash))
                         throw new TypeError('field ' + field + ' is not of type pubkeyhash');
                     stream.writeBinaryStringOptimized(value.data);
                     break;
@@ -410,15 +418,15 @@ export class SchemaUtil {
                         stream.writeString('');
                         break;
                     }
-                    else if (!(value instanceof Subpubkeyhash))
+                    else if (!(value instanceof algorithm_1.Subpubkeyhash))
                         throw new TypeError('field ' + field + ' is not of type subpubkeyhash');
                     stream.writeBinaryStringOptimized(value.data);
                     break;
                 }
                 case 'assetid': {
-                    if (!(value instanceof AssetId))
+                    if (!(value instanceof algorithm_1.AssetId))
                         throw new TypeError('field ' + field + ' is not of type assetid');
-                    stream.writeInteger(new Uint256(value.toUint8Array()));
+                    stream.writeInteger(new algorithm_1.Uint256(value.toUint8Array()));
                     break;
                 }
                 default:
@@ -426,7 +434,7 @@ export class SchemaUtil {
             }
         };
         if (typeof schema.getType == 'function')
-            object.type = Hashing.hash32(ByteUtil.byteStringToUint8Array(schema.getType()));
+            object.type = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema.getType()));
         for (let field in schema) {
             let type = schema[field];
             let value = object[field];
@@ -481,32 +489,32 @@ export class SchemaUtil {
                 case 'recsighash':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Recsighash(value.length == Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.RECSIGHASH - value.length).fill(0)]));
+                        value = new algorithm_1.Recsighash(value.length == algorithm_1.Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, ...new Array(algorithm_1.Chain.size.RECSIGHASH - value.length).fill(0)]));
                     break;
                 case 'seckey':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Seckey(value.length == Chain.size.SECKEY ? value : Uint8Array.from([...value, ...new Array(Chain.size.SECKEY - value.length).fill(0)]));
+                        value = new algorithm_1.Seckey(value.length == algorithm_1.Chain.size.SECKEY ? value : Uint8Array.from([...value, ...new Array(algorithm_1.Chain.size.SECKEY - value.length).fill(0)]));
                     break;
                 case 'pubkey':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Pubkey(value.length == Chain.size.PUBKEY ? value : Uint8Array.from([...value, ...new Array(Chain.size.PUBKEY - value.length).fill(0)]));
+                        value = new algorithm_1.Pubkey(value.length == algorithm_1.Chain.size.PUBKEY ? value : Uint8Array.from([...value, ...new Array(algorithm_1.Chain.size.PUBKEY - value.length).fill(0)]));
                     break;
                 case 'pubkeyhash':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
+                        value = new algorithm_1.Pubkeyhash(value.length == algorithm_1.Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(algorithm_1.Chain.size.PUBKEYHASH - value.length).fill(0)]));
                     break;
                 case 'subpubkeyhash':
                     value = stream.readBinaryString(subtype);
                     if (value != null)
-                        value = new Subpubkeyhash(value.length == Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
+                        value = new algorithm_1.Subpubkeyhash(value.length == algorithm_1.Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(algorithm_1.Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
                     break;
                 case 'assetid':
                     value = stream.readInteger(subtype);
                     if (value != null) {
-                        value = new AssetId(value.toUint8Array().reverse());
+                        value = new algorithm_1.AssetId(value.toUint8Array().reverse());
                     }
                     break;
                 default:
@@ -564,7 +572,7 @@ export class SchemaUtil {
                 let value = stream.readDecimal(type);
                 if (value == null)
                     break;
-                result.push(value.isLessThan(new BigNumber(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : value.toString());
+                result.push(value.isLessThan(new bignumber_js_1.default(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : value.toString());
             }
             else if ([Viewable.True, Viewable.False].includes(type)) {
                 let value = stream.readBoolean(type);
@@ -576,13 +584,13 @@ export class SchemaUtil {
                 let value = stream.readBinaryString(type);
                 if (value == null)
                     break;
-                result.push(ByteUtil.uint8ArrayToHexString(value));
+                result.push(algorithm_1.ByteUtil.uint8ArrayToHexString(value));
             }
             else if (StreamUtil.isString10(type)) {
                 let value = stream.readString(type);
                 if (value == null)
                     break;
-                result.push(TextUtil.isAsciiEncoding(value) ? value : ByteUtil.uint8ArrayToHexString(ByteUtil.byteStringToUint8Array(value)));
+                result.push(text_1.TextUtil.isAsciiEncoding(value) ? value : algorithm_1.ByteUtil.uint8ArrayToHexString(algorithm_1.ByteUtil.byteStringToUint8Array(value)));
             }
             else if (StreamUtil.isInteger(type)) {
                 let value = stream.readSafeInteger(type);
@@ -594,8 +602,9 @@ export class SchemaUtil {
         return result;
     }
 }
-SchemaUtil.UINT08_MAX = new Uint256(Math.pow(2, 8) - 1);
-SchemaUtil.UINT16_MAX = new Uint256(Math.pow(2, 16) - 1);
-SchemaUtil.UINT32_MAX = new Uint256(Math.pow(2, 32) - 1);
-SchemaUtil.UINT64_MAX = new Uint256(2).pow(64).subtract(1);
-SchemaUtil.UINT128_MAX = new Uint256(2).pow(128).subtract(1);
+exports.SchemaUtil = SchemaUtil;
+SchemaUtil.UINT08_MAX = new algorithm_1.Uint256(Math.pow(2, 8) - 1);
+SchemaUtil.UINT16_MAX = new algorithm_1.Uint256(Math.pow(2, 16) - 1);
+SchemaUtil.UINT32_MAX = new algorithm_1.Uint256(Math.pow(2, 32) - 1);
+SchemaUtil.UINT64_MAX = new algorithm_1.Uint256(2).pow(64).subtract(1);
+SchemaUtil.UINT128_MAX = new algorithm_1.Uint256(2).pow(128).subtract(1);
