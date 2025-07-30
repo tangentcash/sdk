@@ -171,7 +171,7 @@ export declare class RPC {
     private static fetchIpset;
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
-    static connectSocket(address: string): Promise<number | null>;
+    static connectSocket(addresses: string[]): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
     static applyResolver(resolver: string | null): void;
     static applyServer(server: string | null): void;

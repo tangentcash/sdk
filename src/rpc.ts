@@ -777,7 +777,7 @@ export class RPC {
     }
     return result;
   }
-  static async connectSocket(address: string): Promise<number | null> {
+  static async connectSocket(addresses: string[]): Promise<number | null> {
     if (this.socket != null)
       return 0;
     else if (!this.getProps().streaming)
@@ -829,9 +829,9 @@ export class RPC {
           };
           this.socket.onclose = () => {
             this.disconnectSocket();
-            this.connectSocket(address);
+            this.connectSocket(addresses);
           };
-          const events = await this.fetch<number>('no-cache', 'subscribe', [address]);
+          const events = await this.fetch<number>('no-cache', 'subscribe', [addresses.join(',')]);
           return events;
         } catch (exception) {
           if (this.onNodeError)
