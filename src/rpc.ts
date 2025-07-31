@@ -1000,7 +1000,14 @@ export class RPC {
       args.push(unrolling);
     return this.fetch('no-cache', 'getmempooltransactionsbyowner', args);
   }
-  static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null> {const args = [address, offset, count];
+  static getBlockTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null> {
+    return this.fetch('cache', 'getblocktransactionsbyhash', unrolling != null ? [hash, unrolling] : [hash]);
+  }
+  static getBlockTransactionsByNumber(hash: string, unrolling?: number): Promise<any[] | null> {
+    return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [hash, unrolling] : [hash]);
+  }
+  static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null> {
+    const args = [address, offset, count];
     if (direction != null)
       args.push(direction);
     if (unrolling != null)

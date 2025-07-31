@@ -851,6 +851,12 @@ class RPC {
             args.push(unrolling);
         return this.fetch('no-cache', 'getmempooltransactionsbyowner', args);
     }
+    static getBlockTransactionsByHash(hash, unrolling) {
+        return this.fetch('cache', 'getblocktransactionsbyhash', unrolling != null ? [hash, unrolling] : [hash]);
+    }
+    static getBlockTransactionsByNumber(hash, unrolling) {
+        return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [hash, unrolling] : [hash]);
+    }
     static getTransactionsByOwner(address, offset, count, direction, unrolling) {
         const args = [address, offset, count];
         if (direction != null)
