@@ -223,7 +223,7 @@ export declare class RPC {
     static getWitnessAccountsByPurpose(address: string, purpose: 'witness' | 'routing' | 'depository', offset: number, count: number): Promise<any[] | null>;
     static getMempoolTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getBlockTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
-    static getBlockTransactionsByNumber(hash: string, unrolling?: number): Promise<any[] | null>;
+    static getBlockTransactionsByNumber(number: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;

@@ -1003,8 +1003,8 @@ export class RPC {
   static getBlockTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null> {
     return this.fetch('cache', 'getblocktransactionsbyhash', unrolling != null ? [hash, unrolling] : [hash]);
   }
-  static getBlockTransactionsByNumber(hash: string, unrolling?: number): Promise<any[] | null> {
-    return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [hash, unrolling] : [hash]);
+  static getBlockTransactionsByNumber(number: number, unrolling?: number): Promise<any[] | null> {
+    return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [number, unrolling] : [number]);
   }
   static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null> {
     const args = [address, offset, count];
