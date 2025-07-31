@@ -192,6 +192,7 @@ export declare class RPC {
     static getProps(): InterfaceProps;
     static clearCache(): void;
     static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null>;
+    static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, value: BigNumber, method: string, args: any[]): Promise<any | null>;
     static getWallet(): Promise<{
         secretKey: string;
         publicKey: string;
