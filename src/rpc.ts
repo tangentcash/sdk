@@ -20,6 +20,41 @@ export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 
+export type TAsset = {
+    id: string | number;
+    chain?: string;
+    token?: string;
+    checksum?: string;
+}
+
+export type TBlock = {
+    wesolowski: string | null;
+    signature: string | null;
+    producer: string | null;
+    hash: string;
+    parent_hash: string;
+    transaction_root: string;
+    receipt_root: string;
+    state_root: string;
+    absolute_work: string | BigNumber;
+    difficulty: string | BigNumber;
+    gas_use: string | BigNumber;
+    gas_limit: string | BigNumber;
+    slot_duration: string | BigNumber;
+    slot_duration_target: string | BigNumber;
+    slot_length: string | BigNumber;
+    proposal_time: string | BigNumber;
+    approval_time: string | BigNumber;
+    wesolowski_time: string | BigNumber;
+    priority: string | BigNumber;
+    number: string | BigNumber;
+    recovery: string | BigNumber;
+    mutation_count: string | BigNumber;
+    transaction_count: string | BigNumber;
+    state_count: string | BigNumber;
+    witnesses: { asset: TAsset, number: string | BigNumber }[];
+}
+
 export type SummaryState = {
   account: {
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber, reserve: BigNumber }>>,
@@ -1016,10 +1051,10 @@ export class RPC {
   static getMempoolCumulativeConsensus(hash: string): Promise<{ branch: string, threshold: BigNumber, progress: BigNumber, committee: BigNumber, reached: boolean } | null> {
     return this.fetch('no-cache', 'getmempoolattestation', [hash]);
   }
-  static getBlockByNumber(number: number, unrolling?: number): Promise<any | null> {
+  static getBlockByNumber(number: number, unrolling?: number): Promise<TBlock | null> {
     return this.fetch('cache', 'getblockbynumber', unrolling != null ? [number, unrolling] : [number]);
   }
-  static getBlockByHash(hash: string, unrolling?: number): Promise<any | null> {
+  static getBlockByHash(hash: string, unrolling?: number): Promise<TBlock | null> {
     return this.fetch('cache', 'getblockbyhash', unrolling != null ? [hash, unrolling] : [hash]);
   }
   static getBlockTipNumber(): Promise<BigNumber | string | null> {
