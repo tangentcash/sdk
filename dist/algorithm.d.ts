@@ -67,6 +67,7 @@ export declare class Uint256 {
     copy(): Uint256;
     valueOf(): number;
     toSafeInteger(): Uint256 | number;
+    toInteger(): number;
     toString(radix?: number): string;
     toHex(): string;
     toCompactHex(): string;

@@ -313,6 +313,9 @@ class Uint256 {
     toSafeInteger() {
         return this.isSafeInteger() ? this.valueOf() : this;
     }
+    toInteger() {
+        return this.isSafeInteger() ? this.valueOf() : Number.MAX_SAFE_INTEGER;
+    }
     toString(radix) {
         return (radix == 16 ? '0x' : '') + this.value.toString(radix);
     }

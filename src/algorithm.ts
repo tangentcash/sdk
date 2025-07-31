@@ -287,6 +287,9 @@ export class Uint256 {
   toSafeInteger(): Uint256 | number {
     return this.isSafeInteger() ? this.valueOf() : this;
   }
+  toInteger(): number {
+    return this.isSafeInteger() ? this.valueOf() : Number.MAX_SAFE_INTEGER;
+  }
   toString(radix?: number): string {
     return (radix == 16 ? '0x' : '') + this.value.toString(radix);
   }
