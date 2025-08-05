@@ -480,7 +480,7 @@ export class AssetId {
       data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
     } else if (typeof data == 'string') {
       data = ByteUtil.hexStringToUint8Array(data);
-    } else if (data instanceof BigNumber) {
+    } else if (BigNumber.isBigNumber(data)) {
       data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
     }
     

@@ -400,7 +400,7 @@ export class SchemaUtil {
           break;
         }
         case 'decimal': {
-          if (!(value instanceof BigNumber))
+          if (!BigNumber.isBigNumber(value))
             throw new TypeError('field ' + field + ' is not of type decimal (bignumber)');
 
           stream.writeDecimal(value);

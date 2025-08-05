@@ -208,7 +208,7 @@ export class EventResolver {
           break;
         }
         case Types.AccountBalance: {
-          if (event.args.length >= 4 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && event.args[3] instanceof BigNumber) {
+          if (event.args.length >= 4 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && BigNumber.isBigNumber(event.args[3])) {
             const [assetId, from, to, value] = event.args;
             const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
             const toAddress = Signing.encodeAddress(new Pubkeyhash(to)) || to;
@@ -230,7 +230,7 @@ export class EventResolver {
             
             const toState = result.account.balances[toAddress][asset.handle];
             toState.supply = toState.supply.plus(value);
-          } else if (event.args.length >= 4 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber && event.args[3] instanceof BigNumber) {
+          } else if (event.args.length >= 4 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && BigNumber.isBigNumber(event.args[2]) && BigNumber.isBigNumber(event.args[3])) {
             const [assetId, owner, supply, reserve] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             const asset = new AssetId(assetId);
@@ -245,7 +245,7 @@ export class EventResolver {
             const ownerState = result.account.balances[ownerAddress][asset.handle];
             ownerState.supply = ownerState.supply.plus(supply)
             ownerState.reserve = ownerState.reserve.plus(reserve);
-          } else if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+          } else if (event.args.length >= 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && BigNumber.isBigNumber(event.args[2])) {
             const [assetId, owner, fee] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             const asset = new AssetId(assetId);
@@ -270,7 +270,7 @@ export class EventResolver {
           break;
         }
         case Types.ValidatorProduction: {
-          if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && event.args[2] instanceof BigNumber) {
+          if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && BigNumber.isBigNumber(event.args[2])) {
             const [from, mint_or_burn, value] = event.args;
             const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
             if (!result.account.refuels[fromAddress])
@@ -283,7 +283,7 @@ export class EventResolver {
           break;
         }
         case Types.DepositoryBalance: {
-          if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+          if (event.args.length >= 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && BigNumber.isBigNumber(event.args[2])) {
             const [assetId, owner, value] = event.args;
             const asset = new AssetId(assetId);
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
@@ -301,7 +301,7 @@ export class EventResolver {
           break;
         }
         case Types.DepositoryPolicy: {
-          if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && event.args[2] instanceof BigNumber) {
+          if (event.args.length >= 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && BigNumber.isBigNumber(event.args[2])) {
             const [assetId, owner, type] = event.args;
             const asset = new AssetId(assetId);
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
@@ -310,7 +310,7 @@ export class EventResolver {
             
             switch (type.toNumber()) {
               case 0: {
-                if (event.args.length >= 4 && event.args[3] instanceof BigNumber) {
+                if (event.args.length >= 4 && BigNumber.isBigNumber(event.args[3])) {
                   const newAccounts = event.args[3];
                   if (!result.depository.accounts[ownerAddress])
                     result.depository.accounts[ownerAddress] = { };
@@ -321,16 +321,16 @@ export class EventResolver {
                 break;
               }
               case 1: {
-                if (event.args.length >= 4 && (event.args[3] instanceof BigNumber || typeof event.args[3] == 'string')) {
+                if (event.args.length >= 4 && (BigNumber.isBigNumber(event.args[3]) || typeof event.args[3] == 'string')) {
                   const transactionHash = event.args[3];
                   if (!result.depository.queues[ownerAddress])
                     result.depository.queues[ownerAddress] = { };
-                  result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: transactionHash instanceof BigNumber ? null : transactionHash };
+                  result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: BigNumber.isBigNumber(transactionHash) ? null : transactionHash };
                 }
                 break;
               }
               case 2: {
-                if (event.args.length >= 6 && event.args[3] instanceof BigNumber && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
+                if (event.args.length >= 6 && BigNumber.isBigNumber(event.args[3]) && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
                   const [securityLevel, acceptsAccountRequests, acceptsWithdrawalRequests] = event.args.slice(3, 6);
                   if (!result.depository.policies[ownerAddress])
                     result.depository.policies[ownerAddress] = { };
@@ -345,7 +345,7 @@ export class EventResolver {
           break;
         }
         case Types.WitnessAccount: {
-          if (event.args.length >= 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && event.args[1] instanceof BigNumber) {
+          if (event.args.length >= 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && BigNumber.isBigNumber(event.args[1])) {
             const [assetId, addressPurpose, addressAliases] = [event.args[0], event.args[1], event.args.slice(2)];
             const asset = new AssetId(assetId);
             if (!asset.handle)
@@ -378,7 +378,7 @@ export class EventResolver {
           break;
         }
         case Types.WitnessTransaction: {
-          if (event.args.length == 2 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
+          if (event.args.length == 2 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
             const [assetId, transactionId] = event.args;
             const asset = new AssetId(assetId);
             if (!asset.handle)
@@ -392,7 +392,7 @@ export class EventResolver {
           break;
         }
         case Types.Rollup: {
-          if (event.args.length == 3 && (event.args[0] instanceof BigNumber || typeof event.args[0] == 'string') && (event.args[1] instanceof BigNumber || typeof event.args[1] == 'string') && (event.args[2] instanceof BigNumber || typeof event.args[2] == 'string')) {
+          if (event.args.length == 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (BigNumber.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (BigNumber.isBigNumber(event.args[2]) || typeof event.args[2] == 'string')) {
             const [transactionHash, relativeGasUse, relativeGasPaid] = event.args;
             result.receipts[new Uint256(transactionHash.toString()).toHex()] = {
               relativeGasUse: new BigNumber(relativeGasUse.toString()),
@@ -421,7 +421,7 @@ export class EventResolver {
     const result: Record<string, any[]> = { };
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
-      const assetId = item.asset != null && (item.asset.id instanceof BigNumber || typeof item.asset.id == 'string') ? item.asset.id : null;
+      const assetId = item.asset != null && (BigNumber.isBigNumber(item.asset.id) || typeof item.asset.id == 'string') ? item.asset.id : null;
       const assetHandle = assetId != null ? new AssetId(assetId).handle || '' : '';
       if (!result[assetHandle])
         result[assetHandle] = [item];
