@@ -486,7 +486,7 @@ class AssetId {
         else if (typeof data == 'string') {
             data = ByteUtil.hexStringToUint8Array(data);
         }
-        else if (data instanceof bignumber_js_1.default) {
+        else if (bignumber_js_1.default.isBigNumber(data)) {
             data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
         }
         if (data instanceof Uint8Array) {
