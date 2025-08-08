@@ -28,6 +28,13 @@ export declare namespace Ledger {
         gasLimit: string;
         nonce: string;
     }
+    class UnknownTransaction extends Messages.Authentic {
+        asset: string;
+        gasPrice: string;
+        gasLimit: string;
+        nonce: string;
+        body: string;
+    }
 }
 export declare namespace States {
     class AccountBalance {

@@ -420,6 +420,13 @@ export class SchemaUtil {
           stream.writeString(value);
           break;
         }
+        case 'typeless': {
+          if (!(value instanceof Uint8Array))
+            throw new TypeError('field ' + field + ' is not of type uint8array');
+
+          stream.writeTypesless(value);
+          break;
+        }
         case 'boolean': {
           if (typeof value != 'boolean')
             throw new TypeError('field ' + field + ' is not of type boolean');
@@ -532,6 +539,8 @@ export class SchemaUtil {
         case 'string':
           value = stream.readString(subtype);
           break;
+        case 'typeless':
+          throw new TypeError('field ' + field + ' of type ' + type + ' is write-only');
         case 'boolean':
           value = stream.readBoolean(subtype);
           break;

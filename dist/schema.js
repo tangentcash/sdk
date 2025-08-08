@@ -62,6 +62,17 @@ var Ledger;
         }
     }
     Ledger.ConsensusTransaction = ConsensusTransaction;
+    class UnknownTransaction extends Messages.Authentic {
+        constructor() {
+            super(...arguments);
+            this.asset = 'assetid';
+            this.gasPrice = 'decimal';
+            this.gasLimit = 'uint256';
+            this.nonce = 'uint64';
+            this.body = 'typeless';
+        }
+    }
+    Ledger.UnknownTransaction = UnknownTransaction;
 })(Ledger || (exports.Ledger = Ledger = {}));
 var States;
 (function (States) {

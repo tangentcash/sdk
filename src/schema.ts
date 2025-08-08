@@ -42,6 +42,14 @@ export namespace Ledger {
     gasLimit: string = 'uint256';
     nonce: string = 'uint64';
   }
+
+  export class UnknownTransaction extends Messages.Authentic {
+    asset: string = 'assetid';
+    gasPrice: string = 'decimal';
+    gasLimit: string = 'uint256';
+    nonce: string = 'uint64';
+    body: string = 'typeless';
+  }
 }
 
 export namespace States {
