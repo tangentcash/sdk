@@ -182,4 +182,23 @@ export namespace Transactions {
 
     getType() { return DepositoryRegrouping.typename; }
   }
+
+  export const typenames: Record<string, string> = {
+    'transfer': 'Transfer',   
+    'upgrade': 'Program creation',
+    'call': 'Program call',
+    'rollup': 'Rollup',
+    'certification': 'Validator certification',
+    'routing_account': 'Routing address registration',
+    'depository_account': 'Depository address selection',
+    'depository_account_finalization': 'Depository address registration',
+    'depository_withdrawal': 'Depository withdrawal',
+    'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
+    'depository_transaction': 'Depository transaction',
+    'depository_adjustment': 'Depository policy renewal',
+    'depository_regrouping': 'Depository group selection',
+    'depository_regrouping_preparation': 'Depository group announcement',
+    'depository_regrouping_commitment': 'Depository group migration',
+    'depository_regrouping_finalization': 'Depository group confirmation'
+  };
 }

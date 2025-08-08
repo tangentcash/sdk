@@ -122,4 +122,5 @@ export declare namespace Transactions {
         participants: string[];
         getType(): string;
     }
+    const typenames: Record<string, string>;
 }
