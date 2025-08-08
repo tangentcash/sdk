@@ -112,18 +112,25 @@ class Uint256 {
                     new Uint8Array(copy).set(new Uint8Array(value.value.buffer));
                     this.value = new uint256_1.UInt256(copy);
                 }
-                else
+                else {
                     this.value = new uint256_1.UInt256();
+                }
             }
             else if (value instanceof Uint8Array) {
-                if (value.length != 32) {
-                    const copy = new Uint8Array(32);
-                    if (value.length > 0)
+                const isZero = value.length == 0 || value.every((x) => x == 0);
+                if (!isZero) {
+                    if (value.length != 32) {
+                        const copy = new Uint8Array(32);
                         copy.set(value.slice(0, 32), 0);
-                    this.value = new uint256_1.UInt256(copy.buffer);
+                        this.value = new uint256_1.UInt256(copy.buffer);
+                    }
+                    else {
+                        this.value = new uint256_1.UInt256(new Uint8Array(value).buffer);
+                    }
                 }
-                else
-                    this.value = new uint256_1.UInt256(new Uint8Array(value).buffer);
+                else {
+                    this.value = new uint256_1.UInt256();
+                }
             }
             else if (typeof value == 'string') {
                 const isHex = value.startsWith('0x') || radix == 16;
