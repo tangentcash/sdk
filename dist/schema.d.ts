@@ -33,7 +33,7 @@ export declare namespace Ledger {
         gasPrice: string;
         gasLimit: string;
         nonce: string;
-        body: string;
+        typeless: string;
         getType: (() => number) | null;
     }
 }

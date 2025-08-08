@@ -69,7 +69,7 @@ var Ledger;
             this.gasPrice = 'decimal';
             this.gasLimit = 'uint256';
             this.nonce = 'uint64';
-            this.body = 'typeless';
+            this.typeless = 'typeless';
             this.getType = null;
         }
     }
