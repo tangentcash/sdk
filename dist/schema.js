@@ -70,6 +70,7 @@ var Ledger;
             this.gasLimit = 'uint256';
             this.nonce = 'uint64';
             this.body = 'typeless';
+            this.getType = null;
         }
     }
     Ledger.UnknownTransaction = UnknownTransaction;

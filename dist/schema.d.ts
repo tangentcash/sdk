@@ -34,6 +34,7 @@ export declare namespace Ledger {
         gasLimit: string;
         nonce: string;
         body: string;
+        getType: (() => number) | null;
     }
 }
 export declare namespace States {

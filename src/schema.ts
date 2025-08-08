@@ -49,6 +49,7 @@ export namespace Ledger {
     gasLimit: string = 'uint256';
     nonce: string = 'uint64';
     body: string = 'typeless';
+    getType: (() => number) | null = null;
   }
 }
 
