@@ -22,8 +22,8 @@ export type ClearCallback = () => any;
 
 export type SummaryState = {
   account: {
+    programs: Set<string>,
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber, reserve: BigNumber }>>,
-    refuels: Record<string, BigNumber>,
     fees: Record<string, Record<string, { asset: AssetId, fee: BigNumber }>>
   },
   depository: {
@@ -177,8 +177,8 @@ export class EventResolver {
   static calculateSummaryState(events?: { event: BigNumber, args: any[] }[]): SummaryState {
     const result: SummaryState = {
       account: {
+        programs: new Set<string>(),
         balances: { },
-        refuels: { },
         fees: { }
       },
       depository: {
@@ -269,16 +269,12 @@ export class EventResolver {
           }
           break;
         }
-        case Types.ValidatorProduction: {
-          if (event.args.length >= 3 && typeof event.args[0] == 'string' && typeof event.args[1] == 'boolean' && BigNumber.isBigNumber(event.args[2])) {
-            const [from, mint_or_burn, value] = event.args;
+        case Types.AccountProgram: {
+          if (event.args.length >= 1 && typeof event.args[0] == 'string') {
+            const [from] = event.args;
             const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
-            if (!result.account.refuels[fromAddress])
-              result.account.refuels[fromAddress] = new BigNumber(0);
-            if (mint_or_burn)
-              result.account.refuels[fromAddress] = result.account.refuels[fromAddress].plus(value);
-            else
-              result.account.refuels[fromAddress] = result.account.refuels[fromAddress].minus(value);
+            if (fromAddress != null)
+              result.account.programs.add(fromAddress);
           }
           break;
         }
@@ -433,7 +429,7 @@ export class EventResolver {
   static isSummaryStateEmpty(state: SummaryState, address?: string): boolean {
     if (address != null) {
       return !state.account.balances[address] &&
-        !state.account.refuels[address] &&
+        !state.account.programs.size &&
         !state.depository.balances[address] &&
         !Object.keys(state.depository.queues).length &&
         !Object.keys(state.depository.accounts).length &&
@@ -445,7 +441,7 @@ export class EventResolver {
         !state.errors.length;
     } else {
       return !Object.keys(state.account.balances).length &&
-        !Object.keys(state.account.refuels).length &&
+        !state.account.programs.size &&
         !Object.keys(state.depository.balances).length &&
         !Object.keys(state.depository.queues).length &&
         !Object.keys(state.depository.accounts).length &&

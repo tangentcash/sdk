@@ -20,12 +20,12 @@ export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 export type SummaryState = {
     account: {
+        programs: Set<string>;
         balances: Record<string, Record<string, {
             asset: AssetId;
             supply: BigNumber;
             reserve: BigNumber;
         }>>;
-        refuels: Record<string, BigNumber>;
         fees: Record<string, Record<string, {
             asset: AssetId;
             fee: BigNumber;

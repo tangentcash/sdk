@@ -4,7 +4,7 @@ import { States, Transactions } from "./schema";
 export class Types
 {
   static AccountBalance = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.AccountBalance.typename));
-  static ValidatorProduction = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.ValidatorProduction.typename));
+  static AccountProgram = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.AccountBalance.typename));
   static DepositoryBalance = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.DepositoryBalance.typename));
   static DepositoryPolicy = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.DepositoryPolicy.typename));
   static WitnessAccount = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.WitnessAccount.typename));

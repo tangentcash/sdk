@@ -81,10 +81,10 @@ var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
-    class ValidatorProduction {
+    class AccountProgram {
     }
-    ValidatorProduction.typename = 'validator_production';
-    States.ValidatorProduction = ValidatorProduction;
+    AccountProgram.typename = 'account_program';
+    States.AccountProgram = AccountProgram;
     class DepositoryBalance {
     }
     DepositoryBalance.typename = 'depository_balance';
