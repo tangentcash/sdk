@@ -154,7 +154,7 @@ export declare class Signing {
     static privateDecrypt(cipherSecretKey: Seckey, cipherPublicKey: Pubkey, ciphertext: Uint8Array): Promise<Uint8Array | null>;
     static decodeSecretKey(value: string): Seckey | null;
     static encodeSecretKey(secretKey: Seckey): string | null;
-    static decodePublicKey(value: string): Seckey | null;
+    static decodePublicKey(value: string): Pubkey | null;
     static encodePublicKey(publicKey: Pubkey): string | null;
     static decodeAddress(value: string): Pubkeyhash | null;
     static decodeSubaddress(value: string): Subpubkeyhash | null;

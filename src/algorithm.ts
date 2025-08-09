@@ -792,7 +792,7 @@ export class Signing {
   static encodeSecretKey(secretKey: Seckey): string | null {
     return Segwit.encode(Chain.props.SECKEY_PREFIX, Chain.props.SECKEY_VERSION, secretKey.data);
   }
-  static decodePublicKey(value: string): Seckey | null {
+  static decodePublicKey(value: string): Pubkey | null {
     let result = Segwit.decode(Chain.props.PUBKEY_PREFIX, value);
     if (!result || result.version != Chain.props.PUBKEY_VERSION || result.program.length != Chain.size.PUBKEY)
       return null;
