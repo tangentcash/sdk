@@ -77,6 +77,16 @@ class Authorizer {
                     throw new Error('Challenge response must contain "signature" hex string');
                 if (solution.message != null && typeof solution.message != 'string')
                     throw new Error('Challenge response "message" must be a hex string');
+                if (solution.reasoning != null && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
+                    throw new Error('Challenge response "reasoning" must be a string ("identity" | "message" | "transaction")');
+                if (solution.favicon != null) {
+                    try {
+                        new URL(solution.favicon);
+                    }
+                    catch {
+                        throw new Error('Challenge response "favicon" must be a URL');
+                    }
+                }
                 if (solution.description != null && typeof solution.description != 'string')
                     throw new Error('Challenge response "description" must be a string');
                 const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.signature)));
@@ -88,7 +98,9 @@ class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
+                        reasoning: solution.reasoning || null,
                         signable: solution.message || null,
+                        favicon: solution.favicon || null,
                         description: solution.description || null
                     });
                     if (solution.message != null && !decision.signature)

@@ -6,7 +6,9 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
+    reasoning: null | 'identity' | 'message' | 'transaction';
     signable: string | null;
+    favicon: string | null;
     description: string | null;
 };
 export type Approval = {

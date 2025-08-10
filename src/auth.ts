@@ -9,7 +9,9 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
+    reasoning: null | 'identity' | 'message' | 'transaction';
     signable: string | null;
+    favicon: string | null;
     description: string | null;
 }
 
@@ -55,7 +57,7 @@ export class Authorizer {
         try {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
             const challenge16 = ByteUtil.uint8ArrayToHexString(challenge);
-            const solution: { signature?: string, message?: string, description?: string } = await (await fetch(url, {
+            const solution: { signature?: string, message?: string, reasoning?: string, favicon?: string, description?: string } = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -72,6 +74,17 @@ export class Authorizer {
                 if (solution.message != null && typeof solution.message != 'string')
                     throw new Error('Challenge response "message" must be a hex string');
 
+                if (solution.reasoning != null && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
+                    throw new Error('Challenge response "reasoning" must be a string ("identity" | "message" | "transaction")');
+
+                if (solution.favicon != null) {
+                    try {
+                        new URL (solution.favicon);
+                    } catch {
+                        throw new Error('Challenge response "favicon" must be a URL');
+                    }
+                }
+
                 if (solution.description != null && typeof solution.description != 'string')
                     throw new Error('Challenge response "description" must be a string');
 
@@ -85,7 +98,9 @@ export class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
+                        reasoning: solution.reasoning || null,
                         signable: solution.message || null,
+                        favicon: solution.favicon || null,
                         description: solution.description || null
                     });
                     if (solution.message != null && !decision.signature)
