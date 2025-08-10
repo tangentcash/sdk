@@ -50,6 +50,9 @@ class Authorizer {
     static applyImplementation(implementation) {
         this.implementation = implementation;
     }
+    static schema(entity) {
+        return `tangent://${algorithm_1.Signing.encodePublicKey(entity.publicKey) || ''}@${entity.hostname}/approve/${entity.reasoning}?security=${entity.trustless ? 'trustless' : 'trust'}${entity.signable ? '&signable=' : ''}${entity.signable ? encodeURIComponent(entity.signable) : ''}${entity.favicon ? '&favicon=' : ''}${entity.favicon ? encodeURIComponent(entity.favicon) : ''}${entity.favicon ? '&favicon=' : ''}${entity.description ? encodeURIComponent(entity.description) : ''}`;
+    }
     static async try(request) {
         if (!this.implementation)
             return false;
@@ -77,8 +80,8 @@ class Authorizer {
                     throw new Error('Challenge response must contain "signature" hex string');
                 if (solution.message != null && typeof solution.message != 'string')
                     throw new Error('Challenge response "message" must be a hex string');
-                if (solution.reasoning != null && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
-                    throw new Error('Challenge response "reasoning" must be a string ("identity" | "message" | "transaction")');
+                if (solution.reasoning != 'account' && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
+                    throw new Error('Challenge response "reasoning" must be a string ("account" | "identity" | "message" | "transaction")');
                 if (solution.favicon != null) {
                     try {
                         new URL(solution.favicon);
@@ -98,7 +101,7 @@ class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
-                        reasoning: solution.reasoning || null,
+                        reasoning: solution.reasoning,
                         signable: solution.message || null,
                         favicon: solution.favicon || null,
                         description: solution.description || null

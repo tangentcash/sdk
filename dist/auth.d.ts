@@ -6,7 +6,7 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
-    reasoning: null | 'identity' | 'message' | 'transaction';
+    reasoning: 'account' | 'identity' | 'message' | 'transaction';
     signable: string | null;
     favicon: string | null;
     description: string | null;
@@ -26,6 +26,7 @@ export declare class NodeImplementation {
 export declare class Authorizer {
     static implementation: Implementation | null;
     static applyImplementation(implementation: Implementation | null): void;
+    static schema(entity: Entity): string;
     static try(request: Prompt): Promise<boolean>;
     private static isIpAddress;
 }

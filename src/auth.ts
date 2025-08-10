@@ -9,7 +9,7 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
-    reasoning: null | 'identity' | 'message' | 'transaction';
+    reasoning: 'account' | 'identity' | 'message' | 'transaction';
     signable: string | null;
     favicon: string | null;
     description: string | null;
@@ -43,6 +43,9 @@ export class Authorizer {
     static applyImplementation(implementation: Implementation | null): void {
         this.implementation = implementation;
     }
+    static schema(entity: Entity): string {
+        return `tangent://${Signing.encodePublicKey(entity.publicKey) || ''}@${entity.hostname}/approve/${entity.reasoning}?security=${entity.trustless ? 'trustless' : 'trust'}${entity.signable ? '&signable=' : ''}${entity.signable ? encodeURIComponent(entity.signable) : ''}${entity.favicon ? '&favicon=' : ''}${entity.favicon ? encodeURIComponent(entity.favicon) : ''}${entity.favicon ? '&favicon=' : ''}${entity.description ? encodeURIComponent(entity.description) : ''}`;
+    }
     static async try(request: Prompt): Promise<boolean> {
         if (!this.implementation)
             return false;
@@ -74,8 +77,8 @@ export class Authorizer {
                 if (solution.message != null && typeof solution.message != 'string')
                     throw new Error('Challenge response "message" must be a hex string');
 
-                if (solution.reasoning != null && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
-                    throw new Error('Challenge response "reasoning" must be a string ("identity" | "message" | "transaction")');
+                if (solution.reasoning != 'account' && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
+                    throw new Error('Challenge response "reasoning" must be a string ("account" | "identity" | "message" | "transaction")');
 
                 if (solution.favicon != null) {
                     try {
@@ -98,7 +101,7 @@ export class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
-                        reasoning: solution.reasoning || null,
+                        reasoning: solution.reasoning,
                         signable: solution.message || null,
                         favicon: solution.favicon || null,
                         description: solution.description || null
