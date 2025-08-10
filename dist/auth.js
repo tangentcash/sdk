@@ -33,45 +33,49 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Authorizer = void 0;
+exports.Authorizer = exports.NodeImplementation = void 0;
 const algorithm_1 = require("./algorithm");
 const utils_1 = require("@noble/hashes/utils");
-class Authorizer {
-    static async prompt(decide) {
-        this.decide = decide;
-        if (this.decide != null) {
-            if (!this.server) {
-                try {
-                    if (!this.internal.createServer)
-                        this.internal.createServer = (await Promise.resolve().then(() => __importStar(require('http')))).createServer;
-                }
-                catch {
-                    return;
-                }
-                this.server = this.internal.createServer(async (req, res) => {
-                    try {
-                        if (req.method != 'POST')
-                            throw new Error('Only POST method is allowed');
-                        const result = JSON.stringify(await this.try(JSON.parse(await new Promise((resolve, reject) => {
-                            let body = '';
-                            req.on('data', (chunk) => body += chunk.toString());
-                            req.on('end', () => resolve(body));
-                            req.on('error', reject);
-                        }))));
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(result);
-                    }
-                    catch (exception) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: exception.message }));
-                    }
-                });
-                await new Promise((resolve) => this.server.listen(this.config.port, this.config.host, resolve));
+class NodeImplementation {
+    static async serveTryFunction(host, port, action) {
+        if (!this.createServer)
+            this.createServer = (await Promise.resolve().then(() => __importStar(require('http')))).createServer;
+        const server = this.createServer(async (req, res) => {
+            try {
+                if (req.method != 'POST')
+                    throw new Error('Only POST method is allowed');
+                const result = JSON.stringify(await action(JSON.parse(await new Promise((resolve, reject) => {
+                    let body = '';
+                    req.on('data', (chunk) => body += chunk.toString());
+                    req.on('end', () => resolve(body));
+                    req.on('error', reject);
+                }))));
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(result);
             }
-        }
-        else if (this.server != null) {
-            await new Promise((resolve, reject) => this.server.close((error) => error ? reject(error) : resolve()));
-            this.server = null;
+            catch (exception) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: exception.message }));
+            }
+        });
+        await new Promise((resolve) => server.listen(port, host, resolve));
+        return server;
+    }
+    static async resolveDomainTXT(hostname) {
+        if (!this.resolveTxt)
+            this.resolveTxt = (await Promise.resolve().then(() => __importStar(require('dns/promises')))).resolveTxt;
+        const result = await this.resolveTxt(hostname);
+        return result.flat();
+    }
+}
+exports.NodeImplementation = NodeImplementation;
+NodeImplementation.createServer = null;
+NodeImplementation.resolveTxt = null;
+class Authorizer {
+    static async prompt(implementation) {
+        this.implementation = implementation;
+        if (this.implementation != null) {
+            await this.implementation.serveTryFunction(this.config.host, this.config.port, this.try);
         }
     }
     static async try(request) {
@@ -105,10 +109,10 @@ class Authorizer {
                 if (!publicKey)
                     throw new Error('Challenge signature is not acceptable');
                 try {
-                    if (!this.decide)
+                    if (!this.implementation)
                         throw new Error('account sharing refused');
-                    const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
-                    const decision = await this.decide({
+                    const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
+                    const decision = await this.implementation.prompt({
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
@@ -151,26 +155,6 @@ class Authorizer {
             return false;
         }
     }
-    static async getPublicKeyFromTXT(hostname) {
-        try {
-            if (!this.internal.resolveTxt)
-                this.internal.resolveTxt = (await Promise.resolve().then(() => __importStar(require('dns/promises')))).resolveTxt;
-            const records = await this.internal.resolveTxt(hostname);
-            for (let i = 0; i < records.length; i++) {
-                const subRecords = records[i];
-                for (let j = 0; j < subRecords.length; j++) {
-                    const publicKey = algorithm_1.Signing.decodePublicKey(subRecords[j]);
-                    if (publicKey != null) {
-                        return publicKey;
-                    }
-                }
-            }
-            return null;
-        }
-        catch (exception) {
-            throw new Error('DNS resolution failed: ' + exception.message);
-        }
-    }
     static isIpAddress(ip) {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
         if (ipv4Regex.test(ip) && ip.split('.').every((x) => parseInt(x) <= 255))
@@ -182,10 +166,4 @@ class Authorizer {
     }
 }
 exports.Authorizer = Authorizer;
-Authorizer.internal = {
-    resolveTxt: null,
-    createServer: null
-};
 Authorizer.config = { host: 'localhost', port: 57673 };
-Authorizer.server = null;
-Authorizer.decide = null;

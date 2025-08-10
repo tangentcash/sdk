@@ -1,8 +1,4 @@
 import { Hashsig, Pubkey, Pubkeyhash } from './algorithm';
-type Internal = {
-    resolveTxt: ((hostname: string) => Promise<string[][]>) | null;
-    createServer: ((callback: any) => any) | null;
-};
 export type Prompt = {
     url?: string;
 };
@@ -17,17 +13,24 @@ export type Approval = {
     account: Pubkeyhash;
     signature: Hashsig | null;
 };
+export type Implementation = {
+    prompt: (request: Entity) => Promise<Approval>;
+    serveTryFunction: (host: string, port: number, action: (args: any) => Promise<any>) => Promise<any>;
+    resolveDomainTXT: (hostname: string) => Promise<string[]>;
+};
+export declare class NodeImplementation {
+    static createServer: any;
+    static resolveTxt: any;
+    static serveTryFunction(host: string, port: number, action: (args: any) => Promise<any>): Promise<any>;
+    static resolveDomainTXT(hostname: string): Promise<string[]>;
+}
 export declare class Authorizer {
-    static internal: Internal;
     static config: {
         host: string;
         port: number;
     };
-    static server: any | null;
-    static decide: ((request: Entity) => Promise<Approval>) | null;
-    static prompt(decide: (request: Entity) => Promise<Approval>): Promise<void>;
+    static implementation: Implementation | null;
+    static prompt(implementation: Implementation | null): Promise<void>;
     static try(request: Prompt): Promise<boolean>;
-    private static getPublicKeyFromTXT;
     private static isIpAddress;
 }
-export {};

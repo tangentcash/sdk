@@ -1,11 +1,6 @@
 import { ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
 import { randomBytes } from '@noble/hashes/utils';
 
-type Internal = {
-    resolveTxt: ((hostname: string) => Promise<string[][]>) | null,
-    createServer: ((callback: any) => any) | null
-}
-
 export type Prompt = {
     url?: string;
 }
@@ -23,49 +18,58 @@ export type Approval = {
     signature: Hashsig | null
 }
 
-export class Authorizer {
-    static internal: Internal = {
-        resolveTxt: null,
-        createServer: null
-    };
-    static config = { host: 'localhost', port: 57673 };
-    static server: any | null = null;
-    static decide: ((request: Entity) => Promise<Approval>) | null = null;
+export type Implementation = {
+    prompt: (request: Entity) => Promise<Approval>,
+    serveTryFunction: (host: string, port: number, action: (args: any) => Promise<any>) => Promise<any>,
+    resolveDomainTXT: (hostname: string) => Promise<string[]>
+};
 
-    static async prompt(decide: (request: Entity) => Promise<Approval>): Promise<void> {
-        this.decide = decide;
-        if (this.decide != null) {
-            if (!this.server) {
-                try {
-                    if (!this.internal.createServer)
-                        this.internal.createServer = (await import('http')).createServer;
-                } catch {
-                    return;
-                }
+export class NodeImplementation {
+    static createServer: any = null;
+    static resolveTxt: any = null;
 
-                this.server = this.internal.createServer(async (req: any, res: any) => {
-                    try {
-                        if (req.method != 'POST')
-                            throw new Error('Only POST method is allowed');
+    static async serveTryFunction(host: string, port: number, action: (args: any) => Promise<any>): Promise<any> {
+        if (!this.createServer)
+            this.createServer = (await import('http')).createServer;
 
-                        const result = JSON.stringify(await this.try(JSON.parse(await new Promise((resolve, reject) => {
-                            let body = '';
-                            req.on('data', (chunk: any) => body += chunk.toString());
-                            req.on('end', () => resolve(body));
-                            req.on('error', reject);
-                        }))));
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(result);
-                    } catch (exception: any) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: exception.message }));
-                    }
-                });
-                await new Promise<void>((resolve) => this.server.listen(this.config.port, this.config.host, resolve));
+        const server = this.createServer(async (req: any, res: any) => {
+            try {
+                if (req.method != 'POST')
+                    throw new Error('Only POST method is allowed');
+
+                const result = JSON.stringify(await action(JSON.parse(await new Promise((resolve, reject) => {
+                    let body = '';
+                    req.on('data', (chunk: any) => body += chunk.toString());
+                    req.on('end', () => resolve(body));
+                    req.on('error', reject);
+                }))));
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(result);
+            } catch (exception: any) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: exception.message }));
             }
-        } else if (this.server != null) {
-            await new Promise<void>((resolve, reject) => this.server.close((error: any) => error ? reject(error) : resolve()));
-            this.server = null;
+        });
+        await new Promise<void>((resolve) => server.listen(port, host, resolve));
+        return server;
+    }
+    static async resolveDomainTXT(hostname: string): Promise<string[]> {
+        if (!this.resolveTxt)
+            this.resolveTxt = (await import('dns/promises')).resolveTxt;
+
+        const result = await this.resolveTxt(hostname);
+        return result.flat();
+    }
+}
+
+export class Authorizer {
+    static config = { host: 'localhost', port: 57673 };
+    static implementation: Implementation | null;
+
+    static async prompt(implementation: Implementation | null): Promise<void> {
+        this.implementation = implementation;
+        if (this.implementation != null) {
+            await this.implementation.serveTryFunction(this.config.host, this.config.port, this.try);
         }
     }
     static async try(request: Prompt): Promise<boolean> {
@@ -104,11 +108,11 @@ export class Authorizer {
                     throw new Error('Challenge signature is not acceptable');
 
                 try {
-                    if (!this.decide)
+                    if (!this.implementation)
                         throw new Error('account sharing refused');
 
-                    const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
-                    const decision = await this.decide({
+                    const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
+                    const decision = await this.implementation.prompt({
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
@@ -147,27 +151,6 @@ export class Authorizer {
             }
         } catch {
             return false;
-        }
-    }
-    private static async getPublicKeyFromTXT(hostname: string): Promise<Pubkey | null> {
-        try {
-            if (!this.internal.resolveTxt)
-                this.internal.resolveTxt = (await import('dns/promises')).resolveTxt;
-
-            const records = await this.internal.resolveTxt(hostname);
-            for (let i = 0; i < records.length; i++) {
-                const subRecords = records[i];
-                for (let j = 0; j < subRecords.length; j++) {
-                    const publicKey = Signing.decodePublicKey(subRecords[j]);
-                    if (publicKey != null) {
-                        return publicKey;
-                    }
-                }
-            }
-
-            return null;
-        } catch (exception: any) {
-            throw new Error('DNS resolution failed: ' + exception.message);
         }
     }
     private static isIpAddress(ip: string): boolean {
