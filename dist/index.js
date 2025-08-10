@@ -20,3 +20,4 @@ __exportStar(require("./serialization"), exports);
 __exportStar(require("./text"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./rpc"), exports);
+__exportStar(require("./auth"), exports);

@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ByteUtil = exports.Hashing = exports.Signing = exports.Segwit = exports.AssetId = exports.Subpubkeyhash = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Recsighash = exports.Uint256 = exports.Chain = void 0;
+exports.ByteUtil = exports.Hashing = exports.Signing = exports.Segwit = exports.AssetId = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Hashsig = exports.Uint256 = exports.Chain = void 0;
 const secp256k1_1 = __importDefault(require("secp256k1"));
 const libsodium_wrappers_1 = __importDefault(require("libsodium-wrappers"));
 const bip39 = __importStar(require("@scure/bip39"));
@@ -93,12 +93,10 @@ Chain.regtest = {
     MESSAGE_MAGIC: 0x6a513fb6b3b71f02
 };
 Chain.size = {
-    SIGHASH: 64,
-    RECSIGHASH: 65,
+    HASHSIG: 65,
     SECKEY: 32,
     PUBKEY: 33,
     PUBKEYHASH: 20,
-    SUBPUBKEYHASH: 40,
     ASSETID: 32,
     MESSAGE: 0xffffff
 };
@@ -390,7 +388,7 @@ class Uint256 {
     }
 }
 exports.Uint256 = Uint256;
-class Recsighash {
+class Hashsig {
     constructor(data) {
         let result = null;
         if (data != null) {
@@ -399,8 +397,8 @@ class Recsighash {
             else if (data instanceof Uint8Array)
                 result = data;
         }
-        if (!result || result.length != Chain.size.RECSIGHASH)
-            this.data = new Uint8Array(Chain.size.RECSIGHASH);
+        if (!result || result.length != Chain.size.HASHSIG)
+            this.data = new Uint8Array(Chain.size.HASHSIG);
         else
             this.data = result;
     }
@@ -408,7 +406,7 @@ class Recsighash {
         return ByteUtil.uint8ArrayCompare(this.data, value.data);
     }
 }
-exports.Recsighash = Recsighash;
+exports.Hashsig = Hashsig;
 class Seckey {
     constructor(data) {
         let result = null;
@@ -466,25 +464,6 @@ class Pubkeyhash {
     }
 }
 exports.Pubkeyhash = Pubkeyhash;
-class Subpubkeyhash {
-    constructor(data) {
-        let result = null;
-        if (data != null) {
-            if (typeof data == 'string')
-                result = ByteUtil.hexStringToUint8Array(data);
-            else if (data instanceof Uint8Array)
-                result = data;
-        }
-        if (!result || result.length != Chain.size.SUBPUBKEYHASH)
-            this.data = new Uint8Array(Chain.size.SUBPUBKEYHASH);
-        else
-            this.data = result;
-    }
-    equals(value) {
-        return ByteUtil.uint8ArrayCompare(this.data, value.data);
-    }
-}
-exports.Subpubkeyhash = Subpubkeyhash;
 class AssetId {
     constructor(data) {
         if (typeof data == 'number') {
@@ -650,7 +629,7 @@ class Signing {
     static sign(hash, secretKey) {
         try {
             const result = secp256k1_1.default.ecdsaSign(hash.toUint8Array(), secretKey.data);
-            const signature = new Recsighash();
+            const signature = new Hashsig();
             signature.data = Uint8Array.from([...result.signature, result.recid]);
             return signature;
         }
@@ -798,52 +777,13 @@ class Signing {
         return Segwit.encode(Chain.props.PUBKEY_PREFIX, Chain.props.PUBKEY_VERSION, publicKey.data);
     }
     static decodeAddress(value) {
-        const result = this.decodeSubaddress(value);
-        return result ? new Pubkeyhash(result.data.slice(0, Chain.size.PUBKEYHASH)) : null;
-    }
-    static decodeSubaddress(value) {
         let result = Segwit.decode(Chain.props.ADDRESS_PREFIX, value);
-        if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.SUBPUBKEYHASH))
+        if (!result || result.version != Chain.props.ADDRESS_VERSION || result.program.length != Chain.size.PUBKEYHASH)
             return null;
-        let subPublicKeyHash = new Subpubkeyhash();
-        subPublicKeyHash.data = result.program.length == Chain.size.SUBPUBKEYHASH ? result.program : Uint8Array.from([...result.program, new Array(Chain.size.SUBPUBKEYHASH - result.program.length).fill(0)]);
-        if (result.program.length > Chain.size.PUBKEYHASH) {
-            for (let i = 0; i < subPublicKeyHash.data.length; i++) {
-                subPublicKeyHash.data[i] ^= subPublicKeyHash.data[i + Chain.size.PUBKEYHASH];
-            }
-        }
-        return subPublicKeyHash;
+        return result ? new Pubkeyhash(result.program) : null;
     }
     static encodeAddress(publicKeyHash) {
-        return this.encodeSubaddress(publicKeyHash);
-    }
-    static encodeSubaddress(publicKeyHash, derivationHash) {
-        let data = publicKeyHash.data;
-        if (derivationHash != null) {
-            data = Uint8Array.from([...publicKeyHash.data, ...derivationHash.data]);
-            for (let i = 0; i < publicKeyHash.data.length; i++) {
-                data[i] ^= derivationHash.data[i];
-            }
-        }
-        return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, data);
-    }
-    static baseAddressOf(address) {
-        const publicKeyHash = this.decodeAddress(address);
-        return publicKeyHash ? this.encodeAddress(publicKeyHash) : null;
-    }
-    static maskAddressOf(address, derivation) {
-        const subPublicKeyHash = this.decodeSubaddress(address);
-        if (!subPublicKeyHash)
-            return null;
-        else if (!derivation)
-            return subPublicKeyHash;
-        const subaddress = Signing.encodeSubaddress(new Pubkeyhash(subPublicKeyHash.data.slice(0, Chain.size.PUBKEYHASH)), Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
-        return subaddress ? Signing.decodeSubaddress(subaddress) : null;
-    }
-    static derivationHashOf(data) {
-        const result = new Pubkeyhash();
-        result.data = Hashing.hash160(data);
-        return result;
+        return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, publicKeyHash.data);
     }
 }
 exports.Signing = Signing;

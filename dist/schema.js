@@ -12,7 +12,7 @@ var Messages;
     class Authentic extends Uniform {
         constructor() {
             super(...arguments);
-            this.signature = 'recsighash';
+            this.signature = 'hashsig';
         }
     }
     Messages.Authentic = Authentic;

@@ -1,7 +1,7 @@
 import jayson from 'jayson';
 import dgram from 'dgram';
 import { resolveTxt } from 'dns/promises';
-import { ByteUtil, Hashing, Pubkey, Pubkeyhash, Recsighash, Signing, Uint256 } from './algorithm';
+import { ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
 import { randomBytes } from '@noble/hashes/utils';
 
 export const discoveryMessage = 'tangent::authorizer';
@@ -14,8 +14,7 @@ export type AuthRequest = {
 
 export type AuthResponse = {
     account: Pubkeyhash,
-    derivation: Pubkeyhash | null,
-    signature: Recsighash | null
+    signature: Hashsig | null
 }
 
 export class Authorizer {
@@ -111,7 +110,7 @@ export class Authorizer {
             if (typeof solution.signature != 'string')
                 throw new Error('Server failed to respond with challenge solution');
 
-            const signature = new Recsighash(ByteUtil.hexStringToUint8Array(solution.challenge));
+            const signature = new Hashsig(ByteUtil.hexStringToUint8Array(solution.challenge));
             const publicKey = Signing.recover(new Uint256(challenge), signature);
             if (!publicKey)
                 throw new Error('Signature is not acceptable');
@@ -133,7 +132,7 @@ export class Authorizer {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'confirmation',
-                    account: Signing.encodeSubaddress(result.account, result.derivation || undefined),
+                    account: Signing.encodeAddress(result.account),
                     signature: result.signature != null ? ByteUtil.uint8ArrayToHexString(result.signature.data) : null
                 })
             });

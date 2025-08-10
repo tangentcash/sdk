@@ -104,7 +104,7 @@ class Authorizer {
             })).json();
             if (typeof solution.signature != 'string')
                 throw new Error('Server failed to respond with challenge solution');
-            const signature = new algorithm_1.Recsighash(algorithm_1.ByteUtil.hexStringToUint8Array(solution.challenge));
+            const signature = new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.challenge));
             const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), signature);
             if (!publicKey)
                 throw new Error('Signature is not acceptable');
@@ -125,7 +125,7 @@ class Authorizer {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'confirmation',
-                    account: algorithm_1.Signing.encodeSubaddress(result.account, result.derivation || undefined),
+                    account: algorithm_1.Signing.encodeAddress(result.account),
                     signature: result.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(result.signature.data) : null
                 })
             });

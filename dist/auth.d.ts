@@ -1,6 +1,6 @@
 import jayson from 'jayson';
 import dgram from 'dgram';
-import { Pubkey, Pubkeyhash, Recsighash } from './algorithm';
+import { Hashsig, Pubkey, Pubkeyhash } from './algorithm';
 export declare const discoveryMessage = "tangent::authorizer";
 export type AuthRequest = {
     publicKey: Pubkey;
@@ -9,8 +9,7 @@ export type AuthRequest = {
 };
 export type AuthResponse = {
     account: Pubkeyhash;
-    derivation: Pubkeyhash | null;
-    signature: Recsighash | null;
+    signature: Hashsig | null;
 };
 export declare class Authorizer {
     static config: {

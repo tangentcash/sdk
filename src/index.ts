@@ -4,3 +4,4 @@ export * from './serialization';
 export * from './text';
 export * from './types';
 export * from './rpc';
+export * from './auth';

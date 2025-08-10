@@ -16,12 +16,10 @@ export declare class Chain {
     static testnet: ChainParams;
     static regtest: ChainParams;
     static size: {
-        SIGHASH: number;
-        RECSIGHASH: number;
+        HASHSIG: number;
         SECKEY: number;
         PUBKEY: number;
         PUBKEYHASH: number;
-        SUBPUBKEYHASH: number;
         ASSETID: number;
         MESSAGE: number;
     };
@@ -83,10 +81,10 @@ export declare class Uint256 {
     min(rval: Uint256 | number, mutate?: boolean): Uint256;
     max(rval: Uint256 | number, mutate?: boolean): Uint256;
 }
-export declare class Recsighash {
+export declare class Hashsig {
     data: Uint8Array;
     constructor(data?: string | Uint8Array);
-    equals(value: Recsighash): boolean;
+    equals(value: Hashsig): boolean;
 }
 export declare class Seckey {
     data: Uint8Array;
@@ -99,11 +97,6 @@ export declare class Pubkey {
     equals(value: Pubkey): boolean;
 }
 export declare class Pubkeyhash {
-    data: Uint8Array;
-    constructor(data?: string | Uint8Array);
-    equals(value: Pubkeyhash): boolean;
-}
-export declare class Subpubkeyhash {
     data: Uint8Array;
     constructor(data?: string | Uint8Array);
     equals(value: Pubkeyhash): boolean;
@@ -134,10 +127,10 @@ export declare class Signing {
     static messageHash(signableMessage: string): Uint256;
     static mnemonicgen(strength?: number): string;
     static keygen(): Seckey;
-    static recover(hash: Uint256, signature: Recsighash): Pubkey | null;
-    static recoverHash(hash: Uint256, signature: Recsighash): Pubkeyhash | null;
-    static sign(hash: Uint256, secretKey: Seckey): Recsighash | null;
-    static verify(hash: Uint256, publicKey: Pubkey, signature: Recsighash): boolean;
+    static recover(hash: Uint256, signature: Hashsig): Pubkey | null;
+    static recoverHash(hash: Uint256, signature: Hashsig): Pubkeyhash | null;
+    static sign(hash: Uint256, secretKey: Seckey): Hashsig | null;
+    static verify(hash: Uint256, publicKey: Pubkey, signature: Hashsig): boolean;
     static verifyMnemonic(mnemonic: string): boolean;
     static verifySecretKey(secretKey: Seckey): boolean;
     static verifyPublicKey(publicKey: Pubkey): boolean;
@@ -157,12 +150,7 @@ export declare class Signing {
     static decodePublicKey(value: string): Pubkey | null;
     static encodePublicKey(publicKey: Pubkey): string | null;
     static decodeAddress(value: string): Pubkeyhash | null;
-    static decodeSubaddress(value: string): Subpubkeyhash | null;
     static encodeAddress(publicKeyHash: Pubkeyhash): string | null;
-    static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null;
-    static baseAddressOf(address: string): string | null;
-    static maskAddressOf(address: string, derivation: string | null): Subpubkeyhash | null;
-    static derivationHashOf(data: Uint8Array): Pubkeyhash;
 }
 export declare class Hashing {
     static hash32(data: Uint8Array): number;

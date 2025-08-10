@@ -64,12 +64,10 @@ export class Chain {
     MESSAGE_MAGIC: 0x6a513fb6b3b71f02
   };
   static size = {
-    SIGHASH: 64,
-    RECSIGHASH: 65,
+    HASHSIG: 65,
     SECKEY: 32,
     PUBKEY: 33,
     PUBKEYHASH: 20,
-    SUBPUBKEYHASH: 40,
     ASSETID: 32,
     MESSAGE: 0xffffff
   }
@@ -364,7 +362,7 @@ export class Uint256 {
   }
 }
 
-export class Recsighash {
+export class Hashsig {
   data: Uint8Array;
 
   constructor(data?: string | Uint8Array) {
@@ -376,12 +374,12 @@ export class Recsighash {
         result = data;
     }
 
-    if (!result || result.length != Chain.size.RECSIGHASH)
-      this.data = new Uint8Array(Chain.size.RECSIGHASH);
+    if (!result || result.length != Chain.size.HASHSIG)
+      this.data = new Uint8Array(Chain.size.HASHSIG);
     else
       this.data = result;
   }
-  equals(value: Recsighash): boolean {
+  equals(value: Hashsig): boolean {
     return ByteUtil.uint8ArrayCompare(this.data, value.data);
   }
 }
@@ -444,28 +442,6 @@ export class Pubkeyhash {
 
     if (!result || result.length != Chain.size.PUBKEYHASH)
       this.data = new Uint8Array(Chain.size.PUBKEYHASH);
-    else
-      this.data = result;
-  }
-  equals(value: Pubkeyhash): boolean {
-    return ByteUtil.uint8ArrayCompare(this.data, value.data);
-  }
-}
-
-export class Subpubkeyhash {
-  data: Uint8Array;
-
-  constructor(data?: string | Uint8Array) {
-    let result: Uint8Array | null = null;
-    if (data != null) {
-      if (typeof data == 'string')
-        result = ByteUtil.hexStringToUint8Array(data);
-      else if (data instanceof Uint8Array)
-        result = data;
-    }
-
-    if (!result || result.length != Chain.size.SUBPUBKEYHASH)
-      this.data = new Uint8Array(Chain.size.SUBPUBKEYHASH);
     else
       this.data = result;
   }
@@ -629,7 +605,7 @@ export class Signing {
     }
     return key;
   }
-  static recover(hash: Uint256, signature: Recsighash): Pubkey | null {
+  static recover(hash: Uint256, signature: Hashsig): Pubkey | null {
     let recoveryId = signature.data[signature.data.length - 1];
     if (recoveryId > 4)
       return null;
@@ -644,24 +620,24 @@ export class Signing {
       return null;
     }
   }
-  static recoverHash(hash: Uint256, signature: Recsighash): Pubkeyhash | null {
+  static recoverHash(hash: Uint256, signature: Hashsig): Pubkeyhash | null {
     let publicKey = this.recover(hash, signature);
     if (!publicKey)
       return null;
 
     return this.derivePublicKeyHash(publicKey);
   }
-  static sign(hash: Uint256, secretKey: Seckey): Recsighash | null {
+  static sign(hash: Uint256, secretKey: Seckey): Hashsig | null {
     try {
       const result = secp256k1.ecdsaSign(hash.toUint8Array(), secretKey.data);
-      const signature = new Recsighash();
+      const signature = new Hashsig();
       signature.data = Uint8Array.from([...result.signature, result.recid]);
       return signature;
     } catch {
       return null;
     }
   }
-  static verify(hash: Uint256, publicKey: Pubkey, signature: Recsighash): boolean {
+  static verify(hash: Uint256, publicKey: Pubkey, signature: Hashsig): boolean {
     try {
       return secp256k1.ecdsaVerify(signature.data.slice(0, 64), hash.toUint8Array(), publicKey.data);
     } catch {
@@ -805,54 +781,14 @@ export class Signing {
     return Segwit.encode(Chain.props.PUBKEY_PREFIX, Chain.props.PUBKEY_VERSION, publicKey.data);
   }
   static decodeAddress(value: string): Pubkeyhash | null {
-    const result = this.decodeSubaddress(value);
-    return result ? new Pubkeyhash(result.data.slice(0, Chain.size.PUBKEYHASH)) : null;
-  }
-  static decodeSubaddress(value: string): Subpubkeyhash | null {
     let result = Segwit.decode(Chain.props.ADDRESS_PREFIX, value);
-    if (!result || result.version != Chain.props.ADDRESS_VERSION || (result.program.length != Chain.size.PUBKEYHASH && result.program.length != Chain.size.SUBPUBKEYHASH))
+    if (!result || result.version != Chain.props.ADDRESS_VERSION || result.program.length != Chain.size.PUBKEYHASH)
       return null;
 
-    let subPublicKeyHash = new Subpubkeyhash();
-    subPublicKeyHash.data = result.program.length == Chain.size.SUBPUBKEYHASH ? result.program : Uint8Array.from([...result.program, new Array(Chain.size.SUBPUBKEYHASH - result.program.length).fill(0)]);
-    if (result.program.length > Chain.size.PUBKEYHASH) {
-      for (let i = 0; i < subPublicKeyHash.data.length; i++) {
-       subPublicKeyHash.data[i] ^= subPublicKeyHash.data[i + Chain.size.PUBKEYHASH];
-      }
-    }
-    return subPublicKeyHash;
+    return result ? new Pubkeyhash(result.program) : null;
   }
   static encodeAddress(publicKeyHash: Pubkeyhash): string | null {
-    return this.encodeSubaddress(publicKeyHash);
-  }
-  static encodeSubaddress(publicKeyHash: Pubkeyhash, derivationHash?: Pubkeyhash): string | null {
-    let data = publicKeyHash.data;
-    if (derivationHash != null) {
-      data = Uint8Array.from([...publicKeyHash.data, ...derivationHash.data]);
-      for (let i = 0; i < publicKeyHash.data.length; i++) {
-        data[i] ^= derivationHash.data[i];
-      }
-    }
-    return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, data);
-  }
-  static baseAddressOf(address: string): string | null {
-    const publicKeyHash = this.decodeAddress(address);
-    return publicKeyHash ? this.encodeAddress(publicKeyHash) : null;
-  }
-  static maskAddressOf(address: string, derivation: string | null): Subpubkeyhash | null {
-    const subPublicKeyHash = this.decodeSubaddress(address);
-    if (!subPublicKeyHash)
-      return null;
-    else if (!derivation)
-      return subPublicKeyHash;
-
-    const subaddress = Signing.encodeSubaddress(new Pubkeyhash(subPublicKeyHash.data.slice(0, Chain.size.PUBKEYHASH)), Signing.derivationHashOf(ByteUtil.utf8StringToUint8Array(derivation)));
-    return subaddress ? Signing.decodeSubaddress(subaddress) : null;
-  }
-  static derivationHashOf(data: Uint8Array): Pubkeyhash {
-    const result = new Pubkeyhash();
-    result.data = Hashing.hash160(data);
-    return result;
+    return Segwit.encode(Chain.props.ADDRESS_PREFIX, Chain.props.ADDRESS_VERSION, publicKeyHash.data);
   }
 }
 

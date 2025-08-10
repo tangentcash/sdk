@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { AssetId, Pubkey, Pubkeyhash, Seckey, Recsighash, Uint256 } from "./algorithm";
+import { AssetId, Pubkey, Pubkeyhash, Seckey, Hashsig, Uint256 } from "./algorithm";
 import { Ledger } from "./schema";
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
 export type NodeError = (address: string, method: string, error: unknown) => void;
@@ -86,7 +86,7 @@ export type TransactionOutput = {
     hash: string;
     data: string;
     body: {
-        signature: Recsighash;
+        signature: Hashsig;
         asset: AssetId;
         nonce: Uint256;
         conservative: boolean;

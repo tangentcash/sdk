@@ -1,4 +1,4 @@
-import { AssetId, ByteUtil, Chain, Hashing, Pubkey, Pubkeyhash, Seckey, Recsighash, Uint256, Subpubkeyhash } from "./algorithm";
+import { AssetId, ByteUtil, Chain, Hashing, Pubkey, Pubkeyhash, Seckey, Hashsig, Uint256 } from "./algorithm";
 import { TextUtil } from "./text";
 import BigNumber from "bignumber.js";
 
@@ -434,9 +434,9 @@ export class SchemaUtil {
           stream.writeBoolean(value);
           break;
         }
-        case 'recsighash': {
-          if (!(value instanceof Recsighash))
-            throw new TypeError('field ' + field + ' is not of type recsighash');
+        case 'hashsig': {
+          if (!(value instanceof Hashsig))
+            throw new TypeError('field ' + field + ' is not of type hashsig');
 
           stream.writeBinaryStringOptimized(value.data);
           break;
@@ -462,17 +462,6 @@ export class SchemaUtil {
           }
           else if (!(value instanceof Pubkeyhash))
             throw new TypeError('field ' + field + ' is not of type pubkeyhash');
-
-          stream.writeBinaryStringOptimized(value.data);
-          break;
-        }
-        case 'subpubkeyhash': {
-          if (!value) {
-            stream.writeString('');
-            break;
-          }
-          else if (!(value instanceof Subpubkeyhash))
-            throw new TypeError('field ' + field + ' is not of type subpubkeyhash');
 
           stream.writeBinaryStringOptimized(value.data);
           break;
@@ -548,10 +537,10 @@ export class SchemaUtil {
         case 'boolean':
           value = stream.readBoolean(subtype);
           break;
-        case 'recsighash':
+        case 'hashsig':
           value = stream.readBinaryString(subtype);
           if (value != null)
-            value = new Recsighash(value.length == Chain.size.RECSIGHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.RECSIGHASH - value.length).fill(0)]));
+            value = new Hashsig(value.length == Chain.size.HASHSIG ? value : Uint8Array.from([...value, ...new Array(Chain.size.HASHSIG - value.length).fill(0)]));
           break;
         case 'seckey':
           value = stream.readBinaryString(subtype);
@@ -567,11 +556,6 @@ export class SchemaUtil {
           value = stream.readBinaryString(subtype);
           if (value != null)
             value = new Pubkeyhash(value.length == Chain.size.PUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.PUBKEYHASH - value.length).fill(0)]));
-          break;
-        case 'subpubkeyhash':
-          value = stream.readBinaryString(subtype);
-          if (value != null)
-            value = new Subpubkeyhash(value.length == Chain.size.SUBPUBKEYHASH ? value : Uint8Array.from([...value, ...new Array(Chain.size.SUBPUBKEYHASH - value.length).fill(0)]));
           break;
         case 'assetid':
           value = stream.readInteger(subtype);

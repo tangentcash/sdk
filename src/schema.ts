@@ -4,7 +4,7 @@ export namespace Messages {
   }
 
   export class Authentic extends Uniform {
-    signature: string = 'recsighash';
+    signature: string = 'hashsig';
   }
   
   export function asSigningSchema(schema: any): any {

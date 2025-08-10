@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { AssetId, ByteUtil, Hashing, Pubkey, Pubkeyhash, Seckey, Recsighash, Signing, Uint256 } from "./algorithm";
+import { AssetId, ByteUtil, Hashing, Pubkey, Pubkeyhash, Seckey, Hashsig, Signing, Uint256 } from "./algorithm";
 import { Ledger } from "./schema";
 import { Types } from "./types";
 
@@ -57,7 +57,7 @@ export type TransactionOutput = {
   hash: string,
   data: string,
   body: {
-    signature: Recsighash,
+    signature: Hashsig,
     asset: AssetId,
     nonce: Uint256,
     conservative: boolean,
