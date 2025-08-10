@@ -38,6 +38,9 @@ export class NodeImplementation {
 export class Authorizer {
     static implementation: Implementation | null;
 
+    static applyImplementation(implementation: Implementation | null): void {
+        this.implementation = implementation;
+    }
     static async try(request: Prompt): Promise<boolean> {
         if (!this.implementation)
             return false;

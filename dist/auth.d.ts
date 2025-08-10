@@ -23,6 +23,7 @@ export declare class NodeImplementation {
 }
 export declare class Authorizer {
     static implementation: Implementation | null;
+    static applyImplementation(implementation: Implementation | null): void;
     static try(request: Prompt): Promise<boolean>;
     private static isIpAddress;
 }

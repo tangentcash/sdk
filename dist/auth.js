@@ -47,6 +47,9 @@ class NodeImplementation {
 exports.NodeImplementation = NodeImplementation;
 NodeImplementation.resolveTxt = null;
 class Authorizer {
+    static applyImplementation(implementation) {
+        this.implementation = implementation;
+    }
     static async try(request) {
         if (!this.implementation)
             return false;
