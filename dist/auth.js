@@ -37,30 +37,6 @@ exports.Authorizer = exports.NodeImplementation = void 0;
 const algorithm_1 = require("./algorithm");
 const utils_1 = require("@noble/hashes/utils");
 class NodeImplementation {
-    static async serveTryFunction(host, port, action) {
-        if (!this.createServer)
-            this.createServer = (await Promise.resolve().then(() => __importStar(require('http')))).createServer;
-        const server = this.createServer(async (req, res) => {
-            try {
-                if (req.method != 'POST')
-                    throw new Error('Only POST method is allowed');
-                const result = JSON.stringify(await action(JSON.parse(await new Promise((resolve, reject) => {
-                    let body = '';
-                    req.on('data', (chunk) => body += chunk.toString());
-                    req.on('end', () => resolve(body));
-                    req.on('error', reject);
-                }))));
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(result);
-            }
-            catch (exception) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: exception.message }));
-            }
-        });
-        await new Promise((resolve) => server.listen(port, host, resolve));
-        return server;
-    }
     static async resolveDomainTXT(hostname) {
         if (!this.resolveTxt)
             this.resolveTxt = (await Promise.resolve().then(() => __importStar(require('dns/promises')))).resolveTxt;
@@ -69,16 +45,11 @@ class NodeImplementation {
     }
 }
 exports.NodeImplementation = NodeImplementation;
-NodeImplementation.createServer = null;
 NodeImplementation.resolveTxt = null;
 class Authorizer {
-    static async prompt(implementation) {
-        this.implementation = implementation;
-        if (this.implementation != null) {
-            await this.implementation.serveTryFunction(this.config.host, this.config.port, this.try);
-        }
-    }
     static async try(request) {
+        if (!this.implementation)
+            return false;
         let url;
         try {
             url = new URL(request.url || '');
@@ -109,8 +80,6 @@ class Authorizer {
                 if (!publicKey)
                     throw new Error('Challenge signature is not acceptable');
                 try {
-                    if (!this.implementation)
-                        throw new Error('account sharing refused');
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
                     const decision = await this.implementation.prompt({
                         publicKey: publicKey,
@@ -166,4 +135,3 @@ class Authorizer {
     }
 }
 exports.Authorizer = Authorizer;
-Authorizer.config = { host: 'localhost', port: 57673 };
