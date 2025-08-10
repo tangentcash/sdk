@@ -14,7 +14,8 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
-    message: string | null;
+    signable: string | null;
+    description: string | null;
 }
 
 export type Approval = {
@@ -78,7 +79,7 @@ export class Authorizer {
         try {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
             const challenge16 = ByteUtil.uint8ArrayToHexString(challenge);
-            const solution: { signature?: string, message?: string } = await (await fetch(url, {
+            const solution: { signature?: string, message?: string, description?: string } = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -93,7 +94,10 @@ export class Authorizer {
                     throw new Error('Challenge response must contain "signature" hex string');
 
                 if (solution.message != null && typeof solution.message != 'string')
-                    throw new Error('Challenge response must contain "message" hex string');
+                    throw new Error('Challenge response "message" must be a hex string');
+
+                if (solution.description != null && typeof solution.description != 'string')
+                    throw new Error('Challenge response "description" must be a string');
 
                 const publicKey = Signing.recover(new Uint256(challenge), new Hashsig(ByteUtil.hexStringToUint8Array(solution.signature)));
                 if (!publicKey)
@@ -108,7 +112,8 @@ export class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
-                        message: solution.message || null
+                        signable: solution.message || null,
+                        description: solution.description || null
                     });
                     if (solution.message != null && !decision.signature)
                         throw new Error('message signing refused');

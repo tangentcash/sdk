@@ -10,7 +10,8 @@ export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
-    message: string | null;
+    signable: string | null;
+    description: string | null;
 };
 export type Approval = {
     account: Pubkeyhash;

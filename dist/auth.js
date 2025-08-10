@@ -98,7 +98,9 @@ class Authorizer {
                 if (typeof solution.signature != 'string')
                     throw new Error('Challenge response must contain "signature" hex string');
                 if (solution.message != null && typeof solution.message != 'string')
-                    throw new Error('Challenge response must contain "message" hex string');
+                    throw new Error('Challenge response "message" must be a hex string');
+                if (solution.description != null && typeof solution.description != 'string')
+                    throw new Error('Challenge response "description" must be a string');
                 const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.signature)));
                 if (!publicKey)
                     throw new Error('Challenge signature is not acceptable');
@@ -110,7 +112,8 @@ class Authorizer {
                         publicKey: publicKey,
                         hostname: url.hostname,
                         trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
-                        message: solution.message || null
+                        signable: solution.message || null,
+                        description: solution.description || null
                     });
                     if (solution.message != null && !decision.signature)
                         throw new Error('message signing refused');
