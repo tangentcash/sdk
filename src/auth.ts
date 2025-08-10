@@ -1,149 +1,155 @@
-import jayson from 'jayson';
-import dgram from 'dgram';
-import { resolveTxt } from 'dns/promises';
 import { ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
 import { randomBytes } from '@noble/hashes/utils';
 
-export const discoveryMessage = 'tangent::authorizer';
+type Internal = {
+    resolveTxt: ((hostname: string) => Promise<string[][]>) | null,
+    createServer: ((callback: any) => any) | null
+}
 
-export type AuthRequest = {
+export type Prompt = {
+    url?: string;
+}
+
+export type Entity = {
     publicKey: Pubkey;
     hostname: string;
     trustless: boolean;
+    message: string | null;
 }
 
-export type AuthResponse = {
+export type Approval = {
     account: Pubkeyhash,
     signature: Hashsig | null
 }
 
 export class Authorizer {
-    static config = { host: '0.0.0.0', port: 57673 };
-    static server: { rpc: jayson.HttpServer, discovery: dgram.Socket } | null = null;
-    static decide: ((request: AuthRequest) => Promise<AuthResponse>) | null = null;
+    static internal: Internal = {
+        resolveTxt: null,
+        createServer: null
+    };
+    static config = { host: 'localhost', port: 57673 };
+    static server: any | null = null;
+    static decide: ((request: Entity) => Promise<Approval>) | null = null;
 
-    static async prompt(decide: (request: AuthRequest) => Promise<AuthResponse>): Promise<void> {
+    static async prompt(decide: (request: Entity) => Promise<Approval>): Promise<void> {
         this.decide = decide;
         if (this.decide != null) {
             if (!this.server) {
-                const server = this.server = {
-                    rpc: new jayson.Server({
-                        authorize: async (args: any[], reply: (error: { code: number, message: string } | null, value: any) => void): Promise<void> => {
-                            try {
-                                reply(null, await this.authorize(args));
-                            } catch (exception: any) {
-                                reply({ code: -Hashing.hash32(ByteUtil.byteStringToUint8Array(exception.message)), message: exception.message }, null);
-                            }
-                        }
-                    }).http(),
-                    discovery: dgram.createSocket('udp4')
-                };
-                server.discovery.on('message', (message, _) => {
-                    if (message.toString() == discoveryMessage) {
-                        server.discovery.send(message);
+                try {
+                    if (!this.internal.createServer)
+                        this.internal.createServer = (await import('http')).createServer;
+                } catch {
+                    return;
+                }
+
+                this.server = this.internal.createServer(async (req: any, res: any) => {
+                    try {
+                        if (req.method != 'POST')
+                            throw new Error('Only POST method is allowed');
+
+                        const result = JSON.stringify(await this.try(JSON.parse(await new Promise((resolve, reject) => {
+                            let body = '';
+                            req.on('data', (chunk: any) => body += chunk.toString());
+                            req.on('end', () => resolve(body));
+                            req.on('error', reject);
+                        }))));
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(result);
+                    } catch (exception: any) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: exception.message }));
                     }
                 });
-                await new Promise<void>((resolve) => server.rpc.listen(this.config.port, this.config.host, resolve));
+                await new Promise<void>((resolve) => this.server.listen(this.config.port, this.config.host, resolve));
             }
         } else if (this.server != null) {
-            await new Promise<void>((resolve, _) => this.server?.discovery.close(() => resolve()));
-            await new Promise<void>((resolve, reject) => this.server?.rpc.close((error) => error ? reject(error) : resolve()));
+            await new Promise<void>((resolve, reject) => this.server.close((error: any) => error ? reject(error) : resolve()));
             this.server = null;
         }
     }
-    static async discover(timeout: number = 5000): Promise<string | null> {
+    static async try(request: Prompt): Promise<boolean> {
+        let url: URL;
         try {
-            const client = dgram.createSocket('udp4');
-            client.setBroadcast(true);
-
-            const result = new Promise<string | null>((resolve, _) => {
-                const timer = setTimeout(() => {
-                    resolve(null);
-                    client.close();
-                }, timeout);
-                client.on('message', (message, rinfo) => {
-                    if (message.toString() == discoveryMessage) {
-                        client.close();
-                        clearTimeout(timer);
-                        resolve(`http://${rinfo.address}:${this.config.port}/`);
-                    }
-                });
-            });
-            await new Promise((resolve, reject) => client.send(discoveryMessage, this.config.port, '255.255.255.255', (err) => err ? reject(err) : resolve(undefined)));
-            return await result;
-        } catch (exception: any) {
-            throw new Error('Discovery failed: ' + exception.message);
+            url = new URL(request.url || '');
+        } catch {
+            return false;
         }
-    }
-    static async try(authorizerURL: URL, solverURL: URL): Promise<any> {
-        const response = await (await fetch(authorizerURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                jsonrpc: "2.0",
-                id: ByteUtil.uint8ArrayToHexString(randomBytes(8)),
-                method: "authorize",
-                params: [solverURL.toString()]
-            })
-        })).json();
-        return response;
-    }
-    private static async authorize(args: any[]): Promise<any> {
-        if (args.length != 1)
-            throw new Error('Exactly 1 argument expected (url: string_uri)');
-        else if (!this.decide)
-            throw new Error('Authorization disabled');
-        
-        try {
-            let url: URL;
-            try { url = new URL(args[0]) } catch { throw new Error('Not a valid URL') };
 
+        try {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
-            const solution = await (await fetch(url, {
+            const challenge16 = ByteUtil.uint8ArrayToHexString(challenge);
+            const solution: { signature?: string, message?: string } = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'challenge',
-                    challenge: ByteUtil.uint8ArrayToHexString(challenge)
+                    challenge: challenge16
                 })
-            })).json();
-            if (typeof solution.signature != 'string')
-                throw new Error('Server failed to respond with challenge solution');
-
-            const signature = new Hashsig(ByteUtil.hexStringToUint8Array(solution.challenge));
-            const publicKey = Signing.recover(new Uint256(challenge), signature);
-            if (!publicKey)
-                throw new Error('Signature is not acceptable');
-
-            const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
-            let result: AuthResponse;
+            })).json();         
+        
+            let result: { type: 'approval', challenge: string, account: string | null, signature: string | null } | { type: 'rejection', challenge: string, error: string };
             try {
-                result = await this.decide({
-                    publicKey: publicKey,
-                    hostname: url.hostname,
-                    trustless: domainPublicKey != null && domainPublicKey.equals(publicKey)
-                });
-            } catch {
-                throw new Error('Operation not permitted (user rejected)');
+                if (typeof solution.signature != 'string')
+                    throw new Error('Challenge response must contain "signature" hex string');
+
+                if (solution.message != null && typeof solution.message != 'string')
+                    throw new Error('Challenge response must contain "message" hex string');
+
+                const publicKey = Signing.recover(new Uint256(challenge), new Hashsig(ByteUtil.hexStringToUint8Array(solution.signature)));
+                if (!publicKey)
+                    throw new Error('Challenge signature is not acceptable');
+
+                try {
+                    if (!this.decide)
+                        throw new Error('account sharing refused');
+
+                    const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
+                    const decision = await this.decide({
+                        publicKey: publicKey,
+                        hostname: url.hostname,
+                        trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
+                        message: solution.message || null
+                    });
+                    if (solution.message != null && !decision.signature)
+                        throw new Error('message signing refused');
+
+                    result = {
+                        type: 'approval',
+                        challenge: challenge16,
+                        account: Signing.encodeAddress(decision.account),
+                        signature: decision.signature != null ? ByteUtil.uint8ArrayToHexString(decision.signature.data) : null
+                    };
+                } catch (exception: any) {
+                    throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
+                }
+            } catch (exception: any) {
+                result = {
+                    type: 'rejection',
+                    challenge: challenge16,
+                    error: exception.message
+                }
             }
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'confirmation',
-                    account: Signing.encodeAddress(result.account),
-                    signature: result.signature != null ? ByteUtil.uint8ArrayToHexString(result.signature.data) : null
-                })
-            });
-            return await response.json();
-        } catch (exception: any) {
-            throw new Error('Authorization failed: ' + exception.message);
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result)
+                });
+                return true;
+            } catch {
+                return false;
+            }
+        } catch {
+            return false;
         }
     }
-    private static async getPublicKeyFromTXT(hostname: string): Promise<Pubkey> {
+    private static async getPublicKeyFromTXT(hostname: string): Promise<Pubkey | null> {
         try {
-            const records = await resolveTxt(hostname);
+            if (!this.internal.resolveTxt)
+                this.internal.resolveTxt = (await import('dns/promises')).resolveTxt;
+
+            const records = await this.internal.resolveTxt(hostname);
             for (let i = 0; i < records.length; i++) {
                 const subRecords = records[i];
                 for (let j = 0; j < subRecords.length; j++) {
@@ -153,8 +159,11 @@ export class Authorizer {
                     }
                 }
             }
-        } catch { }
-        throw new Error('Provided domain name does not have a tangent encoded public key TXT record');
+
+            return null;
+        } catch (exception: any) {
+            throw new Error('DNS resolution failed: ' + exception.message);
+        }
     }
     private static isIpAddress(ip: string): boolean {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;

@@ -1,143 +1,158 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Authorizer = exports.discoveryMessage = void 0;
-const jayson_1 = __importDefault(require("jayson"));
-const dgram_1 = __importDefault(require("dgram"));
-const promises_1 = require("dns/promises");
+exports.Authorizer = void 0;
 const algorithm_1 = require("./algorithm");
 const utils_1 = require("@noble/hashes/utils");
-exports.discoveryMessage = 'tangent::authorizer';
 class Authorizer {
     static async prompt(decide) {
         this.decide = decide;
         if (this.decide != null) {
             if (!this.server) {
-                const server = this.server = {
-                    rpc: new jayson_1.default.Server({
-                        authorize: async (args, reply) => {
-                            try {
-                                reply(null, await this.authorize(args));
-                            }
-                            catch (exception) {
-                                reply({ code: -algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(exception.message)), message: exception.message }, null);
-                            }
-                        }
-                    }).http(),
-                    discovery: dgram_1.default.createSocket('udp4')
-                };
-                server.discovery.on('message', (message, _) => {
-                    if (message.toString() == exports.discoveryMessage) {
-                        server.discovery.send(message);
+                try {
+                    if (!this.internal.createServer)
+                        this.internal.createServer = (await Promise.resolve().then(() => __importStar(require('http')))).createServer;
+                }
+                catch {
+                    return;
+                }
+                this.server = this.internal.createServer(async (req, res) => {
+                    try {
+                        if (req.method != 'POST')
+                            throw new Error('Only POST method is allowed');
+                        const result = JSON.stringify(await this.try(JSON.parse(await new Promise((resolve, reject) => {
+                            let body = '';
+                            req.on('data', (chunk) => body += chunk.toString());
+                            req.on('end', () => resolve(body));
+                            req.on('error', reject);
+                        }))));
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(result);
+                    }
+                    catch (exception) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: exception.message }));
                     }
                 });
-                await new Promise((resolve) => server.rpc.listen(this.config.port, this.config.host, resolve));
+                await new Promise((resolve) => this.server.listen(this.config.port, this.config.host, resolve));
             }
         }
         else if (this.server != null) {
-            await new Promise((resolve, _) => this.server?.discovery.close(() => resolve()));
-            await new Promise((resolve, reject) => this.server?.rpc.close((error) => error ? reject(error) : resolve()));
+            await new Promise((resolve, reject) => this.server.close((error) => error ? reject(error) : resolve()));
             this.server = null;
         }
     }
-    static async discover(timeout = 5000) {
+    static async try(request) {
+        let url;
         try {
-            const client = dgram_1.default.createSocket('udp4');
-            client.setBroadcast(true);
-            const result = new Promise((resolve, _) => {
-                const timer = setTimeout(() => {
-                    resolve(null);
-                    client.close();
-                }, timeout);
-                client.on('message', (message, rinfo) => {
-                    if (message.toString() == exports.discoveryMessage) {
-                        client.close();
-                        clearTimeout(timer);
-                        resolve(`http://${rinfo.address}:${this.config.port}/`);
-                    }
-                });
-            });
-            await new Promise((resolve, reject) => client.send(exports.discoveryMessage, this.config.port, '255.255.255.255', (err) => err ? reject(err) : resolve(undefined)));
-            return await result;
+            url = new URL(request.url || '');
         }
-        catch (exception) {
-            throw new Error('Discovery failed: ' + exception.message);
+        catch {
+            return false;
         }
-    }
-    static async try(authorizerURL, solverURL) {
-        const response = await (await fetch(authorizerURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                jsonrpc: "2.0",
-                id: algorithm_1.ByteUtil.uint8ArrayToHexString((0, utils_1.randomBytes)(8)),
-                method: "authorize",
-                params: [solverURL.toString()]
-            })
-        })).json();
-        return response;
-    }
-    static async authorize(args) {
-        if (args.length != 1)
-            throw new Error('Exactly 1 argument expected (url: string_uri)');
-        else if (!this.decide)
-            throw new Error('Authorization disabled');
         try {
-            let url;
-            try {
-                url = new URL(args[0]);
-            }
-            catch {
-                throw new Error('Not a valid URL');
-            }
-            ;
             const challenge = algorithm_1.Hashing.hash256(Uint8Array.from([...(0, utils_1.randomBytes)(32), ...algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(url.toString()))]));
+            const challenge16 = algorithm_1.ByteUtil.uint8ArrayToHexString(challenge);
             const solution = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'challenge',
-                    challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge)
+                    challenge: challenge16
                 })
             })).json();
-            if (typeof solution.signature != 'string')
-                throw new Error('Server failed to respond with challenge solution');
-            const signature = new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.challenge));
-            const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), signature);
-            if (!publicKey)
-                throw new Error('Signature is not acceptable');
-            const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
             let result;
             try {
-                result = await this.decide({
-                    publicKey: publicKey,
-                    hostname: url.hostname,
-                    trustless: domainPublicKey != null && domainPublicKey.equals(publicKey)
+                if (typeof solution.signature != 'string')
+                    throw new Error('Challenge response must contain "signature" hex string');
+                if (solution.message != null && typeof solution.message != 'string')
+                    throw new Error('Challenge response must contain "message" hex string');
+                const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.signature)));
+                if (!publicKey)
+                    throw new Error('Challenge signature is not acceptable');
+                try {
+                    if (!this.decide)
+                        throw new Error('account sharing refused');
+                    const domainPublicKey = this.isIpAddress(url.hostname) ? await this.getPublicKeyFromTXT(url.hostname) : null;
+                    const decision = await this.decide({
+                        publicKey: publicKey,
+                        hostname: url.hostname,
+                        trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
+                        message: solution.message || null
+                    });
+                    if (solution.message != null && !decision.signature)
+                        throw new Error('message signing refused');
+                    result = {
+                        type: 'approval',
+                        challenge: challenge16,
+                        account: algorithm_1.Signing.encodeAddress(decision.account),
+                        signature: decision.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.signature.data) : null
+                    };
+                }
+                catch (exception) {
+                    throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
+                }
+            }
+            catch (exception) {
+                result = {
+                    type: 'rejection',
+                    challenge: challenge16,
+                    error: exception.message
+                };
+            }
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result)
                 });
+                return true;
             }
             catch {
-                throw new Error('Operation not permitted (user rejected)');
+                return false;
             }
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'confirmation',
-                    account: algorithm_1.Signing.encodeAddress(result.account),
-                    signature: result.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(result.signature.data) : null
-                })
-            });
-            return await response.json();
         }
-        catch (exception) {
-            throw new Error('Authorization failed: ' + exception.message);
+        catch {
+            return false;
         }
     }
     static async getPublicKeyFromTXT(hostname) {
         try {
-            const records = await (0, promises_1.resolveTxt)(hostname);
+            if (!this.internal.resolveTxt)
+                this.internal.resolveTxt = (await Promise.resolve().then(() => __importStar(require('dns/promises')))).resolveTxt;
+            const records = await this.internal.resolveTxt(hostname);
             for (let i = 0; i < records.length; i++) {
                 const subRecords = records[i];
                 for (let j = 0; j < subRecords.length; j++) {
@@ -147,9 +162,11 @@ class Authorizer {
                     }
                 }
             }
+            return null;
         }
-        catch { }
-        throw new Error('Provided domain name does not have a tangent encoded public key TXT record');
+        catch (exception) {
+            throw new Error('DNS resolution failed: ' + exception.message);
+        }
     }
     static isIpAddress(ip) {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -162,6 +179,10 @@ class Authorizer {
     }
 }
 exports.Authorizer = Authorizer;
-Authorizer.config = { host: '0.0.0.0', port: 57673 };
+Authorizer.internal = {
+    resolveTxt: null,
+    createServer: null
+};
+Authorizer.config = { host: 'localhost', port: 57673 };
 Authorizer.server = null;
 Authorizer.decide = null;
