@@ -1,19 +1,36 @@
 import { Hashsig, Pubkey, Pubkeyhash } from './algorithm';
+export declare enum ApprovalType {
+    account = "account",
+    identity = "identity",
+    message = "message",
+    transaction = "transaction"
+}
 export type Prompt = {
     url?: string;
 };
 export type Entity = {
-    publicKey: Pubkey;
-    hostname: string;
-    trustless: boolean;
-    reasoning: 'account' | 'identity' | 'message' | 'transaction';
-    signable: string | null;
-    favicon: string | null;
-    description: string | null;
+    proof: {
+        publicKey: Pubkey;
+        challenge: Uint8Array;
+        signature: Hashsig;
+        hostname: string;
+        trustless: boolean;
+    };
+    about: {
+        favicon: string | null;
+        description: string | null;
+    };
+    sign: {
+        message: Uint8Array | null;
+    };
+    kind: ApprovalType;
 };
 export type Approval = {
     account: Pubkeyhash;
-    signature: Hashsig | null;
+    proof: {
+        message: Uint8Array | null;
+        signature: Hashsig | null;
+    };
 };
 export type Implementation = {
     prompt: (request: Entity) => Promise<Approval>;

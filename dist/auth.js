@@ -33,9 +33,16 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Authorizer = exports.NodeImplementation = void 0;
+exports.Authorizer = exports.NodeImplementation = exports.ApprovalType = void 0;
 const algorithm_1 = require("./algorithm");
 const utils_1 = require("@noble/hashes/utils");
+var ApprovalType;
+(function (ApprovalType) {
+    ApprovalType["account"] = "account";
+    ApprovalType["identity"] = "identity";
+    ApprovalType["message"] = "message";
+    ApprovalType["transaction"] = "transaction";
+})(ApprovalType || (exports.ApprovalType = ApprovalType = {}));
 class NodeImplementation {
     static async resolveDomainTXT(hostname) {
         if (!this.resolveTxt)
@@ -51,7 +58,20 @@ class Authorizer {
         this.implementation = implementation;
     }
     static schema(entity) {
-        return `tangent://${algorithm_1.Signing.encodePublicKey(entity.publicKey) || ''}@${entity.hostname}/approve/${entity.reasoning}?security=${entity.trustless ? 'trustless' : 'trust'}${entity.signable ? '&signable=' : ''}${entity.signable ? encodeURIComponent(entity.signable) : ''}${entity.favicon ? '&favicon=' : ''}${entity.favicon ? encodeURIComponent(entity.favicon) : ''}${entity.favicon ? '&favicon=' : ''}${entity.description ? encodeURIComponent(entity.description) : ''}`;
+        const publicKey = entity.proof.publicKey.equals(new algorithm_1.Pubkey()) ? '' : algorithm_1.Signing.encodePublicKey(entity.proof.publicKey) || '';
+        const result = new URL(`tangent://${publicKey ? publicKey + '@' : ''}${entity.proof.hostname}/approve/${entity.kind}`);
+        const params = new URLSearchParams();
+        params.append('proof.security', entity.proof.trustless ? 'safe' : 'unsafe');
+        params.append('proof.challenge', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge));
+        params.append('proof.signature', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
+        params.append('proof.signature', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
+        if (entity.sign.message != null)
+            params.append('sign.message', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message));
+        if (entity.about.favicon != null)
+            params.append('about.favicon', entity.about.favicon);
+        if (entity.about.description != null)
+            params.append('about.description', entity.about.description);
+        return result.toString() + '?' + params.toString();
     }
     static async try(request) {
         if (!this.implementation)
@@ -65,54 +85,63 @@ class Authorizer {
         }
         try {
             const challenge = algorithm_1.Hashing.hash256(Uint8Array.from([...(0, utils_1.randomBytes)(32), ...algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(url.toString()))]));
-            const challenge16 = algorithm_1.ByteUtil.uint8ArrayToHexString(challenge);
             const solution = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'challenge',
-                    challenge: challenge16
+                    challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge)
                 })
             })).json();
+            const entity = {
+                proof: {
+                    publicKey: new algorithm_1.Pubkey(),
+                    challenge: challenge,
+                    signature: solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig(),
+                    hostname: url.hostname,
+                    trustless: true
+                },
+                about: {
+                    favicon: solution.about && typeof solution.about.favicon == 'string' ? solution.about.favicon || null : null,
+                    description: solution.about && typeof solution.about.description == 'string' ? solution.about.description || null : null
+                },
+                sign: {
+                    message: solution.sign && typeof solution.sign.message == 'string' ? algorithm_1.ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null
+                },
+                kind: typeof solution.kind == 'string' ? solution.kind : ApprovalType.account
+            };
             let result;
             try {
-                if (typeof solution.signature != 'string')
-                    throw new Error('Challenge response must contain "signature" hex string');
-                if (solution.message != null && typeof solution.message != 'string')
-                    throw new Error('Challenge response "message" must be a hex string');
-                if (solution.reasoning != 'account' && solution.reasoning != 'identity' && solution.reasoning != 'message' && solution.reasoning != 'transaction')
-                    throw new Error('Challenge response "reasoning" must be a string ("account" | "identity" | "message" | "transaction")');
-                if (solution.favicon != null) {
+                if (![ApprovalType.account, ApprovalType.identity, ApprovalType.message, ApprovalType.transaction].includes(entity.kind))
+                    throw new Error('Invalid kind of entity (must be a valid type)');
+                if (entity.about.favicon != null) {
                     try {
-                        new URL(solution.favicon);
+                        new URL(entity.about.favicon);
                     }
                     catch {
-                        throw new Error('Challenge response "favicon" must be a URL');
+                        throw new Error('Invalid favicon (must be a valid URL)');
                     }
                 }
-                if (solution.description != null && typeof solution.description != 'string')
-                    throw new Error('Challenge response "description" must be a string');
-                const publicKey = algorithm_1.Signing.recover(new algorithm_1.Uint256(challenge), new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.signature)));
+                const message = this.schema(entity);
+                const messageHash = new algorithm_1.Uint256(algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(message)));
+                const publicKey = algorithm_1.Signing.recover(messageHash, entity.proof.signature);
                 if (!publicKey)
-                    throw new Error('Challenge signature is not acceptable');
+                    throw new Error('Invalid signature (not acceptable for message "' + message + '")');
                 try {
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
-                    const decision = await this.implementation.prompt({
-                        publicKey: publicKey,
-                        hostname: url.hostname,
-                        trustless: domainPublicKey != null && domainPublicKey.equals(publicKey),
-                        reasoning: solution.reasoning,
-                        signable: solution.message || null,
-                        favicon: solution.favicon || null,
-                        description: solution.description || null
-                    });
-                    if (solution.message != null && !decision.signature)
+                    entity.proof.publicKey = publicKey;
+                    entity.proof.trustless = domainPublicKey != null && domainPublicKey.equals(publicKey);
+                    const decision = await this.implementation.prompt(entity);
+                    if (entity.sign.message != null && !decision.proof.signature)
                         throw new Error('message signing refused');
                     result = {
                         type: 'approval',
-                        challenge: challenge16,
+                        challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                         account: algorithm_1.Signing.encodeAddress(decision.account),
-                        signature: decision.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.signature.data) : null
+                        proof: {
+                            message: decision.proof.message != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.message) : (entity.sign.message ? algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message) : null),
+                            signature: decision.proof.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.signature.data) : null
+                        }
                     };
                 }
                 catch (exception) {
@@ -122,7 +151,7 @@ class Authorizer {
             catch (exception) {
                 result = {
                     type: 'rejection',
-                    challenge: challenge16,
+                    challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                     error: exception.message
                 };
             }
