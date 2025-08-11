@@ -135,7 +135,7 @@ class Authorizer {
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
                 try {
-                    const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
+                    const domainPublicKey = this.isIpAddress(url.hostname) ? null : (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null;
                     entity.proof.signature = signature;
                     entity.proof.trustless = entity.proof.publicKey.equals(publicKey) && domainPublicKey != null && domainPublicKey.equals(publicKey);
                     const decision = await this.implementation.prompt(entity);
@@ -154,7 +154,6 @@ class Authorizer {
                     };
                 }
                 catch (exception) {
-                    console.log(exception);
                     throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
                 }
             }
