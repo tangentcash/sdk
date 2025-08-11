@@ -64,7 +64,6 @@ class Authorizer {
         params.append('proof.security', entity.proof.trustless ? 'safe' : 'unsafe');
         params.append('proof.challenge', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge));
         params.append('proof.signature', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
-        params.append('proof.signature', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
         if (entity.sign.message != null)
             params.append('sign.message', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message));
         if (entity.about.favicon != null)
