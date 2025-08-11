@@ -1,5 +1,5 @@
 import { Hashsig, Pubkey, Pubkeyhash, Uint256 } from './algorithm';
-export declare enum ApprovalType {
+export declare enum Approving {
     account = "account",
     identity = "identity",
     message = "message",
@@ -23,7 +23,7 @@ export type Entity = {
     sign: {
         message: Uint8Array | null;
     };
-    kind: ApprovalType;
+    kind: Approving;
 };
 export type Approval = {
     account: Pubkeyhash;
@@ -32,6 +32,23 @@ export type Approval = {
         message: Uint8Array | null;
         signature: Hashsig | null;
     };
+};
+export type Message = {
+    type: 'challenge';
+    challenge: string;
+} | {
+    type: 'approval';
+    challenge: string;
+    account: string | null;
+    proof: {
+        hash: string | null;
+        message: string | null;
+        signature: string | null;
+    };
+} | {
+    type: 'rejection';
+    challenge: string;
+    error: string;
 };
 export type Implementation = {
     prompt: (request: Entity) => Promise<Approval>;

@@ -33,16 +33,16 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Authorizer = exports.NodeImplementation = exports.ApprovalType = void 0;
+exports.Authorizer = exports.NodeImplementation = exports.Approving = void 0;
 const algorithm_1 = require("./algorithm");
 const utils_1 = require("@noble/hashes/utils");
-var ApprovalType;
-(function (ApprovalType) {
-    ApprovalType["account"] = "account";
-    ApprovalType["identity"] = "identity";
-    ApprovalType["message"] = "message";
-    ApprovalType["transaction"] = "transaction";
-})(ApprovalType || (exports.ApprovalType = ApprovalType = {}));
+var Approving;
+(function (Approving) {
+    Approving["account"] = "account";
+    Approving["identity"] = "identity";
+    Approving["message"] = "message";
+    Approving["transaction"] = "transaction";
+})(Approving || (exports.Approving = Approving = {}));
 class NodeImplementation {
     static async resolveDomainTXT(hostname) {
         if (!this.resolveTxt)
@@ -86,13 +86,14 @@ class Authorizer {
         }
         try {
             const challenge = algorithm_1.Hashing.hash256(Uint8Array.from([...(0, utils_1.randomBytes)(32), ...algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(url.toString()))]));
+            const challengeMessage = {
+                type: 'challenge',
+                challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge)
+            };
             const solution = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'challenge',
-                    challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge)
-                })
+                body: JSON.stringify(challengeMessage)
             })).json();
             const entity = {
                 proof: {
@@ -109,11 +110,11 @@ class Authorizer {
                 sign: {
                     message: solution.sign && typeof solution.sign.message == 'string' ? algorithm_1.ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null
                 },
-                kind: typeof solution.kind == 'string' ? solution.kind : ApprovalType.account
+                kind: typeof solution.kind == 'string' ? solution.kind : Approving.account
             };
             let result;
             try {
-                if (![ApprovalType.account, ApprovalType.identity, ApprovalType.message, ApprovalType.transaction].includes(entity.kind))
+                if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
                 if (entity.about.favicon != null) {
                     try {

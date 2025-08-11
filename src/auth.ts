@@ -1,7 +1,7 @@
 import { ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
 import { randomBytes } from '@noble/hashes/utils';
 
-export enum ApprovalType {
+export enum Approving {
     account = 'account',
     identity = 'identity',
     message = 'message',
@@ -16,7 +16,7 @@ export type Entity = {
     proof: { publicKey: Pubkey, challenge: Uint8Array, signature: Hashsig, hostname: string, trustless: boolean },
     about: { favicon: string | null, description: string | null },
     sign: { message: Uint8Array | null }
-    kind: ApprovalType;
+    kind: Approving;
 }
 
 export type Approval = {
@@ -26,6 +26,24 @@ export type Approval = {
         message: Uint8Array | null,
         signature: Hashsig | null
     }
+}
+
+export type Message = {
+    type: 'challenge',
+    challenge: string
+} | {
+    type: 'approval',
+    challenge: string,
+    account: string | null,
+    proof: {
+        hash: string | null,
+        message: string | null,
+        signature: string | null
+    }
+} | {
+    type: 'rejection',
+    challenge: string,
+    error: string
 }
 
 export type Implementation = {
@@ -81,6 +99,10 @@ export class Authorizer {
 
         try {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
+            const challengeMessage: Message = {
+                type: 'challenge',
+                challenge: ByteUtil.uint8ArrayToHexString(challenge)
+            };
             const solution: {
                 proof?: { signature?: string },
                 about?: { favicon?: string, description?: string },
@@ -89,10 +111,7 @@ export class Authorizer {
             } = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'challenge',
-                    challenge: ByteUtil.uint8ArrayToHexString(challenge)
-                })
+                body: JSON.stringify(challengeMessage)
             })).json();     
             const entity: Entity = {
                 proof: {
@@ -109,11 +128,11 @@ export class Authorizer {
                 sign: {
                     message: solution.sign && typeof solution.sign.message == 'string' ? ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null
                 },
-                kind: typeof solution.kind == 'string' ? solution.kind as ApprovalType : ApprovalType.account
+                kind: typeof solution.kind == 'string' ? solution.kind as Approving : Approving.account
             };
-            let result: { type: 'approval', challenge: string, account: string | null, proof: { hash: string | null, message: string | null, signature: string | null } } | { type: 'rejection', challenge: string, error: string };
+            let result: Message;
             try {
-                if (![ApprovalType.account, ApprovalType.identity, ApprovalType.message, ApprovalType.transaction].includes(entity.kind))
+                if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
 
                 if (entity.about.favicon != null) {
