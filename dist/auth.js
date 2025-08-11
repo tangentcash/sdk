@@ -154,6 +154,7 @@ class Authorizer {
                     };
                 }
                 catch (exception) {
+                    console.log(exception);
                     throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
                 }
             }
@@ -171,7 +172,7 @@ class Authorizer {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(acknowledgementRequest)
                 });
-                return true;
+                return acknowledgementRequest.type == 'approval';
             }
             catch {
                 return false;
