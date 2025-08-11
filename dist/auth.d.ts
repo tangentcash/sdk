@@ -36,6 +36,7 @@ export type Approval = {
 export type Message = {
     type: 'challenge';
     challenge: string;
+    props?: Record<string, any>;
 } | {
     type: 'approval';
     challenge: string;
@@ -45,10 +46,12 @@ export type Message = {
         message: string | null;
         signature: string | null;
     };
+    props?: Record<string, any>;
 } | {
     type: 'rejection';
     challenge: string;
     error: string;
+    props?: Record<string, any>;
 };
 export type Implementation = {
     prompt: (request: Entity) => Promise<Approval>;

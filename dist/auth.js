@@ -77,9 +77,12 @@ class Authorizer {
     static async try(request) {
         if (!this.implementation)
             return false;
+        let props = {};
         let url;
         try {
             url = new URL(request.url || '');
+            url.searchParams.forEach((k, v) => props[k] = v);
+            url.search = '';
         }
         catch {
             return false;
@@ -88,7 +91,8 @@ class Authorizer {
             const challenge = algorithm_1.Hashing.hash256(Uint8Array.from([...(0, utils_1.randomBytes)(32), ...algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(url.toString()))]));
             const challengeMessage = {
                 type: 'challenge',
-                challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge)
+                challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge),
+                props: props
             };
             const solution = await (await fetch(url, {
                 method: 'POST',
@@ -144,7 +148,8 @@ class Authorizer {
                             hash: decision.proof.hash != null ? decision.proof.hash.toHex() : null,
                             message: decision.proof.message != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.message) : (entity.sign.message ? algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message) : null),
                             signature: decision.proof.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.signature.data) : null
-                        }
+                        },
+                        props: props
                     };
                 }
                 catch (exception) {
@@ -155,7 +160,8 @@ class Authorizer {
                 result = {
                     type: 'rejection',
                     challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
-                    error: exception.message
+                    error: exception.message,
+                    props: props
                 };
             }
             try {
