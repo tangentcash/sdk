@@ -1,4 +1,4 @@
-import { Hashsig, Pubkey, Pubkeyhash } from './algorithm';
+import { Hashsig, Pubkey, Pubkeyhash, Uint256 } from './algorithm';
 export declare enum ApprovalType {
     account = "account",
     identity = "identity",
@@ -28,6 +28,7 @@ export type Entity = {
 export type Approval = {
     account: Pubkeyhash;
     proof: {
+        hash: Uint256 | null;
         message: Uint8Array | null;
         signature: Hashsig | null;
     };

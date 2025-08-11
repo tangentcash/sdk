@@ -21,7 +21,11 @@ export type Entity = {
 
 export type Approval = {
     account: Pubkeyhash,
-    proof: { message: Uint8Array | null, signature: Hashsig | null }
+    proof: {
+        hash: Uint256 | null,
+        message: Uint8Array | null,
+        signature: Hashsig | null
+    }
 }
 
 export type Implementation = {
@@ -107,7 +111,7 @@ export class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind as ApprovalType : ApprovalType.account
             };
-            let result: { type: 'approval', challenge: string, account: string | null, proof: { message: string | null, signature: string | null } } | { type: 'rejection', challenge: string, error: string };
+            let result: { type: 'approval', challenge: string, account: string | null, proof: { hash: string | null, message: string | null, signature: string | null } } | { type: 'rejection', challenge: string, error: string };
             try {
                 if (![ApprovalType.account, ApprovalType.identity, ApprovalType.message, ApprovalType.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
@@ -132,7 +136,7 @@ export class Authorizer {
                     entity.proof.trustless = domainPublicKey != null && domainPublicKey.equals(publicKey);
 
                     const decision = await this.implementation.prompt(entity);
-                    if (entity.sign.message != null && !decision.proof.signature)
+                    if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))
                         throw new Error('message signing refused');
 
                     result = {
@@ -140,6 +144,7 @@ export class Authorizer {
                         challenge: ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                         account: Signing.encodeAddress(decision.account),
                         proof: {
+                            hash: decision.proof.hash != null ? decision.proof.hash.toHex() : null,
                             message: decision.proof.message != null ? ByteUtil.uint8ArrayToHexString(decision.proof.message) : (entity.sign.message ? ByteUtil.uint8ArrayToHexString(entity.sign.message) : null),
                             signature: decision.proof.signature != null ? ByteUtil.uint8ArrayToHexString(decision.proof.signature.data) : null
                         }

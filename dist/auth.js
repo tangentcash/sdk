@@ -133,13 +133,14 @@ class Authorizer {
                     entity.proof.publicKey = publicKey;
                     entity.proof.trustless = domainPublicKey != null && domainPublicKey.equals(publicKey);
                     const decision = await this.implementation.prompt(entity);
-                    if (entity.sign.message != null && !decision.proof.signature)
+                    if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))
                         throw new Error('message signing refused');
                     result = {
                         type: 'approval',
                         challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                         account: algorithm_1.Signing.encodeAddress(decision.account),
                         proof: {
+                            hash: decision.proof.hash != null ? decision.proof.hash.toHex() : null,
                             message: decision.proof.message != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.message) : (entity.sign.message ? algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message) : null),
                             signature: decision.proof.signature != null ? algorithm_1.ByteUtil.uint8ArrayToHexString(decision.proof.signature.data) : null
                         }
