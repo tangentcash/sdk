@@ -131,6 +131,7 @@ class Authorizer {
                 const signature = solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig();
                 const message = this.schema(entity);
                 const messageHash = new algorithm_1.Uint256(algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(message)));
+                console.log(messageHash.toHex(), algorithm_1.ByteUtil.uint8ArrayToHexString(signature.data));
                 const publicKey = algorithm_1.Signing.recover(messageHash, signature);
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
