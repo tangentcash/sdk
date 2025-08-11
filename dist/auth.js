@@ -101,9 +101,9 @@ class Authorizer {
             })).json();
             const entity = {
                 proof: {
-                    publicKey: new algorithm_1.Pubkey(),
+                    publicKey: new algorithm_1.Pubkey(solution.proof?.publicKey),
                     challenge: challenge,
-                    signature: solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig(),
+                    signature: new algorithm_1.Hashsig(),
                     hostname: url.hostname,
                     trustless: true
                 },
@@ -135,8 +135,8 @@ class Authorizer {
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
                 try {
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
-                    entity.proof.publicKey = publicKey;
-                    entity.proof.trustless = domainPublicKey != null && domainPublicKey.equals(publicKey);
+                    entity.proof.signature = solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig();
+                    entity.proof.trustless = entity.proof.publicKey.equals(publicKey) && domainPublicKey != null && domainPublicKey.equals(publicKey);
                     const decision = await this.implementation.prompt(entity);
                     if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))
                         throw new Error('message signing refused');

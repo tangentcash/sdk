@@ -50,7 +50,7 @@ export type AuthRequest = {
 }
 
 export type AuthResponse = {
-    proof?: { signature?: string },
+    proof?: { publicKey?: string, signature?: string },
     about?: { favicon?: string, description?: string },
     sign?: { message?: string },
     kind?: string
@@ -124,9 +124,9 @@ export class Authorizer {
             })).json();     
             const entity: Entity = {
                 proof: {
-                    publicKey: new Pubkey(),
+                    publicKey: new Pubkey(solution.proof?.publicKey),
                     challenge: challenge,
-                    signature: solution.proof && typeof solution.proof.signature == 'string' ? new Hashsig(ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new Hashsig() : new Hashsig(),
+                    signature: new Hashsig(),
                     hostname: url.hostname,
                     trustless: true
                 },
@@ -143,7 +143,7 @@ export class Authorizer {
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
-
+                
                 if (entity.about.favicon != null) {
                     try {
                         new URL (entity.about.favicon);
@@ -160,8 +160,8 @@ export class Authorizer {
 
                 try {
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
-                    entity.proof.publicKey = publicKey;
-                    entity.proof.trustless = domainPublicKey != null && domainPublicKey.equals(publicKey);
+                    entity.proof.signature = solution.proof && typeof solution.proof.signature == 'string' ? new Hashsig(ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new Hashsig() : new Hashsig();
+                    entity.proof.trustless = entity.proof.publicKey.equals(publicKey) && domainPublicKey != null && domainPublicKey.equals(publicKey);
 
                     const decision = await this.implementation.prompt(entity);
                     if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))

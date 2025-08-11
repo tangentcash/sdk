@@ -55,6 +55,7 @@ export type AuthRequest = {
 };
 export type AuthResponse = {
     proof?: {
+        publicKey?: string;
         signature?: string;
     };
     about?: {
