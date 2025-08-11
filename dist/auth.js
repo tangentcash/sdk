@@ -116,7 +116,7 @@ class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind : Approving.account
             };
-            console.log(entity, solution.proof);
+            console.log(entity, solution);
             let acknowledgementRequest;
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
