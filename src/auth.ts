@@ -155,6 +155,7 @@ export class Authorizer {
 
                 const message = this.schema(entity);
                 const messageHash = new Uint256(Hashing.hash256(ByteUtil.byteStringToUint8Array(message)));
+                console.log(messageHash, entity.proof.signature);
                 const publicKey = Signing.recover(messageHash, entity.proof.signature);
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
