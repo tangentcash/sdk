@@ -81,7 +81,7 @@ class Authorizer {
         let url;
         try {
             url = new URL(request.url || '');
-            url.searchParams.forEach((k, v) => props[k] = v);
+            url.searchParams.forEach((v, k) => props[k] = v);
             url.search = '';
         }
         catch {
