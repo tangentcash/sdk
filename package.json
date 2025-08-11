@@ -14,11 +14,11 @@
     "@types/libsodium-wrappers": "0.7.14",
     "@types/secp256k1": "4.0.6",
     "bech32": "2.0.0",
-    "bignumber.js": "9.3.0",
-    "js-base64": "3.7.7",
+    "bignumber.js": "9.3.1",
+    "js-base64": "3.7.8",
     "libsodium-wrappers": "0.7.15",
     "secp256k1": "5.0.1",
-    "typescript": "5.8.3",
+    "typescript": "5.9.2",
     "uint256": "1.0.8"
   }
 }
