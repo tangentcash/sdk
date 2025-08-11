@@ -80,5 +80,5 @@ export declare class Authorizer {
     static applyImplementation(implementation: Implementation | null): void;
     static schema(entity: Entity, signer?: Pubkeyhash): string;
     static try(request: Prompt): Promise<boolean>;
-    private static isIpAddress;
+    static isIpAddress(ip: string): boolean;
 }

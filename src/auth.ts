@@ -205,7 +205,7 @@ export class Authorizer {
             return false;
         }
     }
-    private static isIpAddress(ip: string): boolean {
+    static isIpAddress(ip: string): boolean {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
         if (ipv4Regex.test(ip) && ip.split('.').every((x: string) => parseInt(x) <= 255))
             return true;
