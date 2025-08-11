@@ -47,7 +47,7 @@ export class Authorizer {
     static applyImplementation(implementation: Implementation | null): void {
         this.implementation = implementation;
     }
-    static schema(entity: Entity): string {
+    static schema(entity: Entity, signer?: Pubkeyhash): string {
         const publicKey = entity.proof.publicKey.equals(new Pubkey()) ? '' : Signing.encodePublicKey(entity.proof.publicKey) || '';
         const result = new URL(`tangent://${publicKey ? publicKey + '@' : ''}${entity.proof.hostname}/approve/${entity.kind}`);
         const params = new URLSearchParams();
@@ -60,6 +60,8 @@ export class Authorizer {
             params.append('about.favicon', entity.about.favicon);
         if (entity.about.description != null)
             params.append('about.description', entity.about.description);
+        if (signer != null)
+            params.append('signer', Signing.encodeAddress(signer) || '');
         return result.toString() + '?' + params.toString();
     }
     static async try(request: Prompt): Promise<boolean> {

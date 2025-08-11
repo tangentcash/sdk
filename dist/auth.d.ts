@@ -43,7 +43,7 @@ export declare class NodeImplementation {
 export declare class Authorizer {
     static implementation: Implementation | null;
     static applyImplementation(implementation: Implementation | null): void;
-    static schema(entity: Entity): string;
+    static schema(entity: Entity, signer?: Pubkeyhash): string;
     static try(request: Prompt): Promise<boolean>;
     private static isIpAddress;
 }

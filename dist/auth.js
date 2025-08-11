@@ -57,7 +57,7 @@ class Authorizer {
     static applyImplementation(implementation) {
         this.implementation = implementation;
     }
-    static schema(entity) {
+    static schema(entity, signer) {
         const publicKey = entity.proof.publicKey.equals(new algorithm_1.Pubkey()) ? '' : algorithm_1.Signing.encodePublicKey(entity.proof.publicKey) || '';
         const result = new URL(`tangent://${publicKey ? publicKey + '@' : ''}${entity.proof.hostname}/approve/${entity.kind}`);
         const params = new URLSearchParams();
@@ -70,6 +70,8 @@ class Authorizer {
             params.append('about.favicon', entity.about.favicon);
         if (entity.about.description != null)
             params.append('about.description', entity.about.description);
+        if (signer != null)
+            params.append('signer', algorithm_1.Signing.encodeAddress(signer) || '');
         return result.toString() + '?' + params.toString();
     }
     static async try(request) {
