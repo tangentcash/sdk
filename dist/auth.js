@@ -116,7 +116,6 @@ class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind : Approving.account
             };
-            console.log(entity, solution);
             let acknowledgementRequest;
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
@@ -129,15 +128,15 @@ class Authorizer {
                         throw new Error('Invalid favicon (must be a valid URL)');
                     }
                 }
+                const signature = solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig();
                 const message = this.schema(entity);
                 const messageHash = new algorithm_1.Uint256(algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(message)));
-                console.log(messageHash, entity.proof.signature);
-                const publicKey = algorithm_1.Signing.recover(messageHash, entity.proof.signature);
+                const publicKey = algorithm_1.Signing.recover(messageHash, signature);
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
                 try {
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => algorithm_1.Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
-                    entity.proof.signature = solution.proof && typeof solution.proof.signature == 'string' ? new algorithm_1.Hashsig(algorithm_1.ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new algorithm_1.Hashsig() : new algorithm_1.Hashsig();
+                    entity.proof.signature = signature;
                     entity.proof.trustless = entity.proof.publicKey.equals(publicKey) && domainPublicKey != null && domainPublicKey.equals(publicKey);
                     const decision = await this.implementation.prompt(entity);
                     if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))

@@ -139,7 +139,6 @@ export class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind as Approving : Approving.account
             };
-            console.log(entity, solution);
             let acknowledgementRequest: AuthRequest;
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
@@ -153,16 +152,16 @@ export class Authorizer {
                     }
                 }
 
+                const signature = solution.proof && typeof solution.proof.signature == 'string' ? new Hashsig(ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new Hashsig() : new Hashsig();
                 const message = this.schema(entity);
                 const messageHash = new Uint256(Hashing.hash256(ByteUtil.byteStringToUint8Array(message)));
-                console.log(messageHash, entity.proof.signature);
-                const publicKey = Signing.recover(messageHash, entity.proof.signature);
+                const publicKey = Signing.recover(messageHash, signature);
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');
 
                 try {
                     const domainPublicKey = this.isIpAddress(url.hostname) ? (await this.implementation.resolveDomainTXT(url.hostname)).map((x) => Signing.decodePublicKey(x)).filter((x) => x != null)[0] || null : null;
-                    entity.proof.signature = solution.proof && typeof solution.proof.signature == 'string' ? new Hashsig(ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new Hashsig() : new Hashsig();
+                    entity.proof.signature = signature;
                     entity.proof.trustless = entity.proof.publicKey.equals(publicKey) && domainPublicKey != null && domainPublicKey.equals(publicKey);
 
                     const decision = await this.implementation.prompt(entity);
