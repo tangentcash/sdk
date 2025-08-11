@@ -785,6 +785,9 @@ class RPC {
             }
         }
     }
+    static decodeTransaction(hexMessage) {
+        return this.fetch('cache', 'decodetransaction', [hexMessage]);
+    }
     static submitTransaction(hexMessage, validate) {
         return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
     }

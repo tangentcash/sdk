@@ -934,6 +934,9 @@ export class RPC {
       }
     }
   }
+  static decodeTransaction(hexMessage: string): Promise<any> {
+    return this.fetch('cache', 'decodetransaction', [hexMessage]);
+  }
   static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null> {
     return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
   }

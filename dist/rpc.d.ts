@@ -191,6 +191,7 @@ export declare class RPC {
     static saveProps(props: InterfaceProps): void;
     static getProps(): InterfaceProps;
     static clearCache(): void;
+    static decodeTransaction(hexMessage: string): Promise<any>;
     static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, value: BigNumber, method: string, args: any[]): Promise<any | null>;
     static getWallet(): Promise<{
