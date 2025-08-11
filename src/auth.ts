@@ -28,7 +28,7 @@ export type Approval = {
     }
 }
 
-export type Message = {
+export type AuthRequest = {
     type: 'challenge',
     challenge: string,
     props?: Record<string, any>
@@ -47,6 +47,13 @@ export type Message = {
     challenge: string,
     error: string,
     props?: Record<string, any>
+}
+
+export type AuthResponse = {
+    proof?: { signature?: string },
+    about?: { favicon?: string, description?: string },
+    sign?: { message?: string },
+    kind?: string
 }
 
 export type Implementation = {
@@ -105,20 +112,15 @@ export class Authorizer {
 
         try {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
-            const challengeMessage: Message = {
+            const challengeRequest: AuthRequest = {
                 type: 'challenge',
                 challenge: ByteUtil.uint8ArrayToHexString(challenge),
                 props: props
             };
-            const solution: {
-                proof?: { signature?: string },
-                about?: { favicon?: string, description?: string },
-                sign?: { message?: string },
-                kind?: string
-            } = await (await fetch(url, {
+            const solution: AuthResponse = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(challengeMessage)
+                body: JSON.stringify(challengeRequest)
             })).json();     
             const entity: Entity = {
                 proof: {
@@ -137,7 +139,7 @@ export class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind as Approving : Approving.account
             };
-            let result: Message;
+            let acknowledgementRequest: AuthRequest;
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
@@ -165,7 +167,7 @@ export class Authorizer {
                     if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))
                         throw new Error('message signing refused');
 
-                    result = {
+                    acknowledgementRequest = {
                         type: 'approval',
                         challenge: ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                         account: Signing.encodeAddress(decision.account),
@@ -180,7 +182,7 @@ export class Authorizer {
                     throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
                 }
             } catch (exception: any) {
-                result = {
+                acknowledgementRequest = {
                     type: 'rejection',
                     challenge: ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                     error: exception.message,
@@ -192,7 +194,7 @@ export class Authorizer {
                 await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(result)
+                    body: JSON.stringify(acknowledgementRequest)
                 });
                 return true;
             } catch {

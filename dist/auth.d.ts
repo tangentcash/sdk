@@ -33,7 +33,7 @@ export type Approval = {
         signature: Hashsig | null;
     };
 };
-export type Message = {
+export type AuthRequest = {
     type: 'challenge';
     challenge: string;
     props?: Record<string, any>;
@@ -52,6 +52,19 @@ export type Message = {
     challenge: string;
     error: string;
     props?: Record<string, any>;
+};
+export type AuthResponse = {
+    proof?: {
+        signature?: string;
+    };
+    about?: {
+        favicon?: string;
+        description?: string;
+    };
+    sign?: {
+        message?: string;
+    };
+    kind?: string;
 };
 export type Implementation = {
     prompt: (request: Entity) => Promise<Approval>;

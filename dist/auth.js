@@ -89,7 +89,7 @@ class Authorizer {
         }
         try {
             const challenge = algorithm_1.Hashing.hash256(Uint8Array.from([...(0, utils_1.randomBytes)(32), ...algorithm_1.Hashing.hash256(algorithm_1.ByteUtil.byteStringToUint8Array(url.toString()))]));
-            const challengeMessage = {
+            const challengeRequest = {
                 type: 'challenge',
                 challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(challenge),
                 props: props
@@ -97,7 +97,7 @@ class Authorizer {
             const solution = await (await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(challengeMessage)
+                body: JSON.stringify(challengeRequest)
             })).json();
             const entity = {
                 proof: {
@@ -116,7 +116,7 @@ class Authorizer {
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind : Approving.account
             };
-            let result;
+            let acknowledgementRequest;
             try {
                 if (![Approving.account, Approving.identity, Approving.message, Approving.transaction].includes(entity.kind))
                     throw new Error('Invalid kind of entity (must be a valid type)');
@@ -140,7 +140,7 @@ class Authorizer {
                     const decision = await this.implementation.prompt(entity);
                     if (entity.sign.message != null && (!decision.proof.hash || !decision.proof.message || !decision.proof.signature))
                         throw new Error('message signing refused');
-                    result = {
+                    acknowledgementRequest = {
                         type: 'approval',
                         challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                         account: algorithm_1.Signing.encodeAddress(decision.account),
@@ -157,7 +157,7 @@ class Authorizer {
                 }
             }
             catch (exception) {
-                result = {
+                acknowledgementRequest = {
                     type: 'rejection',
                     challenge: algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
                     error: exception.message,
@@ -168,7 +168,7 @@ class Authorizer {
                 await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(result)
+                    body: JSON.stringify(acknowledgementRequest)
                 });
                 return true;
             }
