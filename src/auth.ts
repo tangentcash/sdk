@@ -31,7 +31,6 @@ export type AuthApproval = {
 export type AuthRequest = {
     type: 'challenge',
     challenge: string,
-    props?: Record<string, any>
 } | {
     type: 'approval',
     challenge: string,
@@ -40,13 +39,11 @@ export type AuthRequest = {
         hash: string | null,
         message: string | null,
         signature: string | null
-    },
-    props?: Record<string, any>
+    }
 } | {
     type: 'rejection',
     challenge: string,
-    error: string,
-    props?: Record<string, any>
+    error: string
 }
 
 export type AuthResponse = {
@@ -100,12 +97,9 @@ export class Authorizer {
         if (!this.implementation)
             return false;
 
-        let props: Record<string, any> = { };
         let url: URL;
         try {
             url = new URL(request.url || '');
-            url.searchParams.forEach((v, k) => props[k] = v);
-            url.search = '';
         } catch {
             return false;
         }
@@ -114,8 +108,7 @@ export class Authorizer {
             const challenge = Hashing.hash256(Uint8Array.from([...randomBytes(32), ...Hashing.hash256(ByteUtil.byteStringToUint8Array(url.toString()))]));
             const challengeRequest: AuthRequest = {
                 type: 'challenge',
-                challenge: ByteUtil.uint8ArrayToHexString(challenge),
-                props: props
+                challenge: ByteUtil.uint8ArrayToHexString(challenge)
             };
             const solution: AuthResponse = await (await fetch(url, {
                 method: 'POST',
@@ -176,8 +169,7 @@ export class Authorizer {
                             hash: decision.proof.hash != null ? decision.proof.hash.toHex() : null,
                             message: decision.proof.message != null ? ByteUtil.uint8ArrayToHexString(decision.proof.message) : (entity.sign.message ? ByteUtil.uint8ArrayToHexString(entity.sign.message) : null),
                             signature: decision.proof.signature != null ? ByteUtil.uint8ArrayToHexString(decision.proof.signature.data) : null
-                        },
-                        props: props
+                        }
                     };
                 } catch (exception: any) {
                     throw new Error(exception.message ? 'User rejection: ' + exception.message : 'User rejection');
@@ -186,8 +178,7 @@ export class Authorizer {
                 acknowledgementRequest = {
                     type: 'rejection',
                     challenge: ByteUtil.uint8ArrayToHexString(entity.proof.challenge),
-                    error: exception.message,
-                    props: props            
+                    error: exception.message     
                 }
             }
 
