@@ -8,18 +8,18 @@ export enum Approving {
     transaction = 'transaction'
 }
 
-export type Prompt = {
+export type AuthPrompt = {
     url?: string;
 }
 
-export type Entity = {
+export type AuthEntity = {
     proof: { publicKey: Pubkey, challenge: Uint8Array, signature: Hashsig, hostname: string, trustless: boolean },
     about: { favicon: string | null, description: string | null },
     sign: { message: Uint8Array | null }
     kind: Approving;
 }
 
-export type Approval = {
+export type AuthApproval = {
     account: Pubkeyhash,
     proof: {
         hash: Uint256 | null,
@@ -56,8 +56,8 @@ export type AuthResponse = {
     kind?: string
 }
 
-export type Implementation = {
-    prompt: (request: Entity) => Promise<Approval>,
+export type AuthImplementation = {
+    prompt: (request: AuthEntity) => Promise<AuthApproval>,
     resolveDomainTXT: (hostname: string) => Promise<string[]>
 };
 
@@ -74,12 +74,12 @@ export class NodeImplementation {
 }
 
 export class Authorizer {
-    static implementation: Implementation | null;
+    static implementation: AuthImplementation | null;
 
-    static applyImplementation(implementation: Implementation | null): void {
+    static applyImplementation(implementation: AuthImplementation | null): void {
         this.implementation = implementation;
     }
-    static schema(entity: Entity, signer?: Pubkeyhash): string {
+    static schema(entity: AuthEntity, signer?: Pubkeyhash): string {
         const publicKey = entity.proof.publicKey.equals(new Pubkey()) ? '' : Signing.encodePublicKey(entity.proof.publicKey) || '';
         const result = new URL(`tangent://${publicKey ? publicKey + '@' : ''}${entity.proof.hostname}/approve/${entity.kind}`);
         const params = new URLSearchParams();
@@ -96,7 +96,7 @@ export class Authorizer {
             params.append('signer', Signing.encodeAddress(signer) || '');
         return result.toString() + '?' + params.toString();
     }
-    static async try(request: Prompt): Promise<boolean> {
+    static async try(request: AuthPrompt): Promise<boolean> {
         if (!this.implementation)
             return false;
 
@@ -122,7 +122,7 @@ export class Authorizer {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(challengeRequest)
             })).json();     
-            const entity: Entity = {
+            const entity: AuthEntity = {
                 proof: {
                     publicKey: new Pubkey(solution.proof?.publicKey),
                     challenge: challenge,

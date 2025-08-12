@@ -5,10 +5,10 @@ export declare enum Approving {
     message = "message",
     transaction = "transaction"
 }
-export type Prompt = {
+export type AuthPrompt = {
     url?: string;
 };
-export type Entity = {
+export type AuthEntity = {
     proof: {
         publicKey: Pubkey;
         challenge: Uint8Array;
@@ -25,7 +25,7 @@ export type Entity = {
     };
     kind: Approving;
 };
-export type Approval = {
+export type AuthApproval = {
     account: Pubkeyhash;
     proof: {
         hash: Uint256 | null;
@@ -67,8 +67,8 @@ export type AuthResponse = {
     };
     kind?: string;
 };
-export type Implementation = {
-    prompt: (request: Entity) => Promise<Approval>;
+export type AuthImplementation = {
+    prompt: (request: AuthEntity) => Promise<AuthApproval>;
     resolveDomainTXT: (hostname: string) => Promise<string[]>;
 };
 export declare class NodeImplementation {
@@ -76,9 +76,9 @@ export declare class NodeImplementation {
     static resolveDomainTXT(hostname: string): Promise<string[]>;
 }
 export declare class Authorizer {
-    static implementation: Implementation | null;
-    static applyImplementation(implementation: Implementation | null): void;
-    static schema(entity: Entity, signer?: Pubkeyhash): string;
-    static try(request: Prompt): Promise<boolean>;
+    static implementation: AuthImplementation | null;
+    static applyImplementation(implementation: AuthImplementation | null): void;
+    static schema(entity: AuthEntity, signer?: Pubkeyhash): string;
+    static try(request: AuthPrompt): Promise<boolean>;
     static isIpAddress(ip: string): boolean;
 }
