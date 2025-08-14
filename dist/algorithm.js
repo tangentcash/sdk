@@ -468,7 +468,7 @@ class AssetId {
     constructor(data) {
         data = bignumber_js_1.default.isBigNumber(data) ? data.toNumber() : data;
         if (typeof data == 'number') {
-            data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
+            data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16)).reverse();
         }
         else if (typeof data == 'string') {
             data = ByteUtil.hexStringToUint8Array(data);
