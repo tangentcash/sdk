@@ -41,9 +41,6 @@ export declare namespace States {
     class AccountBalance {
         static typename: string;
     }
-    class AccountProgram {
-        static typename: string;
-    }
     class DepositoryBalance {
         static typename: string;
     }

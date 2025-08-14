@@ -105,7 +105,6 @@ class EventResolver {
     static calculateSummaryState(events) {
         const result = {
             account: {
-                programs: new Set(),
                 balances: {},
                 fees: {}
             },
@@ -187,15 +186,6 @@ class EventResolver {
                         const feeState = result.account.fees[ownerAddress][asset.handle];
                         balanceState.supply = balanceState.supply.plus(fee);
                         feeState.fee = feeState.fee.plus(fee);
-                    }
-                    break;
-                }
-                case types_1.Types.AccountProgram: {
-                    if (event.args.length >= 1 && typeof event.args[0] == 'string') {
-                        const [from] = event.args;
-                        const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
-                        if (fromAddress != null)
-                            result.account.programs.add(fromAddress);
                     }
                     break;
                 }
@@ -342,7 +332,6 @@ class EventResolver {
     static isSummaryStateEmpty(state, address) {
         if (address != null) {
             return !state.account.balances[address] &&
-                !state.account.programs.size &&
                 !state.depository.balances[address] &&
                 !Object.keys(state.depository.queues).length &&
                 !Object.keys(state.depository.accounts).length &&
@@ -355,7 +344,6 @@ class EventResolver {
         }
         else {
             return !Object.keys(state.account.balances).length &&
-                !state.account.programs.size &&
                 !Object.keys(state.depository.balances).length &&
                 !Object.keys(state.depository.queues).length &&
                 !Object.keys(state.depository.accounts).length &&

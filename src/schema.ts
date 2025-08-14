@@ -58,10 +58,6 @@ export namespace States {
     static typename: string = 'account_balance';
   }
 
-  export class AccountProgram {
-    static typename: string = 'account_program';
-  }
-
   export class DepositoryBalance {
     static typename: string = 'depository_balance';
   }

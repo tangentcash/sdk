@@ -81,10 +81,6 @@ var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
-    class AccountProgram {
-    }
-    AccountProgram.typename = 'account_program';
-    States.AccountProgram = AccountProgram;
     class DepositoryBalance {
     }
     DepositoryBalance.typename = 'depository_balance';

@@ -1,6 +1,5 @@
 export declare class Types {
     static AccountBalance: number;
-    static AccountProgram: number;
     static DepositoryBalance: number;
     static DepositoryPolicy: number;
     static WitnessAccount: number;
