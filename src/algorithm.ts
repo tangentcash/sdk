@@ -460,7 +460,7 @@ export class AssetId {
   constructor(data?: number | string | BigNumber | Uint8Array) {
     data = BigNumber.isBigNumber(data) ? data.toNumber() : data;
     if (typeof data == 'number') {
-      data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16)).reverse();
+      data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
     } else if (typeof data == 'string') {
       data = ByteUtil.hexStringToUint8Array(data);
     }
