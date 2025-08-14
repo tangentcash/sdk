@@ -91,13 +91,13 @@ export class Uint256 {
       else if (value instanceof Uint8Array) {
         const isZero = value.length == 0 || value.every((x) => x == 0);
         if (!isZero) {
-          if (value.length != 32) {
+          if (value.length < 32) {
             const copy = new Uint8Array(32);
-            copy.set(value.slice(0, 32), 0);
+            copy.set(value.slice(0, 32), 32 - value.length);
             this.value = new UInt256(copy.buffer);
           }
           else {
-            this.value = new UInt256(new Uint8Array(value).buffer);
+            this.value = new UInt256(new Uint8Array(value.slice(0, 32)).buffer);
           }
         } else {
           this.value = new UInt256();
