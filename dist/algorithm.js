@@ -467,12 +467,8 @@ exports.Pubkeyhash = Pubkeyhash;
 class AssetId {
     constructor(data) {
         data = bignumber_js_1.default.isBigNumber(data) ? data.toNumber() : data;
-        if (typeof data == 'number') {
-            data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
-        }
-        else if (typeof data == 'string') {
-            data = ByteUtil.hexStringToUint8Array(data);
-        }
+        data = typeof data == 'number' ? '0x' + data.toString(16) : data;
+        data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
         if (data instanceof Uint8Array) {
             let offset = 0;
             while (data[offset] == 0 && offset + 1 < data.length)
