@@ -466,11 +466,11 @@ export class AssetId {
       while (data[offset] == 0 && offset + 1 < data.length)
         ++offset;
 
+      const numeric = new Uint256(data);
+      this.id = numeric.toCompactHex();
       this.handle = ByteUtil.uint8ArrayToByteString(data.slice(offset));
 
-      const numeric = new Uint256(data);
       const segments = this.handle.split(':');
-      this.id = numeric.toCompactHex();
       this.chain = segments[0];
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
