@@ -474,7 +474,7 @@ export class AssetId {
       data = data.slice(offset);
       this.handle = ByteUtil.uint8ArrayToByteString(data);
 
-      const numeric = new Uint256(data.reverse());
+      const numeric = new Uint256(data);
       const segments = this.handle.split(':');
       this.id = numeric.isSafeInteger() ? numeric.valueOf() : numeric.toCompactHex();
       this.chain = segments[0];
@@ -492,13 +492,13 @@ export class AssetId {
     return this.id.toString() == value.id.toString();
   }
   toUint8Array(): Uint8Array {
-    return ByteUtil.byteStringToUint8Array(this.handle).reverse();
+    return ByteUtil.byteStringToUint8Array(this.handle);
   }
   toUint256(): Uint256 {
     return new Uint256(this.toUint8Array());
   }
   toHex(): string {
-    return ByteUtil.uint8ArrayToHexString(this.toUint8Array().reverse());
+    return ByteUtil.uint8ArrayToHexString(this.toUint8Array());
   }
   isValid(): boolean {
     return (typeof this.id == 'number' ? this.id > 0 : this.id.length > 0) && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
