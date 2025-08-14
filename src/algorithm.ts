@@ -458,12 +458,11 @@ export class AssetId {
   checksum: string | null;
 
   constructor(data?: number | string | BigNumber | Uint8Array) {
+    data = BigNumber.isBigNumber(data) ? data.toNumber() : data;
     if (typeof data == 'number') {
       data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
     } else if (typeof data == 'string') {
       data = ByteUtil.hexStringToUint8Array(data);
-    } else if (BigNumber.isBigNumber(data)) {
-      data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
     }
     
     if (data instanceof Uint8Array) {

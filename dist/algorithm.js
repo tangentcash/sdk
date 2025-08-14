@@ -466,14 +466,12 @@ class Pubkeyhash {
 exports.Pubkeyhash = Pubkeyhash;
 class AssetId {
     constructor(data) {
+        data = bignumber_js_1.default.isBigNumber(data) ? data.toNumber() : data;
         if (typeof data == 'number') {
             data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
         }
         else if (typeof data == 'string') {
             data = ByteUtil.hexStringToUint8Array(data);
-        }
-        else if (bignumber_js_1.default.isBigNumber(data)) {
-            data = ByteUtil.hexStringToUint8Array('0x' + data.toString(16));
         }
         if (data instanceof Uint8Array) {
             let offset = 0;
