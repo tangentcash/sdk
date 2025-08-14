@@ -473,8 +473,7 @@ class AssetId {
             let offset = 0;
             while (data[offset] == 0 && offset + 1 < data.length)
                 ++offset;
-            data = data.slice(offset);
-            this.handle = ByteUtil.uint8ArrayToByteString(data);
+            this.handle = ByteUtil.uint8ArrayToByteString(data.slice(offset));
             const numeric = new Uint256(data);
             const segments = this.handle.split(':');
             this.id = numeric.toCompactHex();
