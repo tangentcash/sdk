@@ -102,7 +102,7 @@ export declare class Pubkeyhash {
     equals(value: Pubkeyhash): boolean;
 }
 export declare class AssetId {
-    id: number | string;
+    id: string;
     handle: string;
     chain: string | null;
     token: string | null;

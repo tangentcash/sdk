@@ -451,7 +451,7 @@ export class Pubkeyhash {
 }
 
 export class AssetId {
-  id: number | string;
+  id: string;
   handle: string;
   chain: string | null;
   token: string | null;
@@ -471,12 +471,12 @@ export class AssetId {
 
       const numeric = new Uint256(data);
       const segments = this.handle.split(':');
-      this.id = numeric.isSafeInteger() ? numeric.valueOf() : numeric.toCompactHex();
+      this.id = numeric.toCompactHex();
       this.chain = segments[0];
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
     } else {
-      this.id = 0;
+      this.id = '0x0';
       this.handle = '';
       this.chain = null;
       this.token = null;
