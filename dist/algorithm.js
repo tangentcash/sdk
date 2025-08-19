@@ -119,7 +119,7 @@ class Uint256 {
                 if (!isZero) {
                     if (value.length < 32) {
                         const copy = new Uint8Array(32);
-                        copy.set(value.slice(0, 32));
+                        copy.set(value.slice(0, 32), 32 - value.length);
                         this.value = new uint256_1.UInt256(copy.buffer);
                     }
                     else {
@@ -470,12 +470,12 @@ class AssetId {
         data = typeof data == 'number' ? '0x' + data.toString(16) : data;
         data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
         if (data instanceof Uint8Array) {
-            let offset = data.length;
-            while (data[offset] == 0 && offset - 1 >= 0)
-                --offset;
+            let offset = 0;
+            while (data[offset] == 0 && offset + 1 < data.length)
+                ++offset;
             const numeric = new Uint256(data);
             this.id = numeric.toCompactHex();
-            this.handle = ByteUtil.uint8ArrayToByteString(data.slice(0, offset));
+            this.handle = ByteUtil.uint8ArrayToByteString(data.slice(offset));
             const segments = this.handle.split(':');
             this.chain = segments[0];
             this.token = segments[1] || null;
