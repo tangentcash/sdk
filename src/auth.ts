@@ -148,7 +148,6 @@ export class Authorizer {
                 const signature = solution.proof && typeof solution.proof.signature == 'string' ? new Hashsig(ByteUtil.hexStringToUint8Array(solution.proof.signature)) || new Hashsig() : new Hashsig();
                 const message = this.schema(entity);
                 const messageHash = new Uint256(Hashing.hash256(ByteUtil.byteStringToUint8Array(message)));
-                console.log(messageHash.toHex());
                 const publicKey = Signing.recover(messageHash, signature);
                 if (!publicKey)
                     throw new Error('Invalid signature (not acceptable for message "' + message + '")');

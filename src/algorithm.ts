@@ -79,8 +79,11 @@ export class Uint256 {
   
   constructor(value?: number | string | Uint8Array | Uint256, radix?: number) {
     if (value != null) {
-      if (value instanceof Uint8Array)
+      if (value instanceof Uint8Array) {
         value = ByteUtil.uint8ArrayToHexString(value);
+        console.log(value);
+      }
+
       if (value instanceof Uint256)
         this.value = new UInt256(value.value);
       else if (typeof value == 'string')

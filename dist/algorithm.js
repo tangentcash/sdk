@@ -104,8 +104,10 @@ Chain.props = _a.mainnet;
 class Uint256 {
     constructor(value, radix) {
         if (value != null) {
-            if (value instanceof Uint8Array)
+            if (value instanceof Uint8Array) {
                 value = ByteUtil.uint8ArrayToHexString(value);
+                console.log(value);
+            }
             if (value instanceof Uint256)
                 this.value = new uint256_1.UInt256(value.value);
             else if (typeof value == 'string')
