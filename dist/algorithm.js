@@ -106,7 +106,6 @@ class Uint256 {
         if (value != null) {
             if (value instanceof Uint8Array) {
                 value = ByteUtil.uint8ArrayToHexString(value);
-                console.log(value);
             }
             if (value instanceof Uint256)
                 this.value = new uint256_1.UInt256(value.value);
@@ -782,7 +781,7 @@ class ByteUtil {
         return Uint8Array.from([...data].map((x) => x.charCodeAt(0)));
     }
     static uint8ArrayToHexString(data) {
-        return '0x' + [...data].map(x => x.toString(16).padStart(2, '0')).join('');
+        return data.length > 0 ? '0x' + [...data].map(x => x.toString(16).padStart(2, '0')).join('') : '0x0';
     }
     static uint8ArrayToByteString(data) {
         return String.fromCharCode(...data);
