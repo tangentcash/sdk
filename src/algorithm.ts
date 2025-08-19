@@ -309,9 +309,9 @@ export class Uint256 {
     return result;
   }
   byteCount(): number {
-    let data = this.toUint8Array(), bytes = 32;
-    while (bytes > 0 && !data[bytes - 1])
-      --bytes;
+    let data = this.toUint8Array(), bytes = 0;
+    while (data[bytes] == 0 && bytes + 1 < data.length)
+      ++bytes;
     return bytes;
   }
   isSafeInteger(): boolean {
@@ -435,13 +435,9 @@ export class AssetId {
     data = typeof data == 'number' ? '0x' + data.toString(16) : data;
     data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
     if (data instanceof Uint8Array) {
-      let offset = 0;
-      while (data[offset] == 0 && offset + 1 < data.length)
-        ++offset;
-
       const numeric = new Uint256(data);
       this.id = numeric.toCompactHex();
-      this.handle = ByteUtil.uint8ArrayToByteString(data.slice(offset));
+      this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(numeric.byteCount()));
 
       const segments = this.handle.split(':');
       this.chain = segments[0];
