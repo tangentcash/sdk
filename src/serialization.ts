@@ -567,7 +567,7 @@ export class SchemaUtil {
         case 'assetid':
           value = stream.readInteger(subtype);
           if (value != null) {
-            value = new AssetId(value.toUint8Array().reverse());
+            value = new AssetId(value.toUint8Array());
           }
           break;
         case 'args':
