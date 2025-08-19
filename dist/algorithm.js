@@ -471,7 +471,7 @@ class AssetId {
         data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
         if (data instanceof Uint8Array) {
             let offset = 0;
-            while (data[offset] == 0 && offset + 1 < data.length)
+            while (data[offset] != 0 && offset + 1 < data.length)
                 ++offset;
             const numeric = new Uint256(data);
             this.id = numeric.toCompactHex();
