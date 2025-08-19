@@ -119,7 +119,7 @@ class Uint256 {
                 if (!isZero) {
                     if (value.length < 32) {
                         const copy = new Uint8Array(32);
-                        copy.set(value.slice(0, 32), 32 - value.length);
+                        copy.set(value.slice(0, 32));
                         this.value = new uint256_1.UInt256(copy.buffer);
                     }
                     else {
