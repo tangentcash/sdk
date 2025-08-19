@@ -310,7 +310,7 @@ class Uint256 {
         return this.value.toJSON();
     }
     toUint8Array() {
-        return this.value.toByteArray();
+        return this.value.toByteArray().reverse();
     }
     testBit(n) {
         return this.value.testBit(n);

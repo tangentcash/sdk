@@ -286,7 +286,7 @@ export class Uint256 {
     return this.value.toJSON();
   }
   toUint8Array(): Uint8Array {
-    return this.value.toByteArray();
+    return this.value.toByteArray().reverse();
   }
   testBit(n: number): boolean {
     return this.value.testBit(n);
