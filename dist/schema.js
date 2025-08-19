@@ -105,7 +105,7 @@ var Transactions;
         class One extends Ledger.Transaction {
             constructor() {
                 super(...arguments);
-                this.to = 'subpubkeyhash';
+                this.to = 'pubkeyhash';
                 this.value = 'decimal';
             }
             getType() { return One.typename; }
@@ -116,7 +116,7 @@ var Transactions;
             constructor() {
                 super(...arguments);
                 this.to = [
-                    'to', 'subpubkeyhash',
+                    'to', 'pubkeyhash',
                     'value', 'decimal'
                 ];
             }
@@ -125,31 +125,18 @@ var Transactions;
         Many.typename = 'transfer';
         Transfer.Many = Many;
     })(Transfer = Transactions.Transfer || (Transactions.Transfer = {}));
-    let Refuel;
-    (function (Refuel) {
-        class One extends Ledger.Transaction {
-            constructor() {
-                super(...arguments);
-                this.to = 'subpubkeyhash';
-                this.value = 'uint256';
-            }
-            getType() { return One.typename; }
+    class Call extends Ledger.Transaction {
+        constructor() {
+            super(...arguments);
+            this.callable = 'pubkeyhash';
+            this.function = 'string';
+            this.value = 'decimal';
+            this.args = 'args';
         }
-        One.typename = 'refuel';
-        Refuel.One = One;
-        class Many extends Ledger.Transaction {
-            constructor() {
-                super(...arguments);
-                this.to = [
-                    'to', 'subpubkeyhash',
-                    'value', 'uint256'
-                ];
-            }
-            getType() { return Many.typename; }
-        }
-        Many.typename = 'refuel';
-        Refuel.Many = Many;
-    })(Refuel = Transactions.Refuel || (Transactions.Refuel = {}));
+        getType() { return Call.typename; }
+    }
+    Call.typename = 'call';
+    Transactions.Call = Call;
     class Rollup extends Ledger.Transaction {
         getType() { return Rollup.typename; }
     }

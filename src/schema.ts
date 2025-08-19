@@ -79,7 +79,7 @@ export namespace Transactions {
   export namespace Transfer {
     export class One extends Ledger.Transaction {
       static typename: string = 'transfer';
-      to: string = 'subpubkeyhash';
+      to: string = 'pubkeyhash';
       value: string = 'decimal';
   
       getType() { return One.typename; }
@@ -88,7 +88,7 @@ export namespace Transactions {
     export class Many extends Ledger.Transaction {
       static typename: string = 'transfer';
       to: string[] = [
-        'to', 'subpubkeyhash',
+        'to', 'pubkeyhash',
         'value', 'decimal'
       ];
   
@@ -96,24 +96,14 @@ export namespace Transactions {
     }
   }
 
-  export namespace Refuel {
-    export class One extends Ledger.Transaction {
-      static typename: string = 'refuel';
-      to: string = 'subpubkeyhash';
-      value: string = 'uint256';
-  
-      getType() { return One.typename; }
-    }
-  
-    export class Many extends Ledger.Transaction {
-      static typename: string = 'refuel';
-      to: string[] = [
-        'to', 'subpubkeyhash',
-        'value', 'uint256'
-      ];
-  
-      getType() { return Many.typename; }
-    }
+  export class Call extends Ledger.Transaction {
+    static typename: string = 'call';
+    callable: string = 'pubkeyhash';
+    function: string = 'string';
+    value: string = 'decimal';
+    args: string = 'args';
+
+    getType() { return Call.typename; }
   }
 
   export class Rollup extends Ledger.Transaction {

@@ -68,18 +68,13 @@ export declare namespace Transactions {
             getType(): string;
         }
     }
-    namespace Refuel {
-        class One extends Ledger.Transaction {
-            static typename: string;
-            to: string;
-            value: string;
-            getType(): string;
-        }
-        class Many extends Ledger.Transaction {
-            static typename: string;
-            to: string[];
-            getType(): string;
-        }
+    class Call extends Ledger.Transaction {
+        static typename: string;
+        callable: string;
+        function: string;
+        value: string;
+        args: string;
+        getType(): string;
     }
     class Rollup extends Ledger.Transaction {
         static typename: string;

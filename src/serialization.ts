@@ -473,6 +473,13 @@ export class SchemaUtil {
           stream.writeInteger(new Uint256(value.toUint8Array()));
           break;
         }
+        case 'args': {
+          if (!Array.isArray(value))
+            throw new TypeError('field ' + field + ' is not of type array');
+
+          this.storeArray(stream, value, true);
+          break;
+        }
         default:
           break;
       }
@@ -563,6 +570,9 @@ export class SchemaUtil {
             value = new AssetId(value.toUint8Array().reverse());
           }
           break;
+        case 'args':
+          value = this.loadArray(stream, true);
+          break;
         default:
           break;
       }
@@ -604,12 +614,46 @@ export class SchemaUtil {
     }
     return object;
   }
-  static array(stream: Stream): any[] {
+  static storeArray(stream: Stream, data: any[], sized: boolean): void {
+    if (sized)
+      stream.writeInteger(data.length);
+    
+    for (let i = 0; i < data.length; i++) {
+      const value = data[i];
+      if ((value instanceof Uint256) || typeof value == 'number')
+        stream.writeInteger(value);
+      else if (BigNumber.isBigNumber(value))
+        stream.writeDecimal(value);
+      else if (value instanceof Uint8Array)
+        stream.writeBinaryString(value);
+      else if (typeof value == 'string')
+        stream.writeString(value);
+      else if (typeof value == 'boolean')
+        stream.writeBoolean(value);
+      else if (value instanceof Hashsig || value instanceof Seckey || value instanceof Pubkey || value instanceof Pubkeyhash)
+        stream.writeBinaryStringOptimized(value.data);
+      else if (value instanceof AssetId)
+        stream.writeInteger(new Uint256(value.toUint8Array()));
+      else
+        throw new Error('array argument ' + i + ' is not serializable');
+    }
+  }
+  static loadArray(stream: Stream, sized: boolean): any[] {
     let result: any[] = [];
-    while (!stream.isEof()) {
+    let size = sized ? stream.readInteger(stream.readType() || Viewable.Invalid)?.toInteger() || Infinity : Infinity;
+    if (sized && !isFinite(size))
+      throw new Error('array is does not have a size');
+
+    for (let i = 0; i < size; i++) {
+      if (stream.isEof()) {
+        if (sized && i != size - 1)
+          throw new Error('array argument ' + i + ' is not found');
+        break;
+      }
+
       let type = stream.readType();
       if (type == null)
-        break;
+        throw new Error('array argument ' + i + ' type is not valid');
 
       if ([Viewable.StringAny10, Viewable.StringAny16].includes(type)) {
         let value = stream.readString(type);
@@ -652,6 +696,8 @@ export class SchemaUtil {
           break;
         
         result.push(value);
+      } else {
+        throw new Error('array argument ' + i + ' is not deserializable');
       }
     }
     return result;
