@@ -332,10 +332,10 @@ class Uint256 {
         return result;
     }
     byteCount() {
-        let data = this.toUint8Array(), bytes = 0;
-        while (data[bytes] == 0 && bytes + 1 < data.length)
-            ++bytes;
-        return bytes;
+        let data = this.toUint8Array(), offset = 0;
+        while (data[offset] == 0 && offset + 1 < data.length)
+            ++offset;
+        return 32 - offset;
     }
     isSafeInteger() {
         let value = parseInt(this.toString());
@@ -442,7 +442,7 @@ class AssetId {
         if (data instanceof Uint8Array) {
             const numeric = new Uint256(data);
             this.id = numeric.toCompactHex();
-            this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(numeric.byteCount()));
+            this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(32 - numeric.byteCount()));
             const segments = this.handle.split(':');
             this.chain = segments[0];
             this.token = segments[1] || null;
