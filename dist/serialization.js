@@ -124,7 +124,7 @@ class Stream {
         let type = StreamUtil.getIntegerType(value);
         let size = StreamUtil.getIntegerSize(type);
         this.write(new Uint8Array([type]));
-        this.write(value.toUint8Array().slice(32 - size));
+        this.write(value.toUint8Array().slice(32 - size).reverse());
         return this;
     }
     writeBoolean(value) {
@@ -134,7 +134,7 @@ class Stream {
     }
     writeTypeslessInteger(value) {
         let size = StreamUtil.getIntegerSize(StreamUtil.getIntegerType(value));
-        this.write(value.toUint8Array().slice(32 - size));
+        this.write(value.toUint8Array().slice(32 - size).reverse());
         return this;
     }
     writeTypesless(value) {
@@ -221,7 +221,7 @@ class Stream {
         let data = this.read(size);
         if (data == null || data.length != size)
             return size == 0 ? new algorithm_1.Uint256(0) : null;
-        return new algorithm_1.Uint256(data);
+        return new algorithm_1.Uint256(data.reverse());
     }
     readSafeInteger(type) {
         let value = this.readInteger(type);
