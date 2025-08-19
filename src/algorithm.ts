@@ -4,7 +4,7 @@ import * as bip39 from '@scure/bip39';
 import { Base64 } from 'js-base64';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { randomBytes } from '@ethersproject/random';
-import { UInt256 } from 'uint256';
+import { UInt256 } from '@radixdlt/uint256';
 import { bech32m } from 'bech32';
 import { sha1 } from '@noble/hashes/sha1';
 import { sha3_512 } from '@noble/hashes/sha3';
@@ -79,41 +79,12 @@ export class Uint256 {
   
   constructor(value?: number | string | Uint8Array | Uint256, radix?: number) {
     if (value != null) {
-      if (value instanceof Uint256) {
-        if (value.value.buffer) {
-          const copy = new ArrayBuffer(value.value.buffer.byteLength );
-          new Uint8Array(copy).set(new Uint8Array(value.value.buffer));
-          this.value = new UInt256(copy);
-        } else {
-          this.value = new UInt256();
-        }
-      }
-      else if (value instanceof Uint8Array) {
-        const isZero = value.length == 0 || value.every((x) => x == 0);
-        if (!isZero) {
-          if (value.length < 32) {
-            const copy = new Uint8Array(32);
-            copy.set(value.slice(0, 32), 32 - value.length);
-            this.value = new UInt256(copy.buffer);
-          }
-          else {
-            this.value = new UInt256(new Uint8Array(value.slice(0, 32)).buffer);
-          }
-        } else {
-          this.value = new UInt256();
-        }
-      }
-      else if (typeof value == 'string') {
-        const isHex = value.startsWith('0x') || radix == 16;
-        if (isHex) {
-          const numeric = (value.startsWith('0x') ? value.substring(2) : value);
-          const intermediate = new Uint256();
-          intermediate.value = new UInt256(numeric, 16);
-          this.value = new UInt256(intermediate.toHex());
-        }
-        else
-          this.value = new UInt256(value, radix);
-      }
+      if (value instanceof Uint8Array)
+        value = ByteUtil.uint8ArrayToHexString(value);
+      if (value instanceof Uint256)
+        this.value = new UInt256(value.value);
+      else if (typeof value == 'string')
+        this.value = new UInt256(value, radix);
       else if (typeof value == 'number')
         this.value = new UInt256(value);
       else
@@ -298,7 +269,7 @@ export class Uint256 {
     return (radix == 16 ? '0x' : '') + this.value.toString(radix);
   }
   toHex(): string {
-    return ByteUtil.uint8ArrayToHexString(ByteUtil.uint8ArraySwapEndianness(this.toUint8Array()));
+    return ByteUtil.uint8ArrayToHexString(this.toUint8Array());
   }
   toCompactHex(): string {
     const hex = this.toHex();

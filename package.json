@@ -10,6 +10,7 @@
   "dependencies": {
     "@ethersproject/random": "5.8.0",
     "@noble/hashes": "1.8.0",
+    "@radixdlt/uint256": "^1.1.0",
     "@scure/bip39": "1.6.0",
     "@types/libsodium-wrappers": "0.7.14",
     "@types/secp256k1": "4.0.6",
@@ -18,7 +19,6 @@
     "js-base64": "3.7.8",
     "libsodium-wrappers": "0.7.15",
     "secp256k1": "5.0.1",
-    "typescript": "5.9.2",
-    "uint256": "1.0.8"
+    "typescript": "5.9.2"
   }
 }
