@@ -535,7 +535,7 @@ export class RPC {
       
       const location = new URL('tcp://' + this.resolver);
       const secure = (location.port == '443');
-      return [`${secure ? 'https' : 'http'}://${this.resolver}/?interface=1&public=1${type == 'ws' ? '&streaming=1' : ''}`, this.resolver];
+      return [`${secure ? 'https' : 'http'}://${this.resolver}/?rpc=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
     } catch {
       return null;
     }
