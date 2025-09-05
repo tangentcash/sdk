@@ -333,7 +333,7 @@ class Uint256 {
     }
     byteCount() {
         let data = this.toUint8Array(), offset = 0;
-        while (data[offset] == 0 && offset + 1 < data.length)
+        while (offset < data.length && data[offset] == 0)
             ++offset;
         return 32 - offset;
     }
