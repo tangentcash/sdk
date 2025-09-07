@@ -200,7 +200,7 @@ export declare class RPC {
         address: string;
     } | null>;
     static getParticipations(): Promise<any[] | null>;
-    static getBlockchains(): Promise<any[] | null>;
+    static getBlockchains(includeWhitelists: boolean): Promise<any[] | null>;
     static getBestDepositoryRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestDepositoryBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestDepositoryPoliciesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
