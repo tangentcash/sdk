@@ -10,7 +10,7 @@
   "dependencies": {
     "@ethersproject/random": "5.8.0",
     "@noble/hashes": "1.8.0",
-    "@radixdlt/uint256": "^1.1.0",
+    "@radixdlt/uint256": "1.1.0",
     "@scure/bip39": "1.6.0",
     "@types/libsodium-wrappers": "0.7.14",
     "@types/secp256k1": "4.0.6",
