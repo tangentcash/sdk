@@ -107,6 +107,7 @@ export declare namespace Transactions {
         securityLevel: string;
         acceptsAccountRequests: string;
         acceptsWithdrawalRequests: string;
+        whitelist: string[];
         getType(): string;
     }
     class DepositoryRegrouping extends Ledger.Transaction {

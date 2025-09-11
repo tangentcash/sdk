@@ -191,6 +191,10 @@ var Transactions;
             this.securityLevel = 'uint8';
             this.acceptsAccountRequests = 'boolean';
             this.acceptsWithdrawalRequests = 'boolean';
+            this.whitelist = [
+                'symbol', 'string',
+                'address', 'string'
+            ];
         }
         getType() { return DepositoryAdjustment.typename; }
     }
