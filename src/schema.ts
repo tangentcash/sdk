@@ -112,8 +112,8 @@ export namespace Transactions {
     getType() { return Rollup.typename; }
   }
 
-  export class Engagement extends Ledger.Transaction {
-    static typename: string = 'engagement';
+  export class ValidatorAdjustment extends Ledger.Transaction {
+    static typename: string = 'validator_adjustment';
     blockProduction: string = 'uint8';
     participationStakes: string[] = [
       'asset', 'assetid',
@@ -124,7 +124,7 @@ export namespace Transactions {
       'stake', 'decimal'
     ];
 
-    getType() { return Engagement.typename; }
+    getType() { return ValidatorAdjustment.typename; }
   }
 
   export class DepositoryAccount extends Ledger.DelegationTransaction {
@@ -174,13 +174,13 @@ export namespace Transactions {
     'upgrade': 'Program creation',
     'call': 'Program call',
     'rollup': 'Rollup',
-    'engagement': 'Validator adjustment',
+    'validator_adjustment': 'Validator adjustment',
     'depository_account': 'Depository address selection',
     'depository_account_finalization': 'Depository address registration',
     'depository_withdrawal': 'Depository withdrawal',
     'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
     'depository_transaction': 'Depository transaction',
-    'depository_adjustment': 'Depository policy renewal',
+    'depository_adjustment': 'Depository adjustment',
     'depository_regrouping': 'Depository group selection',
     'depository_regrouping_preparation': 'Depository group announcement',
     'depository_regrouping_commitment': 'Depository group migration',

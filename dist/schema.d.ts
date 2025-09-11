@@ -80,7 +80,7 @@ export declare namespace Transactions {
         static typename: string;
         getType(): string;
     }
-    class Engagement extends Ledger.Transaction {
+    class ValidatorAdjustment extends Ledger.Transaction {
         static typename: string;
         blockProduction: string;
         participationStakes: string[];

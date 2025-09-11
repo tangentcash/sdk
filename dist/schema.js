@@ -142,7 +142,7 @@ var Transactions;
     }
     Rollup.typename = 'rollup';
     Transactions.Rollup = Rollup;
-    class Engagement extends Ledger.Transaction {
+    class ValidatorAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.blockProduction = 'uint8';
@@ -155,10 +155,10 @@ var Transactions;
                 'stake', 'decimal'
             ];
         }
-        getType() { return Engagement.typename; }
+        getType() { return ValidatorAdjustment.typename; }
     }
-    Engagement.typename = 'engagement';
-    Transactions.Engagement = Engagement;
+    ValidatorAdjustment.typename = 'validator_adjustment';
+    Transactions.ValidatorAdjustment = ValidatorAdjustment;
     class DepositoryAccount extends Ledger.DelegationTransaction {
         constructor() {
             super(...arguments);
@@ -214,13 +214,13 @@ var Transactions;
         'upgrade': 'Program creation',
         'call': 'Program call',
         'rollup': 'Rollup',
-        'engagement': 'Validator adjustment',
+        'validator_adjustment': 'Validator adjustment',
         'depository_account': 'Depository address selection',
         'depository_account_finalization': 'Depository address registration',
         'depository_withdrawal': 'Depository withdrawal',
         'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
         'depository_transaction': 'Depository transaction',
-        'depository_adjustment': 'Depository policy renewal',
+        'depository_adjustment': 'Depository adjustment',
         'depository_regrouping': 'Depository group selection',
         'depository_regrouping_preparation': 'Depository group announcement',
         'depository_regrouping_commitment': 'Depository group migration',
