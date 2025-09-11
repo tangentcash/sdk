@@ -142,7 +142,7 @@ var Transactions;
     }
     Rollup.typename = 'rollup';
     Transactions.Rollup = Rollup;
-    class Certification extends Ledger.Transaction {
+    class Engagement extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.blockProduction = 'uint8';
@@ -155,10 +155,10 @@ var Transactions;
                 'stake', 'decimal'
             ];
         }
-        getType() { return Certification.typename; }
+        getType() { return Engagement.typename; }
     }
-    Certification.typename = 'certification';
-    Transactions.Certification = Certification;
+    Engagement.typename = 'engagement';
+    Transactions.Engagement = Engagement;
     class DepositoryAccount extends Ledger.DelegationTransaction {
         constructor() {
             super(...arguments);
@@ -214,8 +214,7 @@ var Transactions;
         'upgrade': 'Program creation',
         'call': 'Program call',
         'rollup': 'Rollup',
-        'certification': 'Validator certification',
-        'routing_account': 'Routing address registration',
+        'engagement': 'Validator adjustment',
         'depository_account': 'Depository address selection',
         'depository_account_finalization': 'Depository address registration',
         'depository_withdrawal': 'Depository withdrawal',

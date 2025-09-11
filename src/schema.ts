@@ -112,8 +112,8 @@ export namespace Transactions {
     getType() { return Rollup.typename; }
   }
 
-  export class Certification extends Ledger.Transaction {
-    static typename: string = 'certification';
+  export class Engagement extends Ledger.Transaction {
+    static typename: string = 'engagement';
     blockProduction: string = 'uint8';
     participationStakes: string[] = [
       'asset', 'assetid',
@@ -124,7 +124,7 @@ export namespace Transactions {
       'stake', 'decimal'
     ];
 
-    getType() { return Certification.typename; }
+    getType() { return Engagement.typename; }
   }
 
   export class DepositoryAccount extends Ledger.DelegationTransaction {
@@ -174,8 +174,7 @@ export namespace Transactions {
     'upgrade': 'Program creation',
     'call': 'Program call',
     'rollup': 'Rollup',
-    'certification': 'Validator certification',
-    'routing_account': 'Routing address registration',
+    'engagement': 'Validator adjustment',
     'depository_account': 'Depository address selection',
     'depository_account_finalization': 'Depository address registration',
     'depository_withdrawal': 'Depository withdrawal',
