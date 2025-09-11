@@ -936,8 +936,8 @@ export class RPC {
   static getParticipations(): Promise<any[] | null> {
     return this.fetch('no-cache', 'getparticipations');
   }
-  static getBlockchains(includeWhitelists: boolean): Promise<any[] | null> {
-    return this.fetch(includeWhitelists ? 'no-cache' : 'cache', 'getblockchains', includeWhitelists ? [includeWhitelists] : []);
+  static getBlockchains(): Promise<any[] | null> {
+    return this.fetch('cache', 'getblockchains', []);
   }
   static getBestDepositoryRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getbestdepositoryrewardsforselection', [asset.handle, offset, count]);

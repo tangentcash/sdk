@@ -788,8 +788,8 @@ class RPC {
     static getParticipations() {
         return this.fetch('no-cache', 'getparticipations');
     }
-    static getBlockchains(includeWhitelists) {
-        return this.fetch(includeWhitelists ? 'no-cache' : 'cache', 'getblockchains', includeWhitelists ? [includeWhitelists] : []);
+    static getBlockchains() {
+        return this.fetch('cache', 'getblockchains', []);
     }
     static getBestDepositoryRewardsForSelection(asset, offset, count) {
         return this.fetch('no-cache', 'getbestdepositoryrewardsforselection', [asset.handle, offset, count]);
