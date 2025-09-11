@@ -192,8 +192,8 @@ var Transactions;
             this.acceptsAccountRequests = 'boolean';
             this.acceptsWithdrawalRequests = 'boolean';
             this.whitelist = [
+                'address', 'string',
                 'symbol', 'string',
-                'address', 'string'
             ];
         }
         getType() { return DepositoryAdjustment.typename; }

@@ -155,8 +155,8 @@ export namespace Transactions {
     acceptsAccountRequests: string = 'boolean';
     acceptsWithdrawalRequests: string = 'boolean';
     whitelist: string[] = [
+      'address', 'string',
       'symbol', 'string',
-      'address', 'string'
     ];
 
     getType() { return DepositoryAdjustment.typename; }
