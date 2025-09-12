@@ -478,6 +478,9 @@ export class AssetId {
       handle = handle.toUpperCase();
     return new AssetId(ByteUtil.byteStringToUint8Array(handle));
   }
+  static checksumOf(contractAddress: string): string {
+    return Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
+  }
 }
 
 export class Segwit {

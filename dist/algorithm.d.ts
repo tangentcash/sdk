@@ -114,6 +114,7 @@ export declare class AssetId {
     toHex(): string;
     isValid(): boolean;
     static fromHandle(chain: string, token?: string, contractAddress?: string): AssetId;
+    static checksumOf(contractAddress: string): string;
 }
 export declare class Segwit {
     static tweak(outputBits: number, input: Uint8Array, inputBits: number, padding: number): Uint8Array | null;
