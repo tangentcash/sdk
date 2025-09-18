@@ -108,7 +108,8 @@ class Authorizer {
                     description: solution.about && typeof solution.about.description == 'string' ? solution.about.description || null : null
                 },
                 sign: {
-                    message: solution.sign && typeof solution.sign.message == 'string' ? algorithm_1.ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null
+                    message: solution.sign && typeof solution.sign.message == 'string' ? algorithm_1.ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null,
+                    asset: solution.sign && typeof solution.sign.asset == 'string' ? new algorithm_1.AssetId(solution.sign.asset) : null
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind : Approving.account
             };

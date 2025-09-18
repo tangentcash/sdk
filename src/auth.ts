@@ -1,4 +1,4 @@
-import { ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
+import { AssetId, ByteUtil, Hashing, Hashsig, Pubkey, Pubkeyhash, Signing, Uint256 } from './algorithm';
 import { randomBytes } from '@noble/hashes/utils';
 
 export enum Approving {
@@ -15,7 +15,7 @@ export type AuthPrompt = {
 export type AuthEntity = {
     proof: { publicKey: Pubkey, challenge: Uint8Array, signature: Hashsig, hostname: string, trustless: boolean },
     about: { favicon: string | null, description: string | null },
-    sign: { message: Uint8Array | null }
+    sign: { message: Uint8Array | null, asset: AssetId | null }
     kind: Approving;
 }
 
@@ -49,7 +49,7 @@ export type AuthRequest = {
 export type AuthResponse = {
     proof?: { publicKey?: string, signature?: string },
     about?: { favicon?: string, description?: string },
-    sign?: { message?: string },
+    sign?: { message?: string, asset?: string },
     kind?: string
 }
 
@@ -128,7 +128,8 @@ export class Authorizer {
                     description: solution.about && typeof solution.about.description == 'string' ? solution.about.description || null : null
                 },
                 sign: {
-                    message: solution.sign && typeof solution.sign.message == 'string' ? ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null
+                    message: solution.sign && typeof solution.sign.message == 'string' ? ByteUtil.hexStringToUint8Array(solution.sign.message) || null : null,
+                    asset: solution.sign && typeof solution.sign.asset == 'string' ? new AssetId(solution.sign.asset) : null
                 },
                 kind: typeof solution.kind == 'string' ? solution.kind as Approving : Approving.account
             };

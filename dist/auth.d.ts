@@ -1,4 +1,4 @@
-import { Hashsig, Pubkey, Pubkeyhash, Uint256 } from './algorithm';
+import { AssetId, Hashsig, Pubkey, Pubkeyhash, Uint256 } from './algorithm';
 export declare enum Approving {
     account = "account",
     identity = "identity",
@@ -22,6 +22,7 @@ export type AuthEntity = {
     };
     sign: {
         message: Uint8Array | null;
+        asset: AssetId | null;
     };
     kind: Approving;
 };
@@ -61,6 +62,7 @@ export type AuthResponse = {
     };
     sign?: {
         message?: string;
+        asset?: string;
     };
     kind?: string;
 };
