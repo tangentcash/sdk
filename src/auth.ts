@@ -85,6 +85,8 @@ export class Authorizer {
         params.append('proof.signature', ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
         if (entity.sign.message != null)
             params.append('sign.message', ByteUtil.uint8ArrayToHexString(entity.sign.message));
+        if (entity.sign.asset != null)
+            params.append('sign.asset', entity.sign.asset.id);
         if (entity.about.favicon != null)
             params.append('about.favicon', entity.about.favicon);
         if (entity.about.description != null)

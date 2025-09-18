@@ -66,6 +66,8 @@ class Authorizer {
         params.append('proof.signature', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.proof.signature.data));
         if (entity.sign.message != null)
             params.append('sign.message', algorithm_1.ByteUtil.uint8ArrayToHexString(entity.sign.message));
+        if (entity.sign.asset != null)
+            params.append('sign.asset', entity.sign.asset.id);
         if (entity.about.favicon != null)
             params.append('about.favicon', entity.about.favicon);
         if (entity.about.description != null)
