@@ -151,6 +151,7 @@ export namespace Transactions {
     static typename: string = 'depository_adjustment';
     incomingFee: string = 'decimal';
     outgoingFee: string = 'decimal';
+    participationThreshold: string = 'decimal';
     securityLevel: string = 'uint8';
     acceptsAccountRequests: string = 'boolean';
     acceptsWithdrawalRequests: string = 'boolean';

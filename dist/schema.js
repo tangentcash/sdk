@@ -188,6 +188,7 @@ var Transactions;
             super(...arguments);
             this.incomingFee = 'decimal';
             this.outgoingFee = 'decimal';
+            this.participationThreshold = 'decimal';
             this.securityLevel = 'uint8';
             this.acceptsAccountRequests = 'boolean';
             this.acceptsWithdrawalRequests = 'boolean';

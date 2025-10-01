@@ -104,6 +104,7 @@ export declare namespace Transactions {
         static typename: string;
         incomingFee: string;
         outgoingFee: string;
+        participationThreshold: string;
         securityLevel: string;
         acceptsAccountRequests: string;
         acceptsWithdrawalRequests: string;
