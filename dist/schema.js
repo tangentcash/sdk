@@ -200,7 +200,7 @@ var Transactions;
     }
     DepositoryAdjustment.typename = 'depository_adjustment';
     Transactions.DepositoryAdjustment = DepositoryAdjustment;
-    class DepositoryRegrouping extends Ledger.Transaction {
+    class DepositoryMigration extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.participants = [
@@ -209,10 +209,10 @@ var Transactions;
                 'owner', 'pubkeyhash'
             ];
         }
-        getType() { return DepositoryRegrouping.typename; }
+        getType() { return DepositoryMigration.typename; }
     }
-    DepositoryRegrouping.typename = 'depository_regrouping';
-    Transactions.DepositoryRegrouping = DepositoryRegrouping;
+    DepositoryMigration.typename = 'depository_migration';
+    Transactions.DepositoryMigration = DepositoryMigration;
     Transactions.typenames = {
         'transfer': 'Transfer',
         'upgrade': 'Program creation',
@@ -225,9 +225,7 @@ var Transactions;
         'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
         'depository_transaction': 'Depository transaction',
         'depository_adjustment': 'Depository adjustment',
-        'depository_regrouping': 'Depository group selection',
-        'depository_regrouping_preparation': 'Depository group announcement',
-        'depository_regrouping_commitment': 'Depository group migration',
-        'depository_regrouping_finalization': 'Depository group confirmation'
+        'depository_migration': 'Depository participant migration',
+        'depository_migration_finalization': 'Depository migration confirmation'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

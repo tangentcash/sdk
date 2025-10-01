@@ -13,4 +13,4 @@ Types.WitnessAccount = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStrin
 Types.WitnessTransaction = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema_1.States.WitnessTransaction.typename));
 Types.Rollup = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema_1.Transactions.Rollup.typename));
 Types.DepositoryAccount = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema_1.Transactions.DepositoryAccount.typename));
-Types.DepositoryRegrouping = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema_1.Transactions.DepositoryRegrouping.typename));
+Types.DepositoryMigration = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(schema_1.Transactions.DepositoryMigration.typename));

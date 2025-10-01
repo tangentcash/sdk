@@ -162,15 +162,15 @@ export namespace Transactions {
     getType() { return DepositoryAdjustment.typename; }
   }
 
-  export class DepositoryRegrouping extends Ledger.Transaction {
-    static typename: string = 'depository_regrouping';
+  export class DepositoryMigration extends Ledger.Transaction {
+    static typename: string = 'depository_migration';
     participants: string[] = [
       'asset', 'assetid',
       'manager', 'pubkeyhash',
       'owner', 'pubkeyhash'
     ];
 
-    getType() { return DepositoryRegrouping.typename; }
+    getType() { return DepositoryMigration.typename; }
   }
 
   export const typenames: Record<string, string> = {
@@ -185,9 +185,7 @@ export namespace Transactions {
     'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
     'depository_transaction': 'Depository transaction',
     'depository_adjustment': 'Depository adjustment',
-    'depository_regrouping': 'Depository group selection',
-    'depository_regrouping_preparation': 'Depository group announcement',
-    'depository_regrouping_commitment': 'Depository group migration',
-    'depository_regrouping_finalization': 'Depository group confirmation'
+    'depository_migration': 'Depository participant migration',
+    'depository_migration_finalization': 'Depository migration confirmation'
   };
 }

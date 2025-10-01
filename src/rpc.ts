@@ -387,7 +387,7 @@ export class EventResolver {
           break;
         }
         case Types.DepositoryAccount: 
-        case Types.DepositoryRegrouping: {
+        case Types.DepositoryMigration: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;

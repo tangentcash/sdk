@@ -302,7 +302,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.DepositoryAccount:
-                case types_1.Types.DepositoryRegrouping: {
+                case types_1.Types.DepositoryMigration: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;

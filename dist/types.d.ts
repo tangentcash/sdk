@@ -6,5 +6,5 @@ export declare class Types {
     static WitnessTransaction: number;
     static Rollup: number;
     static DepositoryAccount: number;
-    static DepositoryRegrouping: number;
+    static DepositoryMigration: number;
 }

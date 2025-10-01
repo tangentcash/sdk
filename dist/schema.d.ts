@@ -110,7 +110,7 @@ export declare namespace Transactions {
         whitelist: string[];
         getType(): string;
     }
-    class DepositoryRegrouping extends Ledger.Transaction {
+    class DepositoryMigration extends Ledger.Transaction {
         static typename: string;
         participants: string[];
         getType(): string;
