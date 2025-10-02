@@ -151,6 +151,7 @@ export declare class RPC {
         preload: boolean;
     };
     static socket: WebSocket | null;
+    static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
     static onNodeRequest: NodeRequest | null;
     static onNodeResponse: NodeResponse | null;
@@ -190,6 +191,7 @@ export declare class RPC {
     static saveProps(props: InterfaceProps): void;
     static getProps(): InterfaceProps;
     static clearCache(): void;
+    static forcedPolicy<T>(policy: 'cache' | 'no-cache', callback: () => Promise<T>): Promise<T>;
     static decodeTransaction(hexMessage: string): Promise<any>;
     static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, value: BigNumber, method: string, args: any[]): Promise<any | null>;

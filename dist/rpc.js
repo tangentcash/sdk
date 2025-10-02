@@ -505,6 +505,10 @@ class RPC {
         }
     }
     static async fetch(policy, method, args) {
+        if (this.forcePolicy != null) {
+            policy = this.forcePolicy;
+            this.forcePolicy = null;
+        }
         const id = (++this.requests.count).toString();
         const hash = algorithm_1.ByteUtil.uint8ArrayToHexString(algorithm_1.Hashing.hash512(algorithm_1.ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
         const body = {
@@ -773,6 +777,10 @@ class RPC {
             }
         }
     }
+    static forcedPolicy(policy, callback) {
+        this.forcePolicy = policy;
+        return callback();
+    }
     static decodeTransaction(hexMessage) {
         return this.fetch('cache', 'decodetransaction', [hexMessage]);
     }
@@ -906,6 +914,7 @@ RPC.props = {
     preload: false
 };
 RPC.socket = null;
+RPC.forcePolicy = null;
 RPC.onNodeMessage = null;
 RPC.onNodeRequest = null;
 RPC.onNodeResponse = null;

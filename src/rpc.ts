@@ -465,6 +465,7 @@ export class RPC {
     preload: false
   };
   static socket: WebSocket | null = null;
+  static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
   static onNodeRequest: NodeRequest | null = null;
   static onNodeResponse: NodeResponse | null = null;
@@ -624,6 +625,11 @@ export class RPC {
     }
   }
   static async fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null> {
+    if (this.forcePolicy != null) {
+      policy = this.forcePolicy;
+      this.forcePolicy = null;
+    }
+
     const id = (++this.requests.count).toString();
     const hash = ByteUtil.uint8ArrayToHexString(Hashing.hash512(ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
     const body = {
@@ -920,6 +926,10 @@ export class RPC {
         this.onCacheStore(keys[key]);
       }
     }
+  }
+  static forcedPolicy<T>(policy: 'cache' | 'no-cache', callback: () => Promise<T>): Promise<T> {
+    this.forcePolicy = policy;
+    return callback();
   }
   static decodeTransaction(hexMessage: string): Promise<any> {
     return this.fetch('cache', 'decodetransaction', [hexMessage]);
