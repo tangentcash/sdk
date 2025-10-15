@@ -13,7 +13,6 @@ export declare namespace Ledger {
         gasPrice: string;
         gasLimit: string;
         nonce: string;
-        conservative: string;
     }
     class DelegationTransaction extends Messages.Authentic {
         asset: string;

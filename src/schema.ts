@@ -25,7 +25,6 @@ export namespace Ledger {
     gasPrice: string = 'decimal';
     gasLimit: string = 'uint256';
     nonce: string = 'uint64';
-    conservative: string = 'boolean';
   }
 
   export class DelegationTransaction extends Messages.Authentic {

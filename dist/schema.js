@@ -37,7 +37,6 @@ var Ledger;
             this.gasPrice = 'decimal';
             this.gasLimit = 'uint256';
             this.nonce = 'uint64';
-            this.conservative = 'boolean';
         }
     }
     Ledger.Transaction = Transaction;

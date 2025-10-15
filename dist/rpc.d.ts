@@ -70,7 +70,6 @@ export type SummaryState = {
 };
 export type TransactionInput = {
     asset: AssetId;
-    conservative?: boolean;
     nonce?: string | number | BigNumber;
     gasPrice?: string | number | BigNumber;
     gasLimit?: string | number | BigNumber;
@@ -88,7 +87,6 @@ export type TransactionOutput = {
         signature: Hashsig;
         asset: AssetId;
         nonce: Uint256;
-        conservative: boolean;
         gasPrice: BigNumber;
         gasLimit: Uint256;
     } & {
