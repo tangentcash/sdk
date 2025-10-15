@@ -435,7 +435,7 @@ class SchemaUtil {
                     break;
             }
         };
-        if (typeof schema.getType == 'function') {
+        if (schema['type'] !== undefined && typeof schema.getType == 'function') {
             const type = schema.getType();
             object.type = typeof type == 'string' ? algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(type)) : type;
         }
