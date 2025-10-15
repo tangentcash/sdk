@@ -67,6 +67,11 @@ export declare class SchemaUtil {
     static UINT128_MAX: Uint256;
     static store(stream: Stream, object: any, schema: any): void;
     static load(stream: Stream, schema: any): any;
+    static storeRollup(stream: Stream, object: any, schema: any, subtransactions: {
+        args: any;
+        schema: any;
+    }[]): void;
+    static loadRollup(stream: Stream, schema: any, typeToSchema: (type: number) => any): any;
     static storeArray(stream: Stream, data: any[], sized: boolean): void;
     static loadArray(stream: Stream, sized: boolean): any[];
 }

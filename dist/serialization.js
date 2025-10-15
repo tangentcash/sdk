@@ -563,6 +563,102 @@ class SchemaUtil {
         }
         return object;
     }
+    static storeRollup(stream, object, schema, subtransactions) {
+        let assets = [], groups = {};
+        for (let i = 0; i < subtransactions.length; i++) {
+            const subtransaction = subtransactions[i];
+            if (!(subtransaction.args?.asset instanceof algorithm_1.AssetId))
+                throw new Error('Field \'asset\' is required');
+            const asset = subtransaction.args.asset.toUint256();
+            const assetId = asset.toHex();
+            let group = groups[assetId];
+            if (!group) {
+                assets.push(subtransaction.args.asset.toUint256());
+                group[assetId] = [subtransaction];
+            }
+            else {
+                group.push(subtransaction);
+            }
+        }
+        const emptySignature = new algorithm_1.Hashsig();
+        assets = assets.sort((a, b) => a.compareTo(b));
+        SchemaUtil.store(stream, object, schema);
+        stream.writeInteger(assets.length);
+        for (let i = 0; i < assets.length; i++) {
+            const asset = assets[i];
+            const transactions = groups[asset.toHex()];
+            stream.writeInteger(asset);
+            stream.writeInteger(transactions.length);
+            for (let j = 0; j < transactions.length; j++) {
+                const subtransaction = transactions[j];
+                if (typeof subtransaction.schema.getType != 'function') {
+                    throw new Error('Function \'getType\' is required');
+                }
+                else if (!(subtransaction.args.signature instanceof algorithm_1.Hashing)) {
+                    throw new Error('Field \'signature\' is required');
+                }
+                const type = subtransaction.schema.type();
+                const internalTransaction = subtransaction.args.signature.equals(emptySignature);
+                stream.writeBoolean(internalTransaction);
+                stream.writeInteger(typeof type == 'string' ? algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(type)) : type);
+                if (!internalTransaction) {
+                    stream.writeInteger(subtransaction.args.nonce);
+                    stream.writeBinaryStringOptimized(subtransaction.args.signature.data);
+                }
+                for (let item in schema) {
+                    delete subtransaction.schema[item];
+                }
+                SchemaUtil.store(stream, subtransaction.args, subtransaction.schema);
+            }
+        }
+    }
+    static loadRollup(stream, schema, typeToSchema) {
+        const transaction = this.load(stream, schema);
+        if (!transaction)
+            throw new TypeError('Not a valid rollup');
+        const assetsSize256 = stream.readInteger(stream.readType() || Viewable.Invalid);
+        if (!assetsSize256)
+            throw new TypeError('Field \'assets_size\' is required');
+        const assetsSize = assetsSize256.toInteger();
+        transaction.transactions = [];
+        for (let i = 0; i < assetsSize; i++) {
+            const asset = stream.readInteger(stream.readType() || Viewable.Invalid);
+            if (!asset)
+                throw new TypeError('Field \'asset[' + i + ']\' is required');
+            const transactionsSize256 = stream.readInteger(stream.readType() || Viewable.Invalid);
+            if (!transactionsSize256)
+                throw new TypeError('Field \'transactions_size[' + i + ']\' is required');
+            const transactionsSize = transactionsSize256.toInteger();
+            for (let j = 0; j < transactionsSize; j++) {
+                const internalTransaction = stream.readBoolean(stream.readType() || Viewable.Invalid);
+                const type = stream.readInteger(stream.readType() || Viewable.Invalid);
+                if (!type)
+                    throw new TypeError('Field \'type[' + j + ']\' is required');
+                let nonce = null;
+                let signature = null;
+                if (!internalTransaction) {
+                    nonce = stream.readInteger(stream.readType() || Viewable.Invalid);
+                    if (!nonce)
+                        throw new TypeError('Field \'nonce[' + j + ']\' is required');
+                    let signatureValue = stream.readBinaryString(stream.readType() || Viewable.Invalid);
+                    if (!signatureValue)
+                        throw new TypeError('Field \'signature[' + j + ']\' is required');
+                    signature = new algorithm_1.Hashsig(signatureValue.length == algorithm_1.Chain.size.HASHSIG ? signatureValue : Uint8Array.from([...signatureValue, ...new Array(algorithm_1.Chain.size.HASHSIG - signatureValue.length).fill(0)]));
+                }
+                const subschema = { ...typeToSchema(type.toInteger()) };
+                for (let item in schema) {
+                    delete subschema[item];
+                }
+                const subtransaction = SchemaUtil.load(stream, subschema);
+                subtransaction.type = type;
+                subtransaction.asset = new algorithm_1.AssetId(asset.toUint8Array());
+                subtransaction.nonce = nonce;
+                subtransaction.signature = signature;
+                transaction.transactions.push(subtransaction);
+            }
+        }
+        return transaction;
+    }
     static storeArray(stream, data, sized) {
         if (sized)
             stream.writeInteger(data.length);
