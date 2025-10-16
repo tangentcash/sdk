@@ -63,6 +63,7 @@ export type SummaryState = {
         }>;
     };
     receipts: Record<string, {
+        executionIndex: number;
         relativeGasUse: BigNumber;
         relativeGasPaid: BigNumber;
     }>;

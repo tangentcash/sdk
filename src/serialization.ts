@@ -647,7 +647,7 @@ export class SchemaUtil {
                   throw new Error('Function \'getType\' is required');
               }
 
-              const type = subtransaction.schema.type();
+              const type = subtransaction.schema.getType();
               const internalTransaction = subtransaction.args.signature instanceof Hashsig ? subtransaction.args.signature.equals(emptySignature) : true;
               stream.writeBoolean(internalTransaction);
               stream.writeInteger(typeof type == 'string' ? Hashing.hash32(ByteUtil.byteStringToUint8Array(type)) : type);

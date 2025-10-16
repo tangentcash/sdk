@@ -292,9 +292,10 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.Rollup: {
-                    if (event.args.length == 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[2]) || typeof event.args[2] == 'string')) {
-                        const [transactionHash, relativeGasUse, relativeGasPaid] = event.args;
+                    if (event.args.length == 4 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[2]) || typeof event.args[2] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[3]) || typeof event.args[3] == 'string')) {
+                        const [transactionHash, index, relativeGasUse, relativeGasPaid] = event.args;
                         result.receipts[new algorithm_1.Uint256(transactionHash.toString()).toHex()] = {
+                            executionIndex: new bignumber_js_1.default(index).toNumber(),
                             relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()),
                             relativeGasPaid: new bignumber_js_1.default(relativeGasPaid.toString())
                         };
