@@ -626,7 +626,7 @@ export class SchemaUtil {
           let group = groups[assetId];
           if (!group) {
               assets.push(subtransaction.args.asset.toUint256());
-              (group as any)[assetId] = [subtransaction];
+              groups[assetId] = [subtransaction];
           } else {
               group.push(subtransaction);
           }
@@ -645,12 +645,10 @@ export class SchemaUtil {
               const subtransaction = transactions[j];
               if (typeof subtransaction.schema.getType != 'function') {
                   throw new Error('Function \'getType\' is required');
-              } else if (!(subtransaction.args.signature instanceof Hashing)) {
-                  throw new Error('Field \'signature\' is required');
               }
 
               const type = subtransaction.schema.type();
-              const internalTransaction = subtransaction.args.signature.equals(emptySignature);
+              const internalTransaction = subtransaction.args.signature instanceof Hashsig ? subtransaction.args.signature.equals(emptySignature) : true;
               stream.writeBoolean(internalTransaction);
               stream.writeInteger(typeof type == 'string' ? Hashing.hash32(ByteUtil.byteStringToUint8Array(type)) : type);
               if (!internalTransaction) {

@@ -362,8 +362,8 @@ class RPC {
         if (typeof data == 'string') {
             try {
                 if (!data.startsWith('0x')) {
-                    const numeric = new bignumber_js_1.default(data, 10);
-                    if (numeric.toString() == data)
+                    const numeric = new bignumber_js_1.default(data, 10).dp(18);
+                    if (data.startsWith(numeric.toString()))
                         return numeric;
                 }
             }
