@@ -93,8 +93,8 @@ export class Readability {
         .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
         .replace(/([a-z\d])([A-Z])/g, '$1 $2')
         .replace(/_/g, ' ')
-        .trim().trim().toLowerCase();
-    return method[0].toUpperCase() + method.substring(1);
+        .trim().toLowerCase();
+    return method.length > 0 ? method[0].toUpperCase() + method.substring(1) : '';
   }
   static toSubscript(value: string): string {
     let result = '';
