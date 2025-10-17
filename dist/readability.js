@@ -34,7 +34,7 @@ class Readability {
         const token = chainOnly ? null : asset.token?.toUpperCase() || null;
         const chain = asset.chain?.toUpperCase() || 'Unknown';
         if (token != null)
-            return (names_json_1.default[token] || token) + ' on ' + chain;
+            return chain + ' ' + (names_json_1.default[token] || token);
         return names_json_1.default[chain] || chain;
     }
     static toAssetColor(asset) {

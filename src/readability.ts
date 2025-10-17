@@ -41,7 +41,7 @@ export class Readability {
     const token: string | null = chainOnly ? null : asset.token?.toUpperCase() || null;
     const chain: string = asset.chain?.toUpperCase() || 'Unknown';
     if (token != null)
-      return ((Names as Record<string, string>)[token] || token) + ' on ' + chain;
+      return chain + ' ' + ((Names as Record<string, string>)[token] || token);
 
     return (Names as Record<string, string>)[chain] || chain;
   }
