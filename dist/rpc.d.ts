@@ -241,5 +241,4 @@ export declare class RPC {
     static getBlockTipNumber(): Promise<BigNumber | string | null>;
     static getGasPrice(asset: AssetId, percentile?: number): Promise<any | null>;
     static getOptimalTransactionGas(hexMessage: string): Promise<BigNumber | string | null>;
-    static getEstimateTransactionGas(hexMessage: string): Promise<BigNumber | string | null>;
 }

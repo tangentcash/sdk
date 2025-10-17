@@ -1036,7 +1036,4 @@ export class RPC {
   static getOptimalTransactionGas(hexMessage: string): Promise<BigNumber | string | null> {
     return this.fetch('no-cache', 'getoptimaltransactiongas', [hexMessage]);
   }
-  static getEstimateTransactionGas(hexMessage: string): Promise<BigNumber | string | null> {
-    return this.fetch('no-cache', 'getestimatetransactiongas', [hexMessage]);
-  }
 }

@@ -888,9 +888,6 @@ class RPC {
     static getOptimalTransactionGas(hexMessage) {
         return this.fetch('no-cache', 'getoptimaltransactiongas', [hexMessage]);
     }
-    static getEstimateTransactionGas(hexMessage) {
-        return this.fetch('no-cache', 'getestimatetransactiongas', [hexMessage]);
-    }
 }
 exports.RPC = RPC;
 RPC.resolver = null;
