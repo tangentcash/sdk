@@ -65,7 +65,14 @@ class Readability {
         }
     }
     static toTransactionType(type) {
-        return schema_1.Transactions.typenames[type] || 'Non-standard';
+        if (typeof type == 'string')
+            return schema_1.Transactions.typenames[type] || 'Non-standard';
+        for (let name in schema_1.Transactions.typenames) {
+            if (algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(name)) == type) {
+                return schema_1.Transactions.typenames[name];
+            }
+        }
+        return 'Non-standard';
     }
     static toFunctionName(method) {
         let start = method.indexOf(' ');

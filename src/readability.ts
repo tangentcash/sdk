@@ -1,4 +1,4 @@
-import { AssetId } from "./algorithm"; import { Transactions } from "./schema";
+import { AssetId, ByteUtil, Hashing } from "./algorithm"; import { Transactions } from "./schema";
 import Names from './asset/names.json';
 import Colors from './asset/colors.json';
 import BigNumber from "bignumber.js";
@@ -74,8 +74,17 @@ export class Readability {
         return 'Non-standard';
     }
   }
-  static toTransactionType(type: string): string {
-    return Transactions.typenames[type] || 'Non-standard';
+  static toTransactionType(type: string | number): string {
+    if (typeof type == 'string')
+      return Transactions.typenames[type] || 'Non-standard';
+
+    for (let name in Transactions.typenames) {
+      if (Hashing.hash32(ByteUtil.byteStringToUint8Array(name)) == type) {
+        return Transactions.typenames[name];
+      }
+    }
+
+    return 'Non-standard';
   }
   static toFunctionName(method: string): string {
     let start = method.indexOf(' ');
