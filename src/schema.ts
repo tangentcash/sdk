@@ -133,6 +133,12 @@ export namespace Transactions {
     getType() { return DepositoryAccount.typename; }
   }
 
+  export class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
+    static typename: string = 'depository_withdrawal_routing';
+
+    getType() { return DepositoryWithdrawalRouting.typename; }
+  }
+
   export class DepositoryWithdrawal extends Ledger.Transaction {
     static typename: string = 'depository_withdrawal';
     onlyIfNotInQueue: string = 'boolean';
@@ -182,6 +188,7 @@ export namespace Transactions {
     'depository_account': 'Depository address selection',
     'depository_account_finalization': 'Depository address registration',
     'depository_withdrawal': 'Depository withdrawal',
+    'depository_withdrawal_routing': 'Depository withdrawal negotiation',
     'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
     'depository_transaction': 'Depository transaction',
     'depository_adjustment': 'Depository adjustment',

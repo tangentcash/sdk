@@ -385,6 +385,13 @@ export class EventResolver {
           }
           break;
         }
+        case Types.DepositoryWithdrawalRouting: {
+          if (event.args.length == 1 && typeof event.args[0] == 'string') {
+            const [errorMessage] = event.args;
+            result.errors.push(errorMessage);
+          }
+          break;
+        }
         case Types.DepositoryAccount: 
         case Types.DepositoryMigration: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {

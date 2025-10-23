@@ -91,6 +91,10 @@ export declare namespace Transactions {
         routingAddress: string;
         getType(): string;
     }
+    class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
+        static typename: string;
+        getType(): string;
+    }
     class DepositoryWithdrawal extends Ledger.Transaction {
         static typename: string;
         onlyIfNotInQueue: string;

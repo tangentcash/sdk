@@ -167,6 +167,11 @@ var Transactions;
     }
     DepositoryAccount.typename = 'depository_account';
     Transactions.DepositoryAccount = DepositoryAccount;
+    class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
+        getType() { return DepositoryWithdrawalRouting.typename; }
+    }
+    DepositoryWithdrawalRouting.typename = 'depository_withdrawal_routing';
+    Transactions.DepositoryWithdrawalRouting = DepositoryWithdrawalRouting;
     class DepositoryWithdrawal extends Ledger.Transaction {
         constructor() {
             super(...arguments);
@@ -222,6 +227,7 @@ var Transactions;
         'depository_account': 'Depository address selection',
         'depository_account_finalization': 'Depository address registration',
         'depository_withdrawal': 'Depository withdrawal',
+        'depository_withdrawal_routing': 'Depository withdrawal negotiation',
         'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
         'depository_transaction': 'Depository transaction',
         'depository_adjustment': 'Depository adjustment',
