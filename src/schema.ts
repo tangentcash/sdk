@@ -181,18 +181,18 @@ export namespace Transactions {
 
   export const typenames: Record<string, string> = {
     'transfer': 'Transfer',   
-    'upgrade': 'Program creation',
-    'call': 'Program call',
+    'upgrade': 'Create program',
+    'call': 'Call program',
     'rollup': 'Rollup',
-    'validator_adjustment': 'Validator adjustment',
-    'depository_account': 'Depository address selection',
-    'depository_account_finalization': 'Depository address registration',
-    'depository_withdrawal': 'Depository withdrawal',
-    'depository_withdrawal_routing': 'Depository withdrawal negotiation',
-    'depository_withdrawal_finalization': 'Depository withdrawal confirmation',
-    'depository_transaction': 'Depository transaction',
-    'depository_adjustment': 'Depository adjustment',
-    'depository_migration': 'Depository participant migration',
-    'depository_migration_finalization': 'Depository migration confirmation'
+    'validator_adjustment': 'Adjust validator',
+    'depository_account': 'Request dep. address',
+    'depository_account_finalization': 'Register dep. address',
+    'depository_withdrawal': 'Request dep. withdrawal',
+    'depository_withdrawal_routing': 'Register dep. withdrawal',
+    'depository_withdrawal_finalization': 'Send dep. transaction',
+    'depository_transaction': 'Process dep. transaction',
+    'depository_adjustment': 'Adjust depository',
+    'depository_migration': 'Request depository signer migration',
+    'depository_migration_finalization': 'Migrate depository signer'
   };
 }
