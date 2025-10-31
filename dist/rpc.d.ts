@@ -228,13 +228,6 @@ export declare class RPC {
     static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
-    static getMempoolCumulativeConsensus(hash: string): Promise<{
-        branch: string;
-        threshold: BigNumber;
-        progress: BigNumber;
-        committee: BigNumber;
-        reached: boolean;
-    } | null>;
     static getBlockByNumber(number: number, unrolling?: number): Promise<any | null>;
     static getBlockByHash(hash: string, unrolling?: number): Promise<any | null>;
     static getBlockTipNumber(): Promise<BigNumber | string | null>;

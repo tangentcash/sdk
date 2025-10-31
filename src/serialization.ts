@@ -613,6 +613,7 @@ export class SchemaUtil {
 
         object[field] = elements;
       } else {
+        console.log(schema, field, type);
         let optional = type?.indexOf('?') != -1;
         if (optional) {
           let seek = stream.seek;

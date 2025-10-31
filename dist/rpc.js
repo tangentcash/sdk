@@ -869,9 +869,6 @@ class RPC {
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
     }
-    static getMempoolCumulativeConsensus(hash) {
-        return this.fetch('no-cache', 'getmempoolattestation', [hash]);
-    }
     static getBlockByNumber(number, unrolling) {
         return this.fetch('cache', 'getblockbynumber', unrolling != null ? [number, unrolling] : [number]);
     }
