@@ -75,7 +75,7 @@ export type TransactionInput = {
     gasPrice?: string | number | BigNumber;
     gasLimit?: string | number | BigNumber;
     method: {
-        type: Ledger.Transaction | Ledger.DelegationTransaction | Ledger.DelegationTransaction | Ledger.UnknownTransaction;
+        type: Ledger.Transaction | Ledger.Commitment | Ledger.Unknown;
         args: {
             [key: string]: any;
         };

@@ -14,20 +14,12 @@ export declare namespace Ledger {
         gasLimit: string;
         nonce: string;
     }
-    class DelegationTransaction extends Messages.Authentic {
+    class Commitment extends Messages.Authentic {
         asset: string;
-        gasPrice: string;
-        gasLimit: string;
-        nonce: string;
-        manager: string;
-    }
-    class ConsensusTransaction extends Messages.Authentic {
-        asset: string;
-        gasPrice: string;
         gasLimit: string;
         nonce: string;
     }
-    class UnknownTransaction extends Messages.Authentic {
+    class Unknown extends Messages.Authentic {
         asset: string;
         gasPrice: string;
         gasLimit: string;
@@ -86,13 +78,10 @@ export declare namespace Transactions {
         attestationStakes: string[];
         getType(): string;
     }
-    class DepositoryAccount extends Ledger.DelegationTransaction {
+    class DepositoryAccount extends Ledger.Commitment {
         static typename: string;
+        manager: string;
         routingAddress: string;
-        getType(): string;
-    }
-    class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
-        static typename: string;
         getType(): string;
     }
     class DepositoryWithdrawal extends Ledger.Transaction {

@@ -27,24 +27,15 @@ export namespace Ledger {
     nonce: string = 'uint64';
   }
 
-  export class DelegationTransaction extends Messages.Authentic {
+  export class Commitment extends Messages.Authentic {
     asset: string = 'assetid';
-    gasPrice: string = 'decimal';
-    gasLimit: string = 'uint256';
-    nonce: string = 'uint64';
-    manager: string = 'pubkeyhash';
-  }
-
-  export class ConsensusTransaction extends Messages.Authentic {
-    asset: string = 'assetid';
-    gasPrice: string = 'decimal';
     gasLimit: string = 'uint256';
     nonce: string = 'uint64';
   }
 
-  export class UnknownTransaction extends Messages.Authentic {
+  export class Unknown extends Messages.Authentic {
     asset: string = 'assetid';
-    gasPrice: string = 'decimal';
+    gasPrice: string = 'decimal?';
     gasLimit: string = 'uint256';
     nonce: string = 'uint64';
     typeless: string = 'typeless';
@@ -126,17 +117,12 @@ export namespace Transactions {
     getType() { return ValidatorAdjustment.typename; }
   }
 
-  export class DepositoryAccount extends Ledger.DelegationTransaction {
+  export class DepositoryAccount extends Ledger.Commitment {
     static typename: string = 'depository_account';
+    manager: string = 'pubkeyhash';
     routingAddress: string = 'string';
 
     getType() { return DepositoryAccount.typename; }
-  }
-
-  export class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
-    static typename: string = 'depository_withdrawal_routing';
-
-    getType() { return DepositoryWithdrawalRouting.typename; }
   }
 
   export class DepositoryWithdrawal extends Ledger.Transaction {
@@ -185,14 +171,13 @@ export namespace Transactions {
     'call': 'Call program',
     'rollup': 'Rollup',
     'validator_adjustment': 'Adjust validator',
-    'depository_account': 'Request off-chain address',
-    'depository_account_finalization': 'Register off-chain address',
-    'depository_withdrawal': 'Request off-chain withdrawal',
-    'depository_withdrawal_routing': 'Register off-chain withdrawal',
-    'depository_withdrawal_finalization': 'Send off-chain transaction',
-    'depository_transaction': 'Process off-chain transaction',
+    'depository_account': 'Order off-chain address',
+    'depository_account_finalization': 'Issue off-chain address',
+    'depository_withdrawal': 'Order off-chain withdrawal',
+    'depository_withdrawal_finalization': 'Issue off-chain transaction',
+    'depository_attestation': 'Process off-chain transaction',
     'depository_adjustment': 'Adjust depository',
-    'depository_migration': 'Request depository signer migration',
+    'depository_migration': 'Order depository signer migration',
     'depository_migration_finalization': 'Migrate depository signer'
   };
 }

@@ -21,7 +21,6 @@ export declare class Readability {
     static toAssetName(asset: AssetId, chainOnly?: boolean): string;
     static toAssetColor(asset: AssetId): string;
     static toAddressIndex(index?: BigNumber): string;
-    static toTransactionCategory(type: string): string;
     static toTransactionType(type: string | number): string;
     static toFunctionName(method: string): string;
     static toSubscript(value: string): string;

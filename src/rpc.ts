@@ -46,7 +46,7 @@ export type TransactionInput = {
   gasPrice?: string | number | BigNumber;
   gasLimit?: string | number | BigNumber;
   method: {
-    type: Ledger.Transaction | Ledger.DelegationTransaction | Ledger.DelegationTransaction | Ledger.UnknownTransaction,
+    type: Ledger.Transaction | Ledger.Commitment | Ledger.Unknown,
     args: { [key: string]: any }
   }
 }
@@ -382,13 +382,6 @@ export class EventResolver {
               relativeGasUse: new BigNumber(relativeGasUse.toString()),
               relativeGasPaid: new BigNumber(relativeGasPaid.toString())
             };
-          }
-          break;
-        }
-        case Types.DepositoryWithdrawalRouting: {
-          if (event.args.length == 1 && typeof event.args[0] == 'string') {
-            const [errorMessage] = event.args;
-            result.errors.push(errorMessage);
           }
           break;
         }

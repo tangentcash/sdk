@@ -50,20 +50,6 @@ class Readability {
             return 'ANY';
         return (index.eq(0) ? 'ROOT' : 'CHILD') + index.toString();
     }
-    static toTransactionCategory(type) {
-        switch (type) {
-            case 'functional':
-                return 'Functional';
-            case 'delegation':
-                return 'Delegation';
-            case 'consensus':
-                return 'Consensus';
-            case 'attestation':
-                return 'Attestation';
-            default:
-                return 'Non-standard';
-        }
-    }
     static toTransactionType(type) {
         if (typeof type == 'string')
             return schema_1.Transactions.typenames[type] || 'Non-standard';

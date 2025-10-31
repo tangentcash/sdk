@@ -40,39 +40,27 @@ var Ledger;
         }
     }
     Ledger.Transaction = Transaction;
-    class DelegationTransaction extends Messages.Authentic {
+    class Commitment extends Messages.Authentic {
         constructor() {
             super(...arguments);
             this.asset = 'assetid';
-            this.gasPrice = 'decimal';
-            this.gasLimit = 'uint256';
-            this.nonce = 'uint64';
-            this.manager = 'pubkeyhash';
-        }
-    }
-    Ledger.DelegationTransaction = DelegationTransaction;
-    class ConsensusTransaction extends Messages.Authentic {
-        constructor() {
-            super(...arguments);
-            this.asset = 'assetid';
-            this.gasPrice = 'decimal';
             this.gasLimit = 'uint256';
             this.nonce = 'uint64';
         }
     }
-    Ledger.ConsensusTransaction = ConsensusTransaction;
-    class UnknownTransaction extends Messages.Authentic {
+    Ledger.Commitment = Commitment;
+    class Unknown extends Messages.Authentic {
         constructor() {
             super(...arguments);
             this.asset = 'assetid';
-            this.gasPrice = 'decimal';
+            this.gasPrice = 'decimal?';
             this.gasLimit = 'uint256';
             this.nonce = 'uint64';
             this.typeless = 'typeless';
             this.getType = null;
         }
     }
-    Ledger.UnknownTransaction = UnknownTransaction;
+    Ledger.Unknown = Unknown;
 })(Ledger || (exports.Ledger = Ledger = {}));
 var States;
 (function (States) {
@@ -158,20 +146,16 @@ var Transactions;
     }
     ValidatorAdjustment.typename = 'validator_adjustment';
     Transactions.ValidatorAdjustment = ValidatorAdjustment;
-    class DepositoryAccount extends Ledger.DelegationTransaction {
+    class DepositoryAccount extends Ledger.Commitment {
         constructor() {
             super(...arguments);
+            this.manager = 'pubkeyhash';
             this.routingAddress = 'string';
         }
         getType() { return DepositoryAccount.typename; }
     }
     DepositoryAccount.typename = 'depository_account';
     Transactions.DepositoryAccount = DepositoryAccount;
-    class DepositoryWithdrawalRouting extends Ledger.DelegationTransaction {
-        getType() { return DepositoryWithdrawalRouting.typename; }
-    }
-    DepositoryWithdrawalRouting.typename = 'depository_withdrawal_routing';
-    Transactions.DepositoryWithdrawalRouting = DepositoryWithdrawalRouting;
     class DepositoryWithdrawal extends Ledger.Transaction {
         constructor() {
             super(...arguments);
@@ -224,14 +208,13 @@ var Transactions;
         'call': 'Call program',
         'rollup': 'Rollup',
         'validator_adjustment': 'Adjust validator',
-        'depository_account': 'Request off-chain address',
-        'depository_account_finalization': 'Register off-chain address',
-        'depository_withdrawal': 'Request off-chain withdrawal',
-        'depository_withdrawal_routing': 'Register off-chain withdrawal',
-        'depository_withdrawal_finalization': 'Send off-chain transaction',
-        'depository_transaction': 'Process off-chain transaction',
+        'depository_account': 'Order off-chain address',
+        'depository_account_finalization': 'Issue off-chain address',
+        'depository_withdrawal': 'Order off-chain withdrawal',
+        'depository_withdrawal_finalization': 'Issue off-chain transaction',
+        'depository_attestation': 'Process off-chain transaction',
         'depository_adjustment': 'Adjust depository',
-        'depository_migration': 'Request depository signer migration',
+        'depository_migration': 'Order depository signer migration',
         'depository_migration_finalization': 'Migrate depository signer'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

@@ -462,7 +462,11 @@ class SchemaUtil {
                 }
             }
             else {
-                write(field, type, value);
+                let optional = type.includes('?');
+                if (optional && value !== undefined)
+                    write(field, type.replace('?', ''), value);
+                else if (!optional)
+                    write(field, type, value);
             }
         }
     }
@@ -558,7 +562,19 @@ class SchemaUtil {
                 object[field] = elements;
             }
             else {
-                object[field] = read(field, type);
+                let optional = type.includes('?');
+                if (optional) {
+                    let seek = stream.seek;
+                    try {
+                        object[field] = read(field, type.replace('?', ''));
+                    }
+                    catch {
+                        stream.seek = seek;
+                    }
+                }
+                else {
+                    object[field] = read(field, type);
+                }
             }
         }
         return object;

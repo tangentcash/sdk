@@ -8,7 +8,6 @@ export class Types {
   static WitnessAccount = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.WitnessAccount.typename));
   static WitnessTransaction = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.WitnessTransaction.typename));
   static Rollup = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Rollup.typename));
-  static DepositoryWithdrawalRouting = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.DepositoryWithdrawalRouting.typename));
   static DepositoryAccount = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.DepositoryAccount.typename));
   static DepositoryMigration = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.DepositoryMigration.typename));
 }

@@ -302,13 +302,6 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.DepositoryWithdrawalRouting: {
-                    if (event.args.length == 1 && typeof event.args[0] == 'string') {
-                        const [errorMessage] = event.args;
-                        result.errors.push(errorMessage);
-                    }
-                    break;
-                }
                 case types_1.Types.DepositoryAccount:
                 case types_1.Types.DepositoryMigration: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
