@@ -932,6 +932,9 @@ export class RPC {
   static decodeTransaction(hexMessage: string): Promise<any> {
     return this.fetch('cache', 'decodetransaction', [hexMessage]);
   }
+  static simulateTransaction(hexMessage: string): Promise<BigNumber | string | null> {
+    return this.fetch('no-cache', 'simulatetransaction', [hexMessage]);
+  }
   static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null> {
     return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
   }
@@ -1028,8 +1031,5 @@ export class RPC {
   }
   static getGasPrice(asset: AssetId, percentile?: number): Promise<any | null> {
     return this.fetch('no-cache', 'getgasprice', percentile != null ? [asset.handle, percentile] : [asset.handle]);
-  }
-  static getOptimalTransactionGas(hexMessage: string): Promise<BigNumber | string | null> {
-    return this.fetch('no-cache', 'getoptimaltransactiongas', [hexMessage]);
   }
 }

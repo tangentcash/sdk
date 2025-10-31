@@ -784,6 +784,9 @@ class RPC {
     static decodeTransaction(hexMessage) {
         return this.fetch('cache', 'decodetransaction', [hexMessage]);
     }
+    static simulateTransaction(hexMessage) {
+        return this.fetch('no-cache', 'simulatetransaction', [hexMessage]);
+    }
     static submitTransaction(hexMessage, validate) {
         return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
     }
@@ -880,9 +883,6 @@ class RPC {
     }
     static getGasPrice(asset, percentile) {
         return this.fetch('no-cache', 'getgasprice', percentile != null ? [asset.handle, percentile] : [asset.handle]);
-    }
-    static getOptimalTransactionGas(hexMessage) {
-        return this.fetch('no-cache', 'getoptimaltransactiongas', [hexMessage]);
     }
 }
 exports.RPC = RPC;
