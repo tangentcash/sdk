@@ -36,7 +36,7 @@ export type SummaryState = {
     accounts: Record<string, { asset: AssetId, purpose: string, aliases: string[] }>
     transactions: Record<string, { asset: AssetId, transactionIds: string[] }>
   },
-  receipts: Record<string, { executionIndex: number, relativeGasUse: BigNumber, relativeGasPaid: BigNumber }>,
+  receipts: Record<string, { executionIndex: number, relativeGasUse: BigNumber }>,
   errors: string[]
 };
 
@@ -375,12 +375,11 @@ export class EventResolver {
           break;
         }
         case Types.Rollup: {
-          if (event.args.length == 4 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (BigNumber.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (BigNumber.isBigNumber(event.args[2]) || typeof event.args[2] == 'string') && (BigNumber.isBigNumber(event.args[3]) || typeof event.args[3] == 'string')) {
-            const [transactionHash, index, relativeGasUse, relativeGasPaid] = event.args;
+          if (event.args.length == 3 && (BigNumber.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (BigNumber.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (BigNumber.isBigNumber(event.args[2]) || typeof event.args[2] == 'string')) {
+            const [transactionHash, index, relativeGasUse] = event.args;
             result.receipts[new Uint256(transactionHash.toString()).toHex()] = {
               executionIndex: new BigNumber(index).toNumber(),
               relativeGasUse: new BigNumber(relativeGasUse.toString()),
-              relativeGasPaid: new BigNumber(relativeGasPaid.toString())
             };
           }
           break;
