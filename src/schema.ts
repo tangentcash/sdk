@@ -146,10 +146,6 @@ export namespace Transactions {
     securityLevel: string = 'uint8';
     acceptsAccountRequests: string = 'boolean';
     acceptsWithdrawalRequests: string = 'boolean';
-    whitelist: string[] = [
-      'address', 'string',
-      'symbol', 'string',
-    ];
 
     getType() { return DepositoryAdjustment.typename; }
   }
