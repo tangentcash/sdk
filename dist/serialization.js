@@ -462,8 +462,7 @@ class SchemaUtil {
                 }
             }
             else {
-                console.log(schema, field, type);
-                let optional = type?.indexOf('?') != -1;
+                let optional = typeof type == 'string' && type?.indexOf('?') != -1;
                 if (optional && value !== undefined)
                     write(field, type?.replace('?', ''), value);
                 else if (!optional)
@@ -563,7 +562,7 @@ class SchemaUtil {
                 object[field] = elements;
             }
             else {
-                let optional = type?.indexOf('?') != -1;
+                let optional = typeof type == 'string' && type?.indexOf('?') != -1;
                 if (optional) {
                     let seek = stream.seek;
                     try {
