@@ -510,9 +510,9 @@ export class SchemaUtil {
           }
         }
       } else {
-        let optional = type.includes('?');
+        let optional = type?.indexOf('?') != -1;
         if (optional && value !== undefined)
-          write(field, type.replace('?', ''), value);
+          write(field, type?.replace('?', ''), value);
         else if (!optional)
           write(field, type, value);
       }
@@ -613,11 +613,11 @@ export class SchemaUtil {
 
         object[field] = elements;
       } else {
-        let optional = type.includes('?');
+        let optional = type?.indexOf('?') != -1;
         if (optional) {
           let seek = stream.seek;
           try {
-            object[field] = read(field, type.replace('?', ''));
+            object[field] = read(field, type?.replace('?', ''));
           } catch {
             stream.seek = seek;
           }
