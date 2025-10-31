@@ -932,7 +932,7 @@ export class RPC {
   static decodeTransaction(hexMessage: string): Promise<any> {
     return this.fetch('cache', 'decodetransaction', [hexMessage]);
   }
-  static simulateTransaction(hexMessage: string): Promise<BigNumber | string | null> {
+  static simulateTransaction(hexMessage: string): Promise<any | null> {
     return this.fetch('no-cache', 'simulatetransaction', [hexMessage]);
   }
   static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null> {
