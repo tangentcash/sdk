@@ -204,13 +204,13 @@ var Transactions;
         'call': 'Call program',
         'rollup': 'Rollup',
         'validator_adjustment': 'Adjust validator',
-        'depository_account': 'Order off-chain address',
-        'depository_account_finalization': 'Issue off-chain address',
-        'depository_withdrawal': 'Order off-chain withdrawal',
-        'depository_withdrawal_finalization': 'Issue off-chain transaction',
-        'depository_attestation': 'Process off-chain transaction',
-        'depository_adjustment': 'Adjust depository',
-        'depository_migration': 'Order depository signer migration',
-        'depository_migration_finalization': 'Migrate depository signer'
+        'depository_account': 'Order bridge address',
+        'depository_account_finalization': 'Issue bridge address',
+        'depository_withdrawal': 'Order bridge withdrawal',
+        'depository_withdrawal_finalization': 'Issue bridge transaction',
+        'depository_attestation': 'Process bridge transaction',
+        'depository_adjustment': 'Adjust bridge',
+        'depository_migration': 'Order bridge signer migration',
+        'depository_migration_finalization': 'Migrate bridge signer'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));
