@@ -83,6 +83,7 @@ export type TransactionInput = {
 export type TransactionOutput = {
     hash: string;
     data: string;
+    receipt: any;
     body: {
         signature: Hashsig;
         asset: AssetId;
