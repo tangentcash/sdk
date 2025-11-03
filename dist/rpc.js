@@ -135,6 +135,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.AccountBalance: {
+                    console.log(event.args);
                     if (event.args.length >= 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && isNumber(event.args[3])) {
                         const [assetId, from, to, value] = event.args;
                         const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
