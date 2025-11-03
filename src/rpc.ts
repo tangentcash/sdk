@@ -211,7 +211,7 @@ export class EventResolver {
             const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
             const toAddress = Signing.encodeAddress(new Pubkeyhash(to)) || to;
             const asset = new AssetId(assetId);
-            console.log(assetId, from, to, value);
+            console.log(asset, fromAddress, toAddress, value.toString());
             if (!asset.handle)
               break;
 
