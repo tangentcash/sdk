@@ -140,7 +140,6 @@ class EventResolver {
                         const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
                         const toAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(to)) || to;
                         const asset = new algorithm_1.AssetId(assetId);
-                        console.log(asset, fromAddress, toAddress, value.toString());
                         if (!asset.handle)
                             break;
                         if (!result.account.balances[fromAddress])
@@ -160,6 +159,7 @@ class EventResolver {
                         const [assetId, owner, supply, reserve] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         const asset = new algorithm_1.AssetId(assetId);
+                        console.log(assetId, owner, supply, reserve);
                         if (!asset.handle)
                             break;
                         if (!result.account.balances[ownerAddress])

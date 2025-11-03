@@ -211,7 +211,6 @@ export class EventResolver {
             const fromAddress = Signing.encodeAddress(new Pubkeyhash(from)) || from;
             const toAddress = Signing.encodeAddress(new Pubkeyhash(to)) || to;
             const asset = new AssetId(assetId);
-            console.log(asset, fromAddress, toAddress, value.toString());
             if (!asset.handle)
               break;
 
@@ -233,6 +232,7 @@ export class EventResolver {
             const [assetId, owner, supply, reserve] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             const asset = new AssetId(assetId);
+            console.log(assetId, owner, supply, reserve);
             if (!asset.handle)
               break;
             
