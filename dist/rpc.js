@@ -124,6 +124,7 @@ class EventResolver {
         };
         if (!events || !Array.isArray(events))
             return result;
+        const isNumber = (v) => bignumber_js_1.default.isBigNumber(v) || new bignumber_js_1.default(v).isFinite();
         for (let i = 0; i < events.length; i++) {
             const event = events[i];
             switch (event.event.toNumber()) {
@@ -134,7 +135,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.AccountBalance: {
-                    if (event.args.length >= 4 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && bignumber_js_1.default.isBigNumber(event.args[3])) {
+                    if (event.args.length >= 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && typeof event.args[2] == 'string' && isNumber(event.args[3])) {
                         const [assetId, from, to, value] = event.args;
                         const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
                         const toAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(to)) || to;
@@ -154,7 +155,7 @@ class EventResolver {
                         const toState = result.account.balances[toAddress][asset.handle];
                         toState.supply = toState.supply.plus(value);
                     }
-                    else if (event.args.length >= 4 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && bignumber_js_1.default.isBigNumber(event.args[2]) && bignumber_js_1.default.isBigNumber(event.args[3])) {
+                    else if (event.args.length >= 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2]) && isNumber(event.args[3])) {
                         const [assetId, owner, supply, reserve] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         const asset = new algorithm_1.AssetId(assetId);
@@ -168,7 +169,7 @@ class EventResolver {
                         ownerState.supply = ownerState.supply.plus(supply);
                         ownerState.reserve = ownerState.reserve.plus(reserve);
                     }
-                    else if (event.args.length >= 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && bignumber_js_1.default.isBigNumber(event.args[2])) {
+                    else if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, fee] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         const asset = new algorithm_1.AssetId(assetId);
@@ -190,7 +191,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.DepositoryBalance: {
-                    if (event.args.length >= 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && bignumber_js_1.default.isBigNumber(event.args[2])) {
+                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, value] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
@@ -206,7 +207,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.DepositoryPolicy: {
-                    if (event.args.length >= 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && bignumber_js_1.default.isBigNumber(event.args[2])) {
+                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, type] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
@@ -214,7 +215,7 @@ class EventResolver {
                             break;
                         switch (type.toNumber()) {
                             case 0: {
-                                if (event.args.length >= 4 && bignumber_js_1.default.isBigNumber(event.args[3])) {
+                                if (event.args.length >= 4 && isNumber(event.args[3])) {
                                     const newAccounts = event.args[3];
                                     if (!result.depository.accounts[ownerAddress])
                                         result.depository.accounts[ownerAddress] = {};
@@ -225,16 +226,16 @@ class EventResolver {
                                 break;
                             }
                             case 1: {
-                                if (event.args.length >= 4 && (bignumber_js_1.default.isBigNumber(event.args[3]) || typeof event.args[3] == 'string')) {
+                                if (event.args.length >= 4 && (isNumber(event.args[3]) || typeof event.args[3] == 'string')) {
                                     const transactionHash = event.args[3];
                                     if (!result.depository.queues[ownerAddress])
                                         result.depository.queues[ownerAddress] = {};
-                                    result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: bignumber_js_1.default.isBigNumber(transactionHash) ? null : transactionHash };
+                                    result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
                                 }
                                 break;
                             }
                             case 2: {
-                                if (event.args.length >= 6 && bignumber_js_1.default.isBigNumber(event.args[3]) && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
+                                if (event.args.length >= 6 && isNumber(event.args[3]) && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
                                     const [securityLevel, acceptsAccountRequests, acceptsWithdrawalRequests] = event.args.slice(3, 6);
                                     if (!result.depository.policies[ownerAddress])
                                         result.depository.policies[ownerAddress] = {};
@@ -249,7 +250,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.WitnessAccount: {
-                    if (event.args.length >= 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && bignumber_js_1.default.isBigNumber(event.args[1])) {
+                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && isNumber(event.args[1])) {
                         const [assetId, addressPurpose, addressAliases] = [event.args[0], event.args[1], event.args.slice(2)];
                         const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
@@ -279,7 +280,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.WitnessTransaction: {
-                    if (event.args.length == 2 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
+                    if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
                         const [assetId, transactionId] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         if (!asset.handle)
@@ -292,7 +293,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.Rollup: {
-                    if (event.args.length == 3 && (bignumber_js_1.default.isBigNumber(event.args[0]) || typeof event.args[0] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[1]) || typeof event.args[1] == 'string') && (bignumber_js_1.default.isBigNumber(event.args[2]) || typeof event.args[2] == 'string')) {
+                    if (event.args.length == 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && (isNumber(event.args[2]) || typeof event.args[2] == 'string')) {
                         const [transactionHash, index, relativeGasUse] = event.args;
                         result.receipts[new algorithm_1.Uint256(transactionHash.toString()).toHex()] = {
                             executionIndex: new bignumber_js_1.default(index).toNumber(),
