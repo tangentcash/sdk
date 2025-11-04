@@ -89,6 +89,7 @@ export type EventData = {
     transactionId: string;
 } | {
     type: EventType.RollupReceipt;
+    transactionHash: string;
     executionIndex: BigNumber;
     relativeGasUse: BigNumber;
 } | {

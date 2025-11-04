@@ -327,7 +327,7 @@ class EventResolver {
                             executionIndex: new bignumber_js_1.default(index).toNumber(),
                             relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()),
                         };
-                        result.events.push({ type: EventType.RollupReceipt, executionIndex: new bignumber_js_1.default(index), relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()) });
+                        result.events.push({ type: EventType.RollupReceipt, transactionHash: transactionHash, executionIndex: new bignumber_js_1.default(index), relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()) });
                     }
                     break;
                 }

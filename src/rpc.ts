@@ -92,6 +92,7 @@ export type EventData = {
   transactionId: string
 } | {
   type: EventType.RollupReceipt,
+  transactionHash: string,
   executionIndex: BigNumber,
   relativeGasUse: BigNumber
 } | {
@@ -476,7 +477,7 @@ export class EventResolver {
               executionIndex: new BigNumber(index).toNumber(),
               relativeGasUse: new BigNumber(relativeGasUse.toString()),
             };
-            result.events.push({ type: EventType.RollupReceipt, executionIndex: new BigNumber(index), relativeGasUse: new BigNumber(relativeGasUse.toString()) });
+            result.events.push({ type: EventType.RollupReceipt, transactionHash: transactionHash, executionIndex: new BigNumber(index), relativeGasUse: new BigNumber(relativeGasUse.toString()) });
           }
           break;
         }
