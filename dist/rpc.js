@@ -373,8 +373,7 @@ class EventResolver {
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
                 !Object.keys(state.receipts).length &&
-                !state.errors.length &&
-                !state.events.length;
+                !state.errors.length;
         }
         else {
             return !Object.keys(state.account.balances).length &&
@@ -386,8 +385,7 @@ class EventResolver {
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
                 !Object.keys(state.receipts).length &&
-                !state.errors.length &&
-                !state.events.length;
+                !state.errors.length;
         }
     }
 }
