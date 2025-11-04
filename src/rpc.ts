@@ -63,13 +63,18 @@ export type EventData = {
   value: BigNumber
 } | {
   type: EventType.DepositoryAccount,
+  asset: AssetId,
+  owner: string,
   accounts: BigNumber
 } | {
   type: EventType.DepositoryQueue,
+  asset: AssetId,
+  owner: string,
   transactionHash: string
 } | {
   type: EventType.DepositoryPolicy,
   asset: AssetId,
+  owner: string,
   securityLevel: BigNumber,
   acceptsAccountRequests: boolean,
   acceptsWithdrawalRequests: boolean
@@ -383,7 +388,7 @@ export class EventResolver {
                   if (!result.depository.accounts[ownerAddress][asset.handle])
                     result.depository.accounts[ownerAddress][asset.handle] = { asset: asset, newAccounts: 0 };
                   result.depository.accounts[ownerAddress][asset.handle].newAccounts += newAccounts.toNumber();
-                  result.events.push({ type: EventType.DepositoryAccount, accounts: newAccounts });
+                  result.events.push({ type: EventType.DepositoryAccount, asset: asset, owner: ownerAddress, accounts: newAccounts });
                 }
                 break;
               }
@@ -393,7 +398,7 @@ export class EventResolver {
                   if (!result.depository.queues[ownerAddress])
                     result.depository.queues[ownerAddress] = { };
                   result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
-                  result.events.push({ type: EventType.DepositoryQueue, transactionHash: transactionHash });
+                  result.events.push({ type: EventType.DepositoryQueue, asset: asset, owner: ownerAddress, transactionHash: transactionHash });
                 }
                 break;
               }
@@ -403,7 +408,7 @@ export class EventResolver {
                   if (!result.depository.policies[ownerAddress])
                     result.depository.policies[ownerAddress] = { };
                   result.depository.policies[ownerAddress][asset.handle] = { asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests };
-                  result.events.push({ type: EventType.DepositoryPolicy, asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
+                  result.events.push({ type: EventType.DepositoryPolicy, asset: asset, owner: ownerAddress, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
                 }
                 break;
               }

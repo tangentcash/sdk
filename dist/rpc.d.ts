@@ -60,13 +60,18 @@ export type EventData = {
     value: BigNumber;
 } | {
     type: EventType.DepositoryAccount;
+    asset: AssetId;
+    owner: string;
     accounts: BigNumber;
 } | {
     type: EventType.DepositoryQueue;
+    asset: AssetId;
+    owner: string;
     transactionHash: string;
 } | {
     type: EventType.DepositoryPolicy;
     asset: AssetId;
+    owner: string;
     securityLevel: BigNumber;
     acceptsAccountRequests: boolean;
     acceptsWithdrawalRequests: boolean;
