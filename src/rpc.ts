@@ -20,6 +20,79 @@ export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 
+export enum EventType {
+  Error,
+  Transfer,
+  TransferIsolated,
+  TransferFee,
+  DepositoryTransfer,
+  DepositoryAccount,
+  DepositoryQueue,
+  DepositoryPolicy,
+  DepositoryParticipant,
+  WitnessAccount,
+  WitnessTransaction,
+  RollupReceipt,
+  Unknown
+}
+
+export type EventData = {
+  type: EventType.Error,
+  message: string
+} | {
+  type: EventType.Transfer,
+  asset: AssetId,
+  from: string,
+  to: string,
+  value: BigNumber
+} | {
+  type: EventType.TransferIsolated,
+  asset: AssetId,
+  owner: string,
+  supply: BigNumber,
+  reserve: BigNumber
+} | {
+  type: EventType.TransferFee,
+  asset: AssetId,
+  owner: string,
+  fee: BigNumber
+} | {
+  type: EventType.DepositoryTransfer,
+  asset: AssetId,
+  owner: string,
+  value: BigNumber
+} | {
+  type: EventType.DepositoryAccount,
+  accounts: BigNumber
+} | {
+  type: EventType.DepositoryQueue,
+  transactionHash: string
+} | {
+  type: EventType.DepositoryPolicy,
+  asset: AssetId,
+  securityLevel: BigNumber,
+  acceptsAccountRequests: boolean,
+  acceptsWithdrawalRequests: boolean
+} | {
+  type: EventType.DepositoryParticipant,
+  owner: string
+} | {
+  type: EventType.WitnessAccount,
+  purpose: 'routing' | 'depository' | 'witness',
+  addresses: string[]
+} | {
+  type: EventType.WitnessTransaction,
+  transactionId: string
+} | {
+  type: EventType.RollupReceipt,
+  executionIndex: BigNumber,
+  relativeGasUse: BigNumber
+} | {
+  type: EventType.Unknown,
+  event: BigNumber,
+  args: any[]
+}
+
 export type SummaryState = {
   account: {
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber, reserve: BigNumber }>>,
@@ -33,11 +106,12 @@ export type SummaryState = {
     participants: Set<string>
   },
   witness: {
-    accounts: Record<string, { asset: AssetId, purpose: string, aliases: string[] }>
+    accounts: Record<string, { asset: AssetId, purpose: 'routing' | 'depository' | 'witness', aliases: string[] }>
     transactions: Record<string, { asset: AssetId, transactionIds: string[] }>
   },
   receipts: Record<string, { executionIndex: number, relativeGasUse: BigNumber }>,
-  errors: string[]
+  errors: string[],
+  events: EventData[]
 };
 
 export type TransactionInput = {
@@ -190,7 +264,8 @@ export class EventResolver {
         transactions: { }
       },
       receipts: { },
-      errors: []
+      errors: [],
+      events: []
     };
     if (!events || !Array.isArray(events))
       return result;
@@ -198,10 +273,12 @@ export class EventResolver {
     const isNumber = (v: any) => BigNumber.isBigNumber(v) || new BigNumber(v).isFinite();
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
+      const size = result.events.length;
       switch (event.event.toNumber()) {
         case 0: {
           if (event.args.length >= 1 && typeof event.args[0] == 'string') {
             result.errors.push(event.args[0]);
+            result.events.push({ type: EventType.Error, message: event.args[0] });
           }
           break;
         }
@@ -228,11 +305,11 @@ export class EventResolver {
             
             const toState = result.account.balances[toAddress][asset.handle];
             toState.supply = toState.supply.plus(value);
+            result.events.push({ type: EventType.Transfer, asset: asset, from: fromAddress, to: toAddress, value: new BigNumber(value) });
           } else if (event.args.length >= 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2]) && isNumber(event.args[3])) {
             const [assetId, owner, supply, reserve] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             const asset = new AssetId(assetId);
-            console.log(assetId, owner, supply, reserve);
             if (!asset.handle)
               break;
             
@@ -244,6 +321,7 @@ export class EventResolver {
             const ownerState = result.account.balances[ownerAddress][asset.handle];
             ownerState.supply = ownerState.supply.plus(supply)
             ownerState.reserve = ownerState.reserve.plus(reserve);
+            result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: owner, supply: new BigNumber(supply), reserve: new BigNumber(reserve) });
           } else if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
             const [assetId, owner, fee] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
@@ -265,6 +343,7 @@ export class EventResolver {
             const feeState = result.account.fees[ownerAddress][asset.handle];
             balanceState.supply = balanceState.supply.plus(fee);
             feeState.fee = feeState.fee.plus(fee);
+            result.events.push({ type: EventType.TransferFee, asset: asset, owner: owner, fee: new BigNumber(fee) });
           }
           break;
         }
@@ -283,6 +362,7 @@ export class EventResolver {
             
             const state = result.depository.balances[ownerAddress][asset.handle];
             state.supply = state.supply.plus(value);
+            result.events.push({ type: EventType.DepositoryTransfer, asset: asset, owner: owner, value: new BigNumber(value) });
           }
           break;
         }
@@ -303,6 +383,7 @@ export class EventResolver {
                   if (!result.depository.accounts[ownerAddress][asset.handle])
                     result.depository.accounts[ownerAddress][asset.handle] = { asset: asset, newAccounts: 0 };
                   result.depository.accounts[ownerAddress][asset.handle].newAccounts += newAccounts.toNumber();
+                  result.events.push({ type: EventType.DepositoryAccount, accounts: newAccounts });
                 }
                 break;
               }
@@ -312,6 +393,7 @@ export class EventResolver {
                   if (!result.depository.queues[ownerAddress])
                     result.depository.queues[ownerAddress] = { };
                   result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
+                  result.events.push({ type: EventType.DepositoryQueue, transactionHash: transactionHash });
                 }
                 break;
               }
@@ -321,6 +403,7 @@ export class EventResolver {
                   if (!result.depository.policies[ownerAddress])
                     result.depository.policies[ownerAddress] = { };
                   result.depository.policies[ownerAddress][asset.handle] = { asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests };
+                  result.events.push({ type: EventType.DepositoryPolicy, asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
                 }
                 break;
               }
@@ -337,7 +420,7 @@ export class EventResolver {
             if (!asset.handle)
               break;
             
-            let purpose: string;
+            let purpose: any;
             switch (addressPurpose.toNumber()) {
               case 1:
                 purpose = 'routing';
@@ -360,6 +443,7 @@ export class EventResolver {
               if (typeof addressAliases[i] == 'string')
                 addressState.aliases.push(addressAliases[i]);
             }
+            result.events.push({ type: EventType.WitnessAccount, purpose: purpose, addresses: addressState.aliases });
           }
           break;
         }
@@ -374,6 +458,7 @@ export class EventResolver {
               result.witness.transactions[asset.handle].transactionIds.push(transactionId);
             else
               result.witness.transactions[asset.handle] = { asset: asset, transactionIds: [transactionId] };
+            result.events.push({ type: EventType.WitnessTransaction, transactionId: transactionId });
           }
           break;
         }
@@ -384,6 +469,7 @@ export class EventResolver {
               executionIndex: new BigNumber(index).toNumber(),
               relativeGasUse: new BigNumber(relativeGasUse.toString()),
             };
+            result.events.push({ type: EventType.RollupReceipt, executionIndex: new BigNumber(index), relativeGasUse: new BigNumber(relativeGasUse.toString()) });
           }
           break;
         }
@@ -393,12 +479,15 @@ export class EventResolver {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             result.depository.participants.add(ownerAddress);
+            result.events.push({ type: EventType.DepositoryParticipant, owner: ownerAddress });
           }
           break;
         }
         default:
           break;
       }
+      if (size == result.events.length)
+        result.events.push({ type: EventType.Unknown, event: event.event, args: event.args });
     }
 
     return result;

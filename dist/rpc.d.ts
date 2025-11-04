@@ -18,6 +18,77 @@ export type PropsLoad = () => InterfaceProps | null;
 export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
+export declare enum EventType {
+    Error = 0,
+    Transfer = 1,
+    TransferIsolated = 2,
+    TransferFee = 3,
+    DepositoryTransfer = 4,
+    DepositoryAccount = 5,
+    DepositoryQueue = 6,
+    DepositoryPolicy = 7,
+    DepositoryParticipant = 8,
+    WitnessAccount = 9,
+    WitnessTransaction = 10,
+    RollupReceipt = 11,
+    Unknown = 12
+}
+export type EventData = {
+    type: EventType.Error;
+    message: string;
+} | {
+    type: EventType.Transfer;
+    asset: AssetId;
+    from: string;
+    to: string;
+    value: BigNumber;
+} | {
+    type: EventType.TransferIsolated;
+    asset: AssetId;
+    owner: string;
+    supply: BigNumber;
+    reserve: BigNumber;
+} | {
+    type: EventType.TransferFee;
+    asset: AssetId;
+    owner: string;
+    fee: BigNumber;
+} | {
+    type: EventType.DepositoryTransfer;
+    asset: AssetId;
+    owner: string;
+    value: BigNumber;
+} | {
+    type: EventType.DepositoryAccount;
+    accounts: BigNumber;
+} | {
+    type: EventType.DepositoryQueue;
+    transactionHash: string;
+} | {
+    type: EventType.DepositoryPolicy;
+    asset: AssetId;
+    securityLevel: BigNumber;
+    acceptsAccountRequests: boolean;
+    acceptsWithdrawalRequests: boolean;
+} | {
+    type: EventType.DepositoryParticipant;
+    owner: string;
+} | {
+    type: EventType.WitnessAccount;
+    purpose: 'routing' | 'depository' | 'witness';
+    addresses: string[];
+} | {
+    type: EventType.WitnessTransaction;
+    transactionId: string;
+} | {
+    type: EventType.RollupReceipt;
+    executionIndex: BigNumber;
+    relativeGasUse: BigNumber;
+} | {
+    type: EventType.Unknown;
+    event: BigNumber;
+    args: any[];
+};
 export type SummaryState = {
     account: {
         balances: Record<string, Record<string, {
@@ -54,7 +125,7 @@ export type SummaryState = {
     witness: {
         accounts: Record<string, {
             asset: AssetId;
-            purpose: string;
+            purpose: 'routing' | 'depository' | 'witness';
             aliases: string[];
         }>;
         transactions: Record<string, {
@@ -67,6 +138,7 @@ export type SummaryState = {
         relativeGasUse: BigNumber;
     }>;
     errors: string[];
+    events: EventData[];
 };
 export type TransactionInput = {
     asset: AssetId;
