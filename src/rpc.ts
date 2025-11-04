@@ -88,6 +88,7 @@ export type EventData = {
   addresses: string[]
 } | {
   type: EventType.WitnessTransaction,
+  asset: AssetId,
   transactionId: string
 } | {
   type: EventType.RollupReceipt,
@@ -464,7 +465,7 @@ export class EventResolver {
               result.witness.transactions[asset.handle].transactionIds.push(transactionId);
             else
               result.witness.transactions[asset.handle] = { asset: asset, transactionIds: [transactionId] };
-            result.events.push({ type: EventType.WitnessTransaction, transactionId: transactionId });
+            result.events.push({ type: EventType.WitnessTransaction, asset: asset, transactionId: transactionId });
           }
           break;
         }

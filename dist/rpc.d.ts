@@ -85,6 +85,7 @@ export type EventData = {
     addresses: string[];
 } | {
     type: EventType.WitnessTransaction;
+    asset: AssetId;
     transactionId: string;
 } | {
     type: EventType.RollupReceipt;
