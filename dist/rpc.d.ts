@@ -80,6 +80,7 @@ export type EventData = {
     owner: string;
 } | {
     type: EventType.WitnessAccount;
+    asset: AssetId;
     purpose: 'routing' | 'depository' | 'witness';
     addresses: string[];
 } | {

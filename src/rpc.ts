@@ -83,6 +83,7 @@ export type EventData = {
   owner: string
 } | {
   type: EventType.WitnessAccount,
+  asset: AssetId,
   purpose: 'routing' | 'depository' | 'witness',
   addresses: string[]
 } | {
@@ -448,7 +449,7 @@ export class EventResolver {
               if (typeof addressAliases[i] == 'string')
                 addressState.aliases.push(addressAliases[i]);
             }
-            result.events.push({ type: EventType.WitnessAccount, purpose: purpose, addresses: addressState.aliases });
+            result.events.push({ type: EventType.WitnessAccount, asset: asset, purpose: purpose, addresses: addressState.aliases });
           }
           break;
         }
