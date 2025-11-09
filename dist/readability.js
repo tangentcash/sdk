@@ -7,8 +7,7 @@ exports.Readability = void 0;
 exports.lerp = lerp;
 const algorithm_1 = require("./algorithm");
 const schema_1 = require("./schema");
-const names_json_1 = __importDefault(require("./asset/names.json"));
-const colors_json_1 = __importDefault(require("./asset/colors.json"));
+const assets_json_1 = __importDefault(require("./assets.json"));
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 function lerp(a, b, t) {
     return a * (1 - t) + b * t;
@@ -17,7 +16,7 @@ class Readability {
     static toAssetQuery(asset) {
         const token = asset.token?.toUpperCase() || null;
         const chain = asset.chain?.toUpperCase() || 'Unknown';
-        const name = names_json_1.default[token || chain];
+        const name = assets_json_1.default[token || chain];
         return name ? name + ' ' + (token || chain) : (token || chain);
     }
     static toAssetSymbol(asset) {
@@ -34,16 +33,8 @@ class Readability {
         const token = chainOnly ? null : asset.token?.toUpperCase() || null;
         const chain = asset.chain?.toUpperCase() || 'Unknown';
         if (token != null)
-            return chain + ' ' + (names_json_1.default[token] || token);
-        return names_json_1.default[chain] || chain;
-    }
-    static toAssetColor(asset) {
-        const token = asset.token?.toLowerCase() || null;
-        if (token != null) {
-            return colors_json_1.default[token] || token;
-        }
-        const chain = asset.chain?.toLowerCase() || 'var(--gray-5)';
-        return colors_json_1.default[chain] || chain;
+            return chain + ' ' + (assets_json_1.default[token] || token);
+        return assets_json_1.default[chain] || chain;
     }
     static toAddressIndex(index) {
         if (!index)

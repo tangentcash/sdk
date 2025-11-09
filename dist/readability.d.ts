@@ -19,7 +19,6 @@ export declare class Readability {
     static toAssetFallback(asset: AssetId): string;
     static toAssetImage(asset: AssetId): string;
     static toAssetName(asset: AssetId, chainOnly?: boolean): string;
-    static toAssetColor(asset: AssetId): string;
     static toAddressIndex(index?: BigNumber): string;
     static toTransactionType(type: string | number): string;
     static toFunctionName(method: string): string;

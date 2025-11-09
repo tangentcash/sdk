@@ -1,6 +1,5 @@
 import { AssetId, ByteUtil, Hashing } from "./algorithm"; import { Transactions } from "./schema";
-import Names from './asset/names.json';
-import Colors from './asset/colors.json';
+import Assets from './assets.json';
 import BigNumber from "bignumber.js";
 
 export function lerp(a: number, b: number, t: number): number {
@@ -24,7 +23,7 @@ export class Readability {
   static toAssetQuery(asset: AssetId): string {
     const token: string | null = asset.token?.toUpperCase() || null;
     const chain: string = asset.chain?.toUpperCase() || 'Unknown';
-    const name: string | null = (Names as Record<string, string>)[token || chain];
+    const name: string | null = (Assets as Record<string, string>)[token || chain];
     return name ? name + ' ' + (token || chain) : (token || chain);
   }
   static toAssetSymbol(asset: AssetId): string {
@@ -41,18 +40,9 @@ export class Readability {
     const token: string | null = chainOnly ? null : asset.token?.toUpperCase() || null;
     const chain: string = asset.chain?.toUpperCase() || 'Unknown';
     if (token != null)
-      return chain + ' ' + ((Names as Record<string, string>)[token] || token);
+      return chain + ' ' + ((Assets as Record<string, string>)[token] || token);
 
-    return (Names as Record<string, string>)[chain] || chain;
-  }
-  static toAssetColor(asset: AssetId): string {
-    const token: string | null = asset.token?.toLowerCase() || null;
-    if (token != null) {
-      return (Colors as Record<string, string>)[token] || token;
-    }
-
-    const chain: string = asset.chain?.toLowerCase() || 'var(--gray-5)';
-    return (Colors as Record<string, string>)[chain] || chain;
+    return (Assets as Record<string, string>)[chain] || chain;
   }
   static toAddressIndex(index?: BigNumber): string {
     if (!index)
