@@ -68,14 +68,14 @@ var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
-    class DepositoryBalance {
+    class BridgeBalance {
     }
-    DepositoryBalance.typename = 'depository_balance';
-    States.DepositoryBalance = DepositoryBalance;
-    class DepositoryPolicy {
+    BridgeBalance.typename = 'bridge_balance';
+    States.BridgeBalance = BridgeBalance;
+    class BridgePolicy {
     }
-    DepositoryPolicy.typename = 'depository_policy';
-    States.DepositoryPolicy = DepositoryPolicy;
+    BridgePolicy.typename = 'bridge_policy';
+    States.BridgePolicy = BridgePolicy;
     class WitnessAccount {
     }
     WitnessAccount.typename = 'witness_account';
@@ -146,17 +146,17 @@ var Transactions;
     }
     ValidatorAdjustment.typename = 'validator_adjustment';
     Transactions.ValidatorAdjustment = ValidatorAdjustment;
-    class DepositoryAccount extends Ledger.Commitment {
+    class BridgeAccount extends Ledger.Commitment {
         constructor() {
             super(...arguments);
             this.manager = 'pubkeyhash';
             this.routingAddress = 'string';
         }
-        getType() { return DepositoryAccount.typename; }
+        getType() { return BridgeAccount.typename; }
     }
-    DepositoryAccount.typename = 'depository_account';
-    Transactions.DepositoryAccount = DepositoryAccount;
-    class DepositoryWithdrawal extends Ledger.Transaction {
+    BridgeAccount.typename = 'bridge_account';
+    Transactions.BridgeAccount = BridgeAccount;
+    class BridgeWithdrawal extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.onlyIfNotInQueue = 'boolean';
@@ -167,11 +167,11 @@ var Transactions;
                 'value', 'decimal'
             ];
         }
-        getType() { return DepositoryWithdrawal.typename; }
+        getType() { return BridgeWithdrawal.typename; }
     }
-    DepositoryWithdrawal.typename = 'depository_withdrawal';
-    Transactions.DepositoryWithdrawal = DepositoryWithdrawal;
-    class DepositoryAdjustment extends Ledger.Transaction {
+    BridgeWithdrawal.typename = 'bridge_withdrawal';
+    Transactions.BridgeWithdrawal = BridgeWithdrawal;
+    class BridgeAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.incomingFee = 'decimal';
@@ -181,11 +181,11 @@ var Transactions;
             this.acceptsAccountRequests = 'boolean';
             this.acceptsWithdrawalRequests = 'boolean';
         }
-        getType() { return DepositoryAdjustment.typename; }
+        getType() { return BridgeAdjustment.typename; }
     }
-    DepositoryAdjustment.typename = 'depository_adjustment';
-    Transactions.DepositoryAdjustment = DepositoryAdjustment;
-    class DepositoryMigration extends Ledger.Transaction {
+    BridgeAdjustment.typename = 'bridge_adjustment';
+    Transactions.BridgeAdjustment = BridgeAdjustment;
+    class BridgeMigration extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.participants = [
@@ -194,23 +194,23 @@ var Transactions;
                 'owner', 'pubkeyhash'
             ];
         }
-        getType() { return DepositoryMigration.typename; }
+        getType() { return BridgeMigration.typename; }
     }
-    DepositoryMigration.typename = 'depository_migration';
-    Transactions.DepositoryMigration = DepositoryMigration;
+    BridgeMigration.typename = 'bridge_migration';
+    Transactions.BridgeMigration = BridgeMigration;
     Transactions.typenames = {
         'transfer': 'Transfer',
         'upgrade': 'Create program',
         'call': 'Call program',
         'rollup': 'Rollup',
         'validator_adjustment': 'Adjust validator',
-        'depository_account': 'Order bridge address',
-        'depository_account_finalization': 'Issue bridge address',
-        'depository_withdrawal': 'Order bridge withdrawal',
-        'depository_withdrawal_finalization': 'Issue bridge transaction',
-        'depository_attestation': 'Process bridge transaction',
-        'depository_adjustment': 'Adjust bridge',
-        'depository_migration': 'Order bridge signer migration',
-        'depository_migration_finalization': 'Migrate bridge signer'
+        'bridge_account': 'Order bridge address',
+        'bridge_account_finalization': 'Issue bridge address',
+        'bridge_withdrawal': 'Order bridge withdrawal',
+        'bridge_withdrawal_finalization': 'Issue bridge transaction',
+        'bridge_attestation': 'Process bridge transaction',
+        'bridge_adjustment': 'Adjust bridge',
+        'bridge_migration': 'Order bridge signer migration',
+        'bridge_migration_finalization': 'Migrate bridge signer'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

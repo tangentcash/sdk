@@ -48,12 +48,12 @@ export namespace States {
     static typename: string = 'account_balance';
   }
 
-  export class DepositoryBalance {
-    static typename: string = 'depository_balance';
+  export class BridgeBalance {
+    static typename: string = 'bridge_balance';
   }
 
-  export class DepositoryPolicy {
-    static typename: string = 'depository_policy';
+  export class BridgePolicy {
+    static typename: string = 'bridge_policy';
   }
 
   export class WitnessAccount {
@@ -117,16 +117,16 @@ export namespace Transactions {
     getType() { return ValidatorAdjustment.typename; }
   }
 
-  export class DepositoryAccount extends Ledger.Commitment {
-    static typename: string = 'depository_account';
+  export class BridgeAccount extends Ledger.Commitment {
+    static typename: string = 'bridge_account';
     manager: string = 'pubkeyhash';
     routingAddress: string = 'string';
 
-    getType() { return DepositoryAccount.typename; }
+    getType() { return BridgeAccount.typename; }
   }
 
-  export class DepositoryWithdrawal extends Ledger.Transaction {
-    static typename: string = 'depository_withdrawal';
+  export class BridgeWithdrawal extends Ledger.Transaction {
+    static typename: string = 'bridge_withdrawal';
     onlyIfNotInQueue: string = 'boolean';
     fromManager: string = 'pubkeyhash';
     toManager: string = 'pubkeyhash';
@@ -135,11 +135,11 @@ export namespace Transactions {
       'value', 'decimal'
     ];
 
-    getType() { return DepositoryWithdrawal.typename; }
+    getType() { return BridgeWithdrawal.typename; }
   }
 
-  export class DepositoryAdjustment extends Ledger.Transaction {
-    static typename: string = 'depository_adjustment';
+  export class BridgeAdjustment extends Ledger.Transaction {
+    static typename: string = 'bridge_adjustment';
     incomingFee: string = 'decimal';
     outgoingFee: string = 'decimal';
     participationThreshold: string = 'decimal';
@@ -147,18 +147,18 @@ export namespace Transactions {
     acceptsAccountRequests: string = 'boolean';
     acceptsWithdrawalRequests: string = 'boolean';
 
-    getType() { return DepositoryAdjustment.typename; }
+    getType() { return BridgeAdjustment.typename; }
   }
 
-  export class DepositoryMigration extends Ledger.Transaction {
-    static typename: string = 'depository_migration';
+  export class BridgeMigration extends Ledger.Transaction {
+    static typename: string = 'bridge_migration';
     participants: string[] = [
       'asset', 'assetid',
       'manager', 'pubkeyhash',
       'owner', 'pubkeyhash'
     ];
 
-    getType() { return DepositoryMigration.typename; }
+    getType() { return BridgeMigration.typename; }
   }
 
   export const typenames: Record<string, string> = {
@@ -167,13 +167,13 @@ export namespace Transactions {
     'call': 'Call program',
     'rollup': 'Rollup',
     'validator_adjustment': 'Adjust validator',
-    'depository_account': 'Order bridge address',
-    'depository_account_finalization': 'Issue bridge address',
-    'depository_withdrawal': 'Order bridge withdrawal',
-    'depository_withdrawal_finalization': 'Issue bridge transaction',
-    'depository_attestation': 'Process bridge transaction',
-    'depository_adjustment': 'Adjust bridge',
-    'depository_migration': 'Order bridge signer migration',
-    'depository_migration_finalization': 'Migrate bridge signer'
+    'bridge_account': 'Order bridge address',
+    'bridge_account_finalization': 'Issue bridge address',
+    'bridge_withdrawal': 'Order bridge withdrawal',
+    'bridge_withdrawal_finalization': 'Issue bridge transaction',
+    'bridge_attestation': 'Process bridge transaction',
+    'bridge_adjustment': 'Adjust bridge',
+    'bridge_migration': 'Order bridge signer migration',
+    'bridge_migration_finalization': 'Migrate bridge signer'
   };
 }

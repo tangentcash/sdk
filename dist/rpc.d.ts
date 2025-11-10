@@ -23,11 +23,11 @@ export declare enum EventType {
     Transfer = 1,
     TransferIsolated = 2,
     TransferFee = 3,
-    DepositoryTransfer = 4,
-    DepositoryAccount = 5,
-    DepositoryQueue = 6,
-    DepositoryPolicy = 7,
-    DepositoryParticipant = 8,
+    BridgeTransfer = 4,
+    BridgeAccount = 5,
+    BridgeQueue = 6,
+    BridgePolicy = 7,
+    BridgeParticipant = 8,
     WitnessAccount = 9,
     WitnessTransaction = 10,
     RollupReceipt = 11,
@@ -54,34 +54,34 @@ export type EventData = {
     owner: string;
     fee: BigNumber;
 } | {
-    type: EventType.DepositoryTransfer;
+    type: EventType.BridgeTransfer;
     asset: AssetId;
     owner: string;
     value: BigNumber;
 } | {
-    type: EventType.DepositoryAccount;
+    type: EventType.BridgeAccount;
     asset: AssetId;
     owner: string;
     accounts: BigNumber;
 } | {
-    type: EventType.DepositoryQueue;
+    type: EventType.BridgeQueue;
     asset: AssetId;
     owner: string;
     transactionHash: string;
 } | {
-    type: EventType.DepositoryPolicy;
+    type: EventType.BridgePolicy;
     asset: AssetId;
     owner: string;
     securityLevel: BigNumber;
     acceptsAccountRequests: boolean;
     acceptsWithdrawalRequests: boolean;
 } | {
-    type: EventType.DepositoryParticipant;
+    type: EventType.BridgeParticipant;
     owner: string;
 } | {
     type: EventType.WitnessAccount;
     asset: AssetId;
-    purpose: 'routing' | 'depository' | 'witness';
+    purpose: 'routing' | 'bridge' | 'witness';
     addresses: string[];
 } | {
     type: EventType.WitnessTransaction;
@@ -109,7 +109,7 @@ export type SummaryState = {
             fee: BigNumber;
         }>>;
     };
-    depository: {
+    bridge: {
         balances: Record<string, Record<string, {
             asset: AssetId;
             supply: BigNumber;
@@ -133,7 +133,7 @@ export type SummaryState = {
     witness: {
         accounts: Record<string, {
             asset: AssetId;
-            purpose: 'routing' | 'depository' | 'witness';
+            purpose: 'routing' | 'bridge' | 'witness';
             aliases: string[];
         }>;
         transactions: Record<string, {
@@ -283,9 +283,9 @@ export declare class RPC {
     } | null>;
     static getParticipations(): Promise<any[] | null>;
     static getBlockchains(): Promise<any[] | null>;
-    static getBestDepositoryRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
-    static getBestDepositoryBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
-    static getBestDepositoryPoliciesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestBridgeRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestBridgePoliciesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getNextAccountNonce(address: string): Promise<{
         min: BigNumber | string;
         max: BigNumber | string;
@@ -300,10 +300,10 @@ export declare class RPC {
     static getValidatorProduction(address: string): Promise<any | null>;
     static getValidatorParticipations(address: string, offset: number, count: number): Promise<any[] | null>;
     static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null>;
-    static getDepositoryBalances(address: string, offset: number, count: number): Promise<any[] | null>;
+    static getBridgeBalances(address: string, offset: number, count: number): Promise<any[] | null>;
     static getWitnessAccount(address: string, asset: AssetId, walletAddress: string): Promise<any | null>;
     static getWitnessAccounts(address: string, offset: number, count: number): Promise<any[] | null>;
-    static getWitnessAccountsByPurpose(address: string, purpose: 'witness' | 'routing' | 'depository', offset: number, count: number): Promise<any[] | null>;
+    static getWitnessAccountsByPurpose(address: string, purpose: 'witness' | 'routing' | 'bridge', offset: number, count: number): Promise<any[] | null>;
     static getMempoolTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getBlockTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getBlockTransactionsByNumber(number: number, unrolling?: number): Promise<any[] | null>;

@@ -14,11 +14,11 @@ var EventType;
     EventType[EventType["Transfer"] = 1] = "Transfer";
     EventType[EventType["TransferIsolated"] = 2] = "TransferIsolated";
     EventType[EventType["TransferFee"] = 3] = "TransferFee";
-    EventType[EventType["DepositoryTransfer"] = 4] = "DepositoryTransfer";
-    EventType[EventType["DepositoryAccount"] = 5] = "DepositoryAccount";
-    EventType[EventType["DepositoryQueue"] = 6] = "DepositoryQueue";
-    EventType[EventType["DepositoryPolicy"] = 7] = "DepositoryPolicy";
-    EventType[EventType["DepositoryParticipant"] = 8] = "DepositoryParticipant";
+    EventType[EventType["BridgeTransfer"] = 4] = "BridgeTransfer";
+    EventType[EventType["BridgeAccount"] = 5] = "BridgeAccount";
+    EventType[EventType["BridgeQueue"] = 6] = "BridgeQueue";
+    EventType[EventType["BridgePolicy"] = 7] = "BridgePolicy";
+    EventType[EventType["BridgeParticipant"] = 8] = "BridgeParticipant";
     EventType[EventType["WitnessAccount"] = 9] = "WitnessAccount";
     EventType[EventType["WitnessTransaction"] = 10] = "WitnessTransaction";
     EventType[EventType["RollupReceipt"] = 11] = "RollupReceipt";
@@ -124,7 +124,7 @@ class EventResolver {
                 balances: {},
                 fees: {}
             },
-            depository: {
+            bridge: {
                 balances: {},
                 accounts: {},
                 queues: {},
@@ -212,24 +212,24 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.DepositoryBalance: {
+                case types_1.Types.BridgeBalance: {
                     if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, value] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         if (!asset.handle)
                             break;
-                        if (!result.depository.balances[ownerAddress])
-                            result.depository.balances[ownerAddress] = {};
-                        if (!result.depository.balances[ownerAddress][asset.handle])
-                            result.depository.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
-                        const state = result.depository.balances[ownerAddress][asset.handle];
+                        if (!result.bridge.balances[ownerAddress])
+                            result.bridge.balances[ownerAddress] = {};
+                        if (!result.bridge.balances[ownerAddress][asset.handle])
+                            result.bridge.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
+                        const state = result.bridge.balances[ownerAddress][asset.handle];
                         state.supply = state.supply.plus(value);
-                        result.events.push({ type: EventType.DepositoryTransfer, asset: asset, owner: owner, value: new bignumber_js_1.default(value) });
+                        result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: owner, value: new bignumber_js_1.default(value) });
                     }
                     break;
                 }
-                case types_1.Types.DepositoryPolicy: {
+                case types_1.Types.BridgePolicy: {
                     if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, type] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
@@ -240,32 +240,32 @@ class EventResolver {
                             case 0: {
                                 if (event.args.length >= 4 && isNumber(event.args[3])) {
                                     const newAccounts = event.args[3];
-                                    if (!result.depository.accounts[ownerAddress])
-                                        result.depository.accounts[ownerAddress] = {};
-                                    if (!result.depository.accounts[ownerAddress][asset.handle])
-                                        result.depository.accounts[ownerAddress][asset.handle] = { asset: asset, newAccounts: 0 };
-                                    result.depository.accounts[ownerAddress][asset.handle].newAccounts += newAccounts.toNumber();
-                                    result.events.push({ type: EventType.DepositoryAccount, asset: asset, owner: ownerAddress, accounts: newAccounts });
+                                    if (!result.bridge.accounts[ownerAddress])
+                                        result.bridge.accounts[ownerAddress] = {};
+                                    if (!result.bridge.accounts[ownerAddress][asset.handle])
+                                        result.bridge.accounts[ownerAddress][asset.handle] = { asset: asset, newAccounts: 0 };
+                                    result.bridge.accounts[ownerAddress][asset.handle].newAccounts += newAccounts.toNumber();
+                                    result.events.push({ type: EventType.BridgeAccount, asset: asset, owner: ownerAddress, accounts: newAccounts });
                                 }
                                 break;
                             }
                             case 1: {
                                 if (event.args.length >= 4 && (isNumber(event.args[3]) || typeof event.args[3] == 'string')) {
                                     const transactionHash = event.args[3];
-                                    if (!result.depository.queues[ownerAddress])
-                                        result.depository.queues[ownerAddress] = {};
-                                    result.depository.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
-                                    result.events.push({ type: EventType.DepositoryQueue, asset: asset, owner: ownerAddress, transactionHash: transactionHash });
+                                    if (!result.bridge.queues[ownerAddress])
+                                        result.bridge.queues[ownerAddress] = {};
+                                    result.bridge.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
+                                    result.events.push({ type: EventType.BridgeQueue, asset: asset, owner: ownerAddress, transactionHash: transactionHash });
                                 }
                                 break;
                             }
                             case 2: {
                                 if (event.args.length >= 6 && isNumber(event.args[3]) && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
                                     const [securityLevel, acceptsAccountRequests, acceptsWithdrawalRequests] = event.args.slice(3, 6);
-                                    if (!result.depository.policies[ownerAddress])
-                                        result.depository.policies[ownerAddress] = {};
-                                    result.depository.policies[ownerAddress][asset.handle] = { asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests };
-                                    result.events.push({ type: EventType.DepositoryPolicy, asset: asset, owner: ownerAddress, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
+                                    if (!result.bridge.policies[ownerAddress])
+                                        result.bridge.policies[ownerAddress] = {};
+                                    result.bridge.policies[ownerAddress][asset.handle] = { asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests };
+                                    result.events.push({ type: EventType.BridgePolicy, asset: asset, owner: ownerAddress, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
                                 }
                                 break;
                             }
@@ -287,7 +287,7 @@ class EventResolver {
                                 purpose = 'routing';
                                 break;
                             case 2:
-                                purpose = 'depository';
+                                purpose = 'bridge';
                                 break;
                             case 0:
                             default:
@@ -331,13 +331,13 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.DepositoryAccount:
-                case types_1.Types.DepositoryMigration: {
+                case types_1.Types.BridgeAccount:
+                case types_1.Types.BridgeMigration: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        result.depository.participants.add(ownerAddress);
-                        result.events.push({ type: EventType.DepositoryParticipant, owner: ownerAddress });
+                        result.bridge.participants.add(ownerAddress);
+                        result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
                     }
                     break;
                 }
@@ -365,11 +365,11 @@ class EventResolver {
     static isSummaryStateEmpty(state, address) {
         if (address != null) {
             return !state.account.balances[address] &&
-                !state.depository.balances[address] &&
-                !Object.keys(state.depository.queues).length &&
-                !Object.keys(state.depository.accounts).length &&
-                !Object.keys(state.depository.policies).length &&
-                !state.depository.participants.size &&
+                !state.bridge.balances[address] &&
+                !Object.keys(state.bridge.queues).length &&
+                !Object.keys(state.bridge.accounts).length &&
+                !Object.keys(state.bridge.policies).length &&
+                !state.bridge.participants.size &&
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
                 !Object.keys(state.receipts).length &&
@@ -377,11 +377,11 @@ class EventResolver {
         }
         else {
             return !Object.keys(state.account.balances).length &&
-                !Object.keys(state.depository.balances).length &&
-                !Object.keys(state.depository.queues).length &&
-                !Object.keys(state.depository.accounts).length &&
-                !Object.keys(state.depository.policies).length &&
-                !state.depository.participants.size &&
+                !Object.keys(state.bridge.balances).length &&
+                !Object.keys(state.bridge.queues).length &&
+                !Object.keys(state.bridge.accounts).length &&
+                !Object.keys(state.bridge.policies).length &&
+                !state.bridge.participants.size &&
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
                 !Object.keys(state.receipts).length &&
@@ -835,14 +835,14 @@ class RPC {
     static getBlockchains() {
         return this.fetch('cache', 'getblockchains', []);
     }
-    static getBestDepositoryRewardsForSelection(asset, offset, count) {
-        return this.fetch('no-cache', 'getbestdepositoryrewardsforselection', [asset.handle, offset, count]);
+    static getBestBridgeRewardsForSelection(asset, offset, count) {
+        return this.fetch('no-cache', 'getbestbridgerewardsforselection', [asset.handle, offset, count]);
     }
-    static getBestDepositoryBalancesForSelection(asset, offset, count) {
-        return this.fetch('no-cache', 'getbestdepositorybalancesforselection', [asset.handle, offset, count]);
+    static getBestBridgeBalancesForSelection(asset, offset, count) {
+        return this.fetch('no-cache', 'getbestbridgebalancesforselection', [asset.handle, offset, count]);
     }
-    static getBestDepositoryPoliciesForSelection(asset, offset, count) {
-        return this.fetch('no-cache', 'getbestdepositorypoliciesforselection', [asset.handle, offset, count]);
+    static getBestBridgePoliciesForSelection(asset, offset, count) {
+        return this.fetch('no-cache', 'getbestbridgepoliciesforselection', [asset.handle, offset, count]);
     }
     static getNextAccountNonce(address) {
         return this.fetch('no-cache', 'getnextaccountnonce', [address]);
@@ -865,8 +865,8 @@ class RPC {
     static getValidatorAttestations(address, offset, count) {
         return this.fetch('no-cache', 'getvalidatorattestations', [address, offset, count]);
     }
-    static getDepositoryBalances(address, offset, count) {
-        return this.fetch('no-cache', 'getdepositorybalances', [address, offset, count]);
+    static getBridgeBalances(address, offset, count) {
+        return this.fetch('no-cache', 'getbridgebalances', [address, offset, count]);
     }
     static getWitnessAccount(address, asset, walletAddress) {
         return this.fetch('no-cache', 'getwitnessaccount', [address, asset.handle, walletAddress]);
