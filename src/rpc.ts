@@ -695,8 +695,14 @@ export class RPC {
             for (let i = 0; i < data.length; i++) {
               try {
                 const seed = data[i];
-                const scheme = new URL(seed);
-                const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
+                let scheme = new URL(seed);
+                if (scheme.hostname == 'selfhost') {
+                  const port = scheme.port;
+                  scheme = new URL(location[1]);
+                  scheme.port = port;
+                }
+
+                let address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
                 if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
                   interfaces.online.add(address);
                   ++results;
