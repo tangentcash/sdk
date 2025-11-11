@@ -449,7 +449,7 @@ class RPC {
         try {
             if (!this.resolver)
                 return null;
-            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?rpc=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
+            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
         }
         catch {
             return null;
