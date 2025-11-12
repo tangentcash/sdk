@@ -668,6 +668,7 @@ export class RPC {
             const scheme = new URL('tcp://' + seed);
             const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
             if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
+              interfaces.offline.delete(address);
               interfaces.online.add(address);
               ++results;
             }
@@ -786,7 +787,13 @@ export class RPC {
       }
     }
 
-    await this.fetchIpset('http', 'preload');
+    if (!this.httpInterfaces.preload) {
+      let preloadSize = await this.fetchIpset('http', 'preload');
+      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('http', 'fetch');
+      if (!preloadSize && !fetchSize)
+        return null;
+    }
+
     while (this.httpInterfaces.offline.size < this.httpInterfaces.online.size) {
       const location = this.fetchNode('http');
       if (location != null) {
@@ -875,7 +882,13 @@ export class RPC {
       return null;
     
     const method = 'connect';
-    await this.fetchIpset('ws', 'preload');
+    if (!this.wsInterfaces.preload) {
+      let preloadSize = await this.fetchIpset('ws', 'preload');
+      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('ws', 'fetch');
+      if (!preloadSize && !fetchSize)
+        return null;
+    }
+    
     while (this.wsInterfaces.offline.size < this.wsInterfaces.online.size) {
       const location = this.fetchNode('ws');
       if (location != null) {
