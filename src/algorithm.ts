@@ -453,7 +453,7 @@ export class AssetId {
         throw false;
     } catch {
       this.id = '0x0';
-      this.handle = 'TAN';
+      this.handle = '';
       this.chain = 'TAN';
       this.token = null;
       this.checksum = null;
