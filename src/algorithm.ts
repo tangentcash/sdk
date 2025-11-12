@@ -449,6 +449,8 @@ export class AssetId {
       this.chain = segments[0];
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
+      if (this.chain == 'TAN')
+        throw false;
     } catch {
       this.id = '0x0';
       this.handle = 'TAN';
