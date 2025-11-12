@@ -621,7 +621,7 @@ export class RPC {
       const nodes = Array.from(type == 'ws' ? this.wsInterfaces.online.keys() : this.httpInterfaces.online.keys());
       const node = nodes[Math.floor(Math.random() * nodes.length)];
       const location = new URL('tcp://' + node);
-      const secure = (location.port == '443' || !this.isIpAddress(location.hostname));
+      const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
       return [`${type}${secure ? 's' : ''}://${node}/`, node];
     } catch {
       return null;
@@ -1021,10 +1021,13 @@ export class RPC {
     this.props.preload = true;
     return this.props.data;
   }
-  static isIpAddress(address: string): boolean {
+  static requiresSecureTransport(address: string): boolean {
+    if (address == 'localhost')
+      return false;
+
     const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     const ipv6Pattern = /^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$/;
-    return ipv4Pattern.test(address) || ipv6Pattern.test(address);
+    return !ipv4Pattern.test(address) && !ipv6Pattern.test(address);
   }
   static clearCache(): void {
     if (this.onCacheKeys != null && this.onCacheStore != null) {

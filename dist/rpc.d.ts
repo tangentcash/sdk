@@ -269,7 +269,7 @@ export declare class RPC {
     }): void;
     static saveProps(props: InterfaceProps): void;
     static getProps(): InterfaceProps;
-    static isIpAddress(address: string): boolean;
+    static requiresSecureTransport(address: string): boolean;
     static clearCache(): void;
     static forcedPolicy<T>(policy: 'cache' | 'no-cache', callback: () => Promise<T>): Promise<T>;
     static decodeTransaction(hexMessage: string): Promise<any>;
