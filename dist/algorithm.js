@@ -439,8 +439,12 @@ class AssetId {
         data = bignumber_js_1.default.isBigNumber(data) ? data.toNumber() : data;
         data = typeof data == 'number' ? '0x' + data.toString(16) : data;
         data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
-        if (data instanceof Uint8Array) {
+        try {
+            if (!(data instanceof Uint8Array))
+                throw false;
             const numeric = new Uint256(data);
+            if (numeric.eq(0))
+                throw false;
             this.id = numeric.toCompactHex();
             this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(32 - numeric.byteCount()));
             const segments = this.handle.split(':');
@@ -448,9 +452,9 @@ class AssetId {
             this.token = segments[1] || null;
             this.checksum = segments[2] || null;
         }
-        else {
+        catch {
             this.id = '0x0';
-            this.handle = '';
+            this.handle = 'TAN';
             this.chain = null;
             this.token = null;
             this.checksum = null;
