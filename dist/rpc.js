@@ -159,8 +159,6 @@ class EventResolver {
                         const fromAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(from)) || from;
                         const toAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(to)) || to;
                         const asset = new algorithm_1.AssetId(assetId);
-                        if (!asset.handle)
-                            break;
                         if (!result.account.balances[fromAddress])
                             result.account.balances[fromAddress] = {};
                         if (!result.account.balances[fromAddress][asset.handle])
@@ -179,8 +177,6 @@ class EventResolver {
                         const [assetId, owner, supply, reserve] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         const asset = new algorithm_1.AssetId(assetId);
-                        if (!asset.handle)
-                            break;
                         if (!result.account.balances[ownerAddress])
                             result.account.balances[ownerAddress] = {};
                         if (!result.account.balances[ownerAddress][asset.handle])
@@ -194,8 +190,6 @@ class EventResolver {
                         const [assetId, owner, fee] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         const asset = new algorithm_1.AssetId(assetId);
-                        if (!asset.handle)
-                            break;
                         if (!result.account.balances[ownerAddress])
                             result.account.balances[ownerAddress] = {};
                         if (!result.account.balances[ownerAddress][asset.handle])
@@ -217,8 +211,6 @@ class EventResolver {
                         const [assetId, owner, value] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        if (!asset.handle)
-                            break;
                         if (!result.bridge.balances[ownerAddress])
                             result.bridge.balances[ownerAddress] = {};
                         if (!result.bridge.balances[ownerAddress][asset.handle])
@@ -234,8 +226,6 @@ class EventResolver {
                         const [assetId, owner, type] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        if (!asset.handle)
-                            break;
                         switch (type.toNumber()) {
                             case 0: {
                                 if (event.args.length >= 4 && isNumber(event.args[3])) {
@@ -279,8 +269,6 @@ class EventResolver {
                     if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && isNumber(event.args[1])) {
                         const [assetId, addressPurpose, addressAliases] = [event.args[0], event.args[1], event.args.slice(2)];
                         const asset = new algorithm_1.AssetId(assetId);
-                        if (!asset.handle)
-                            break;
                         let purpose;
                         switch (addressPurpose.toNumber()) {
                             case 1:
@@ -310,8 +298,6 @@ class EventResolver {
                     if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
                         const [assetId, transactionId] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
-                        if (!asset.handle)
-                            break;
                         if (result.witness.transactions[asset.handle] != null)
                             result.witness.transactions[asset.handle].transactionIds.push(transactionId);
                         else
