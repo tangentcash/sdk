@@ -449,7 +449,7 @@ class RPC {
         try {
             if (!this.resolver)
                 return null;
-            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
+            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
         }
         catch {
             return null;
@@ -476,12 +476,25 @@ class RPC {
                     return 0;
                 const seeds = this.onIpsetLoad ? this.onIpsetLoad(type) : null;
                 interfaces.preload = true;
-                if (!seeds || !Array.isArray(seeds) || !seeds.length)
+                if (!seeds || !Array.isArray(seeds.online) || !Array.isArray(seeds.offline))
                     return 0;
                 let results = 0;
-                for (let i = 0; i < seeds.length; i++) {
+                for (let i = 0; i < seeds.offline.length; i++) {
                     try {
-                        const seed = seeds[i];
+                        const seed = seeds.offline[i];
+                        const scheme = new URL('tcp://' + seed);
+                        const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
+                        if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
+                            interfaces.offline.add(address);
+                            interfaces.online.delete(address);
+                            ++results;
+                        }
+                    }
+                    catch { }
+                }
+                for (let i = 0; i < seeds.online.length; i++) {
+                    try {
+                        const seed = seeds.online[i];
                         const scheme = new URL('tcp://' + seed);
                         const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
                         if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
@@ -534,7 +547,7 @@ class RPC {
                     }
                 }
                 if (this.onIpsetStore != null)
-                    this.onIpsetStore(type, [...interfaces.online, ...interfaces.offline]);
+                    this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
                 return 0;
             }
             default:
@@ -631,6 +644,8 @@ class RPC {
                 }
                 this.httpInterfaces.online.delete(location[1]);
                 this.httpInterfaces.offline.add(location[1]);
+                if (this.onIpsetStore != null)
+                    this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
             }
             else {
                 const found = await this.fetchIpset('http', 'fetch');
@@ -743,6 +758,8 @@ class RPC {
                 }
                 this.wsInterfaces.online.delete(location[1]);
                 this.wsInterfaces.offline.add(location[1]);
+                if (this.onIpsetStore != null)
+                    this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
             }
             else {
                 const found = await this.fetchIpset('ws', 'fetch');
@@ -817,7 +834,9 @@ class RPC {
         return this.props.data;
     }
     static requiresSecureTransport(address) {
-        if (address == 'localhost')
+        if (window?.location?.protocol == 'https:')
+            return true;
+        else if (address == 'localhost')
             return false;
         const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
         const ipv6Pattern = /^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$/;

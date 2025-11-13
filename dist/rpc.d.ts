@@ -12,8 +12,14 @@ export type NodeMessage = (event: {
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = (type: 'http' | 'ws') => string[] | null;
-export type IpsetStore = (type: 'http' | 'ws', ipset: string[]) => boolean;
+export type IpsetLoad = (type: 'http' | 'ws') => {
+    online: string[];
+    offline: string[];
+} | null;
+export type IpsetStore = (type: 'http' | 'ws', ipset: {
+    online: string[];
+    offline: string[];
+}) => boolean;
 export type PropsLoad = () => InterfaceProps | null;
 export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;

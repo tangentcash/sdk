@@ -13,8 +13,8 @@ export type NodeMessage = (event: { type: string, result: any }) => void;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = (type: 'http' | 'ws') => string[] | null;
-export type IpsetStore = (type: 'http' | 'ws', ipset: string[]) => boolean;
+export type IpsetLoad = (type: 'http' | 'ws') => { online: string[], offline: string[] } | null;
+export type IpsetStore = (type: 'http' | 'ws', ipset: { online: string[], offline: string[] }) => boolean;
 export type PropsLoad = () => InterfaceProps | null;
 export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
@@ -632,7 +632,7 @@ export class RPC {
       if (!this.resolver)
         return null;
       
-      return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
+      return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
     } catch {
       return null;
     }
@@ -658,13 +658,26 @@ export class RPC {
         
         const seeds = this.onIpsetLoad ? this.onIpsetLoad(type) : null;
         interfaces.preload = true;
-        if (!seeds || !Array.isArray(seeds) || !seeds.length)
+        if (!seeds || !Array.isArray(seeds.online) || !Array.isArray(seeds.offline))
           return 0;
 
         let results = 0;
-        for (let i = 0; i < seeds.length; i++) {
+        for (let i = 0; i < seeds.offline.length; i++) {
           try {
-            const seed = seeds[i];
+            const seed = seeds.offline[i];
+            const scheme = new URL('tcp://' + seed);
+            const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
+            if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
+              interfaces.offline.add(address);
+              interfaces.online.delete(address);
+              ++results;
+            }
+          } catch { }
+        }
+
+        for (let i = 0; i < seeds.online.length; i++) {
+          try {
+            const seed = seeds.online[i];
             const scheme = new URL('tcp://' + seed);
             const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
             if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
@@ -720,7 +733,7 @@ export class RPC {
         }
     
         if (this.onIpsetStore != null)
-          this.onIpsetStore(type, [...interfaces.online, ...interfaces.offline]);
+          this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
         return 0;
       }
       default:
@@ -826,6 +839,8 @@ export class RPC {
 
         this.httpInterfaces.online.delete(location[1]);
         this.httpInterfaces.offline.add(location[1]);
+        if (this.onIpsetStore != null)
+          this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
       } else {
         const found = await this.fetchIpset('http', 'fetch');
         if (!found) {
@@ -944,6 +959,8 @@ export class RPC {
 
         this.wsInterfaces.online.delete(location[1]);
         this.wsInterfaces.offline.add(location[1]);
+        if (this.onIpsetStore != null)
+          this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
       } else {
         const found = await this.fetchIpset('ws', 'fetch');
         if (!found) {
@@ -1035,7 +1052,9 @@ export class RPC {
     return this.props.data;
   }
   static requiresSecureTransport(address: string): boolean {
-    if (address == 'localhost')
+    if (window?.location?.protocol == 'https:')
+      return true;
+    else if (address == 'localhost')
       return false;
 
     const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
