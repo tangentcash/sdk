@@ -377,6 +377,19 @@ class EventResolver {
 }
 exports.EventResolver = EventResolver;
 class RPC {
+    static reportAvailability(type, location, available) {
+        const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
+        if (available) {
+            interfaces.online.add(location);
+            interfaces.offline.delete(location);
+        }
+        else {
+            interfaces.online.delete(location);
+            interfaces.offline.add(location);
+        }
+        if (this.onIpsetStore != null)
+            this.onIpsetStore('http', { online: [...interfaces.online], offline: [...interfaces.offline] });
+    }
     static fetchObject(data) {
         if (typeof data == 'string') {
             try {
@@ -616,12 +629,10 @@ class RPC {
                             body: content,
                         });
                         dataContent = await response.text();
+                        this.reportAvailability('http', location[1], true);
                     }
                     catch (exception) {
-                        this.httpInterfaces.online.delete(location[1]);
-                        this.httpInterfaces.offline.add(location[1]);
-                        if (this.onIpsetStore != null)
-                            this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
+                        this.reportAvailability('http', location[1], false);
                         throw exception;
                     }
                     const data = JSON.parse(dataContent);
@@ -711,10 +722,7 @@ class RPC {
                         });
                     }
                     catch (exception) {
-                        this.wsInterfaces.online.delete(location[1]);
-                        this.wsInterfaces.offline.add(location[1]);
-                        if (this.onIpsetStore != null)
-                            this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
+                        this.reportAvailability('ws', location[1], false);
                         throw exception;
                     }
                     if (this.onNodeResponse)
@@ -752,6 +760,7 @@ class RPC {
                         this.connectSocket(addresses);
                     };
                     const events = await this.fetch('no-cache', 'subscribe', [addresses.join(',')]);
+                    this.reportAvailability('ws', location[1], true);
                     return events;
                 }
                 catch (exception) {

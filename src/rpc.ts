@@ -555,6 +555,18 @@ export class RPC {
   static onPropsLoad: PropsLoad | null = null;
   static onPropsStore: PropsStore | null = null;
 
+  private static reportAvailability(type: 'ws' | 'http', location: string, available: boolean): void {
+    const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
+    if (available) {
+      interfaces.online.add(location);
+      interfaces.offline.delete(location);
+    } else {  
+      interfaces.online.delete(location);
+      interfaces.offline.add(location);
+    }
+    if (this.onIpsetStore != null)
+      this.onIpsetStore('http', { online: [...interfaces.online], offline: [...interfaces.offline] });
+  }
   private static fetchObject(data: any): any {
     if (typeof data == 'string') {
       try {
@@ -771,7 +783,7 @@ export class RPC {
         if (this.onNodeError)
           this.onNodeError(this.socket?.url || '[unknown]', method, exception);
       }
-        
+      
       if (result !== undefined) {
         if (result instanceof Error)
           throw result;
@@ -802,11 +814,9 @@ export class RPC {
               body: content,
             });
             dataContent = await response.text();
+            this.reportAvailability('http', location[1], true);
           } catch (exception) {
-            this.httpInterfaces.online.delete(location[1]);
-            this.httpInterfaces.offline.add(location[1]);
-            if (this.onIpsetStore != null)
-              this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
+            this.reportAvailability('http', location[1], false);
             throw exception;
           }
           const data = JSON.parse(dataContent);
@@ -902,10 +912,7 @@ export class RPC {
               socket.onerror = () => reject(new Error('websocket connection error'));
             });
           } catch (exception) {
-            this.wsInterfaces.online.delete(location[1]);
-            this.wsInterfaces.offline.add(location[1]);
-            if (this.onIpsetStore != null)
-              this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
+            this.reportAvailability('ws', location[1], false);
             throw exception;
           }
           if (this.onNodeResponse)
@@ -943,6 +950,7 @@ export class RPC {
             this.connectSocket(addresses);
           };
           const events = await this.fetch<number>('no-cache', 'subscribe', [addresses.join(',')]);
+          this.reportAvailability('ws', location[1], true);
           return events;
         } catch (exception) {
           if (this.onNodeError)

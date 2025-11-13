@@ -248,6 +248,7 @@ export declare class RPC {
     static onIpsetStore: IpsetStore | null;
     static onPropsLoad: PropsLoad | null;
     static onPropsStore: PropsStore | null;
+    private static reportAvailability;
     private static fetchObject;
     private static fetchData;
     private static fetchResult;
