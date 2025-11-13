@@ -565,7 +565,7 @@ export class RPC {
       interfaces.offline.add(location);
     }
     if (this.onIpsetStore != null)
-      this.onIpsetStore('http', { online: [...interfaces.online], offline: [...interfaces.offline] });
+      this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
   }
   private static fetchObject(data: any): any {
     if (typeof data == 'string') {
