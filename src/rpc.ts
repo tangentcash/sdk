@@ -1083,7 +1083,7 @@ export class RPC {
     return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
   }
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, value: BigNumber, method: string, args: any[]): Promise<any | null> {
-    return this.fetch('no-cache', 'call', [asset.handle, fromAddress, toAddress, value, method, ...args]);
+    return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, value, method, ...args]);
   }
   static getWallet(): Promise<{ secretKey: string, publicKey: string, publicKeyHash: string, address: string } | null> {
     return this.fetch('no-cache', 'getwallet');
