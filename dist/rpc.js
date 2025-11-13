@@ -834,7 +834,7 @@ class RPC {
         return this.props.data;
     }
     static requiresSecureTransport(address) {
-        if (window?.location?.protocol == 'https:')
+        if (typeof window != 'undefined' && window?.location?.protocol == 'https:')
             return true;
         else if (address == 'localhost')
             return false;
