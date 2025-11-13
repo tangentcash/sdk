@@ -608,12 +608,22 @@ class RPC {
                 try {
                     if (this.onNodeRequest)
                         this.onNodeRequest(location[0], method, body, content.length);
-                    const response = await fetch(location[0], {
-                        headers: { 'Content-Type': 'application/json' },
-                        method: 'POST',
-                        body: content,
-                    });
-                    const dataContent = await response.text();
+                    let dataContent;
+                    try {
+                        const response = await fetch(location[0], {
+                            headers: { 'Content-Type': 'application/json' },
+                            method: 'POST',
+                            body: content,
+                        });
+                        dataContent = await response.text();
+                    }
+                    catch (exception) {
+                        this.httpInterfaces.online.delete(location[1]);
+                        this.httpInterfaces.offline.add(location[1]);
+                        if (this.onIpsetStore != null)
+                            this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
+                        throw exception;
+                    }
                     const data = JSON.parse(dataContent);
                     if (this.onNodeResponse)
                         this.onNodeResponse(location[0], method, data, dataContent.length);
@@ -628,10 +638,6 @@ class RPC {
                         throw result;
                     return result;
                 }
-                this.httpInterfaces.online.delete(location[1]);
-                this.httpInterfaces.offline.add(location[1]);
-                if (this.onIpsetStore != null)
-                    this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
             }
             else {
                 const found = await this.fetchIpset('http', 'fetch');
@@ -696,11 +702,21 @@ class RPC {
                 try {
                     if (this.onNodeRequest)
                         this.onNodeRequest(location[0], method, null, 0);
-                    const connection = await new Promise((resolve, reject) => {
-                        const socket = new WebSocket(location[0]);
-                        socket.onopen = () => resolve(socket);
-                        socket.onerror = () => reject(new Error('websocket connection error'));
-                    });
+                    let connection;
+                    try {
+                        connection = await new Promise((resolve, reject) => {
+                            const socket = new WebSocket(location[0]);
+                            socket.onopen = () => resolve(socket);
+                            socket.onerror = () => reject(new Error('websocket connection error'));
+                        });
+                    }
+                    catch (exception) {
+                        this.wsInterfaces.online.delete(location[1]);
+                        this.wsInterfaces.offline.add(location[1]);
+                        if (this.onIpsetStore != null)
+                            this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
+                        throw exception;
+                    }
                     if (this.onNodeResponse)
                         this.onNodeResponse(location[0], method, null, 0);
                     this.socket = connection;
@@ -742,10 +758,6 @@ class RPC {
                     if (this.onNodeError)
                         this.onNodeError(location[0], method, exception);
                 }
-                this.wsInterfaces.online.delete(location[1]);
-                this.wsInterfaces.offline.add(location[1]);
-                if (this.onIpsetStore != null)
-                    this.onIpsetStore('http', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
             }
             else {
                 const found = await this.fetchIpset('ws', 'fetch');
