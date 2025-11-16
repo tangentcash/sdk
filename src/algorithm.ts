@@ -453,7 +453,7 @@ export class AssetId {
         throw false;
     } catch {
       this.id = '0x0';
-      this.handle = '';
+      this.handle = 'TAN';
       this.chain = 'TAN';
       this.token = null;
       this.checksum = null;
@@ -463,16 +463,19 @@ export class AssetId {
     return this.id.toString() == value.id.toString();
   }
   toUint8Array(): Uint8Array {
+    if (this.id == '0x0')
+      return new Uint8Array();
+
     return ByteUtil.byteStringToUint8Array(this.handle);
   }
   toUint256(): Uint256 {
     return new Uint256(this.toUint8Array());
   }
   toHex(): string {
-    return ByteUtil.uint8ArrayToHexString(this.toUint8Array());
+    return ByteUtil.uint8ArrayToHexString(ByteUtil.byteStringToUint8Array(this.handle));
   }
   isValid(): boolean {
-    return (typeof this.id == 'number' ? this.id > 0 : this.id.length > 0) && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
+    return this.id.length > 0 && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
   }
   static fromHandle(chain: string, token?: string, contractAddress?: string): AssetId {
     let handle = chain.substring(0, 8);
