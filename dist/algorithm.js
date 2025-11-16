@@ -474,7 +474,7 @@ class AssetId {
         return new Uint256(this.toUint8Array());
     }
     toHex() {
-        return ByteUtil.uint8ArrayToHexString(ByteUtil.byteStringToUint8Array(this.handle));
+        return ByteUtil.uint8ArrayToHexString(this.toUint8Array());
     }
     isValid() {
         return this.id.length > 0 && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
