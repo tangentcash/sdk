@@ -952,8 +952,8 @@ class RPC {
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
     }
-    static getAssetHolders(asset) {
-        return this.fetch('no-cache', 'getassetholders', [asset.handle]);
+    static getAssetHolders(asset, filter) {
+        return this.fetch('no-cache', 'getassetholders', [asset.handle, filter]);
     }
     static getBlockByNumber(number, unrolling) {
         return this.fetch('cache', 'getblockbynumber', unrolling != null ? [number, unrolling] : [number]);
