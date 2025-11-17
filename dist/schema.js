@@ -132,7 +132,8 @@ var Transactions;
     class ValidatorAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
-            this.blockProduction = 'uint8';
+            this.blockProduction = 'boolean';
+            this.blockProductionStake = 'decimal?';
             this.participationStakes = [
                 'asset', 'assetid',
                 'stake', 'decimal'

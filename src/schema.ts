@@ -104,7 +104,8 @@ export namespace Transactions {
 
   export class ValidatorAdjustment extends Ledger.Transaction {
     static typename: string = 'validator_adjustment';
-    blockProduction: string = 'uint8';
+    blockProduction: string = 'boolean';
+    blockProductionStake: string = 'decimal?';
     participationStakes: string[] = [
       'asset', 'assetid',
       'stake', 'decimal'
