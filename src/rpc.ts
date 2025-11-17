@@ -278,7 +278,7 @@ export class EventResolver {
     if (!events || !Array.isArray(events))
       return result;
 
-    const isNumber = (v: any) => BigNumber.isBigNumber(v) || new BigNumber(v).isFinite();
+    const isNumber = (v: any) => typeof v == 'string' && v.startsWith('0x') ? false : BigNumber.isBigNumber(v) || new BigNumber(v, 10).isFinite();
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
       const size = result.events.length;
@@ -321,7 +321,7 @@ export class EventResolver {
               result.account.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0), reserve: new BigNumber(0) };
 
             const ownerState = result.account.balances[ownerAddress][asset.handle];
-            ownerState.supply = ownerState.supply.plus(supply)
+            ownerState.supply = ownerState.supply.plus(supply);
             ownerState.reserve = ownerState.reserve.plus(reserve);
             result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: owner, supply: new BigNumber(supply), reserve: new BigNumber(reserve) });
           } else if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {

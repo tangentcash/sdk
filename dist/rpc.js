@@ -141,7 +141,7 @@ class EventResolver {
         };
         if (!events || !Array.isArray(events))
             return result;
-        const isNumber = (v) => bignumber_js_1.default.isBigNumber(v) || new bignumber_js_1.default(v).isFinite();
+        const isNumber = (v) => typeof v == 'string' && v.startsWith('0x') ? false : bignumber_js_1.default.isBigNumber(v) || new bignumber_js_1.default(v, 10).isFinite();
         for (let i = 0; i < events.length; i++) {
             const event = events[i];
             const size = result.events.length;
