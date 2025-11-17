@@ -386,7 +386,7 @@ export class EventResolver {
                   if (!result.bridge.queues[ownerAddress])
                     result.bridge.queues[ownerAddress] = { };
                   result.bridge.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
-                  result.events.push({ type: EventType.BridgeQueue, asset: asset, owner: ownerAddress, transactionHash: transactionHash });
+                  result.events.push({ type: EventType.BridgeQueue, asset: asset, owner: ownerAddress, transactionHash: isNumber(transactionHash) ? null : transactionHash });
                 }
                 break;
               }
