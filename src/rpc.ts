@@ -89,7 +89,7 @@ export type EventData = {
 } | {
   type: EventType.WitnessTransaction,
   asset: AssetId,
-  transactionId: string
+  stateHash: string
 } | {
   type: EventType.RollupReceipt,
   transactionHash: string,
@@ -115,7 +115,7 @@ export type SummaryState = {
   },
   witness: {
     accounts: Record<string, { asset: AssetId, purpose: 'routing' | 'bridge' | 'witness', aliases: string[] }>
-    transactions: Record<string, { asset: AssetId, transactionIds: string[] }>
+    transactions: Record<string, { asset: AssetId, stateHashes: string[] }>
   },
   receipts: Record<string, { executionIndex: number, relativeGasUse: BigNumber }>,
   errors: string[],
@@ -438,14 +438,16 @@ export class EventResolver {
           break;
         }
         case Types.WitnessTransaction: {
-          if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
-            const [assetId, transactionId] = event.args;
+          if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
+            const [assetId, stateHash] = event.args;
             const asset = new AssetId(assetId);
+
+            const hash = new Uint256(stateHash.toString()).toHex();
             if (result.witness.transactions[asset.handle] != null)
-              result.witness.transactions[asset.handle].transactionIds.push(transactionId);
+              result.witness.transactions[asset.handle].stateHashes.push(hash);
             else
-              result.witness.transactions[asset.handle] = { asset: asset, transactionIds: [transactionId] };
-            result.events.push({ type: EventType.WitnessTransaction, asset: asset, transactionId: transactionId });
+              result.witness.transactions[asset.handle] = { asset: asset, stateHashes: [hash] };
+            result.events.push({ type: EventType.WitnessTransaction, asset: asset, stateHash: hash });
           }
           break;
         }

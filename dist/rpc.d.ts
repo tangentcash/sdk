@@ -92,7 +92,7 @@ export type EventData = {
 } | {
     type: EventType.WitnessTransaction;
     asset: AssetId;
-    transactionId: string;
+    stateHash: string;
 } | {
     type: EventType.RollupReceipt;
     transactionHash: string;
@@ -144,7 +144,7 @@ export type SummaryState = {
         }>;
         transactions: Record<string, {
             asset: AssetId;
-            transactionIds: string[];
+            stateHashes: string[];
         }>;
     };
     receipts: Record<string, {

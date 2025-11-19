@@ -295,14 +295,15 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.WitnessTransaction: {
-                    if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string') {
-                        const [assetId, transactionId] = event.args;
+                    if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
+                        const [assetId, stateHash] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
+                        const hash = new algorithm_1.Uint256(stateHash.toString()).toHex();
                         if (result.witness.transactions[asset.handle] != null)
-                            result.witness.transactions[asset.handle].transactionIds.push(transactionId);
+                            result.witness.transactions[asset.handle].stateHashes.push(hash);
                         else
-                            result.witness.transactions[asset.handle] = { asset: asset, transactionIds: [transactionId] };
-                        result.events.push({ type: EventType.WitnessTransaction, asset: asset, transactionId: transactionId });
+                            result.witness.transactions[asset.handle] = { asset: asset, stateHashes: [hash] };
+                        result.events.push({ type: EventType.WitnessTransaction, asset: asset, stateHash: hash });
                     }
                     break;
                 }
