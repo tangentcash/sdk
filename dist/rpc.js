@@ -184,7 +184,7 @@ class EventResolver {
                         const ownerState = result.account.balances[ownerAddress][asset.handle];
                         ownerState.supply = ownerState.supply.plus(supply);
                         ownerState.reserve = ownerState.reserve.plus(reserve);
-                        result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: owner, supply: new bignumber_js_1.default(supply), reserve: new bignumber_js_1.default(reserve) });
+                        result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: ownerAddress, supply: new bignumber_js_1.default(supply), reserve: new bignumber_js_1.default(reserve) });
                     }
                     else if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
                         const [assetId, owner, fee] = event.args;
@@ -202,7 +202,7 @@ class EventResolver {
                         const feeState = result.account.fees[ownerAddress][asset.handle];
                         balanceState.supply = balanceState.supply.plus(fee);
                         feeState.fee = feeState.fee.plus(fee);
-                        result.events.push({ type: EventType.TransferFee, asset: asset, owner: owner, fee: new bignumber_js_1.default(fee) });
+                        result.events.push({ type: EventType.TransferFee, asset: asset, owner: ownerAddress, fee: new bignumber_js_1.default(fee) });
                     }
                     break;
                 }
@@ -217,7 +217,7 @@ class EventResolver {
                             result.bridge.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
                         const state = result.bridge.balances[ownerAddress][asset.handle];
                         state.supply = state.supply.plus(value);
-                        result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: owner, value: new bignumber_js_1.default(value) });
+                        result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: ownerAddress, value: new bignumber_js_1.default(value) });
                     }
                     break;
                 }

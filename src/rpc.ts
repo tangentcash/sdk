@@ -323,7 +323,7 @@ export class EventResolver {
             const ownerState = result.account.balances[ownerAddress][asset.handle];
             ownerState.supply = ownerState.supply.plus(supply);
             ownerState.reserve = ownerState.reserve.plus(reserve);
-            result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: owner, supply: new BigNumber(supply), reserve: new BigNumber(reserve) });
+            result.events.push({ type: EventType.TransferIsolated, asset: asset, owner: ownerAddress, supply: new BigNumber(supply), reserve: new BigNumber(reserve) });
           } else if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
             const [assetId, owner, fee] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
@@ -342,7 +342,7 @@ export class EventResolver {
             const feeState = result.account.fees[ownerAddress][asset.handle];
             balanceState.supply = balanceState.supply.plus(fee);
             feeState.fee = feeState.fee.plus(fee);
-            result.events.push({ type: EventType.TransferFee, asset: asset, owner: owner, fee: new BigNumber(fee) });
+            result.events.push({ type: EventType.TransferFee, asset: asset, owner: ownerAddress, fee: new BigNumber(fee) });
           }
           break;
         }
@@ -358,7 +358,7 @@ export class EventResolver {
             
             const state = result.bridge.balances[ownerAddress][asset.handle];
             state.supply = state.supply.plus(value);
-            result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: owner, value: new BigNumber(value) });
+            result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: ownerAddress, value: new BigNumber(value) });
           }
           break;
         }
