@@ -543,6 +543,7 @@ export class RPC {
     data: new InterfaceProps(),
     preload: false
   };
+  static strict: boolean = false;
   static socket: WebSocket | null = null;
   static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
@@ -564,7 +565,8 @@ export class RPC {
       interfaces.offline.delete(location);
     } else {  
       interfaces.online.delete(location);
-      interfaces.offline.add(location);
+      if (!this.strict)
+        interfaces.offline.add(location);
     }
     if (this.onIpsetStore != null)
       this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
@@ -661,7 +663,8 @@ export class RPC {
             const scheme = new URL('tcp://' + seed);
             const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
             if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
-              interfaces.offline.add(address);
+              if (!this.strict)
+                interfaces.offline.add(address);
               interfaces.online.delete(address);
               ++results;
             }
