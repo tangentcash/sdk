@@ -132,7 +132,7 @@ var Transactions;
     class ValidatorAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
-            this.attestationStakes = [
+            this.attestations = [
                 'has', 'assetid',
                 'stake', 'decimal',
                 'hasAcceptsAccountRequests', 'boolean',

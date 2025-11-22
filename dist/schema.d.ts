@@ -73,7 +73,7 @@ export declare namespace Transactions {
     }
     class ValidatorAdjustment extends Ledger.Transaction {
         static typename: string;
-        attestationStakes: string[];
+        attestations: string[];
         hasParticipation: string;
         participationStake: string;
         hasProduction: string;
