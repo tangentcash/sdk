@@ -138,8 +138,7 @@ export namespace Transactions {
   export class BridgeWithdrawal extends Ledger.Transaction {
     static typename: string = 'bridge_withdrawal';
     onlyIfNotInQueue: string = 'boolean';
-    fromManager: string = 'pubkeyhash';
-    toManager: string = 'pubkeyhash';
+    manager: string = 'pubkeyhash';
     to: string[] = [
       'to', 'string',
       'value', 'decimal'

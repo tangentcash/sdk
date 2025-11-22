@@ -89,8 +89,7 @@ export declare namespace Transactions {
     class BridgeWithdrawal extends Ledger.Transaction {
         static typename: string;
         onlyIfNotInQueue: string;
-        fromManager: string;
-        toManager: string;
+        manager: string;
         to: string[];
         getType(): string;
     }

@@ -170,8 +170,7 @@ var Transactions;
         constructor() {
             super(...arguments);
             this.onlyIfNotInQueue = 'boolean';
-            this.fromManager = 'pubkeyhash';
-            this.toManager = 'pubkeyhash';
+            this.manager = 'pubkeyhash';
             this.to = [
                 'to', 'string',
                 'value', 'decimal'
