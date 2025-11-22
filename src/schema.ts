@@ -48,12 +48,12 @@ export namespace States {
     static typename: string = 'account_balance';
   }
 
-  export class BridgeBalance {
-    static typename: string = 'bridge_balance';
+  export class ValidatorAttestation {
+    static typename: string = 'validator_attestation';
   }
 
-  export class BridgePolicy {
-    static typename: string = 'bridge_policy';
+  export class BridgeBalance {
+    static typename: string = 'bridge_balance';
   }
 
   export class WitnessAccount {
@@ -104,16 +104,25 @@ export namespace Transactions {
 
   export class ValidatorAdjustment extends Ledger.Transaction {
     static typename: string = 'validator_adjustment';
-    blockProduction: string = 'boolean';
-    blockProductionStake: string = 'decimal?';
-    participationStakes: string[] = [
-      'asset', 'assetid',
-      'stake', 'decimal'
-    ];
     attestationStakes: string[] = [
-      'asset', 'assetid',
-      'stake', 'decimal'
+      'has', 'assetid',
+      'stake', 'decimal',
+      'hasAcceptsAccountRequests', 'boolean',
+      'hasAcceptsWithdrawalRequests', 'boolean',
+      'hasSecurityLevel', 'boolean',
+      'hasIncomingFee', 'boolean',
+      'hasOutgoingFee', 'boolean',
+      'hasParticipationThreshold', 'boolean',
+      'acceptsAccountRequests', 'boolean?',
+      'acceptsWithdrawalRequests', 'boolean?',
+      'securityLevel', 'uint8?',
+      'incomingFee', 'decimal?',
+      'outgoingFee', 'decimal?',
     ];
+    hasParticipation: string = 'boolean';
+    participationStake: string = 'decimal?';
+    hasProduction: string = 'boolean';
+    productionStake: string = 'decimal?';
 
     getType() { return ValidatorAdjustment.typename; }
   }
@@ -139,18 +148,6 @@ export namespace Transactions {
     getType() { return BridgeWithdrawal.typename; }
   }
 
-  export class BridgeAdjustment extends Ledger.Transaction {
-    static typename: string = 'bridge_adjustment';
-    incomingFee: string = 'decimal';
-    outgoingFee: string = 'decimal';
-    participationThreshold: string = 'decimal';
-    securityLevel: string = 'uint8';
-    acceptsAccountRequests: string = 'boolean';
-    acceptsWithdrawalRequests: string = 'boolean';
-
-    getType() { return BridgeAdjustment.typename; }
-  }
-
   export class BridgeMigration extends Ledger.Transaction {
     static typename: string = 'bridge_migration';
     participants: string[] = [
@@ -168,12 +165,11 @@ export namespace Transactions {
     'call': 'Call program',
     'rollup': 'Rollup',
     'validator_adjustment': 'Adjust validator',
+    'bridge_attestation': 'Process bridge transaction',
     'bridge_account': 'Order bridge address',
     'bridge_account_finalization': 'Issue bridge address',
     'bridge_withdrawal': 'Order bridge withdrawal',
     'bridge_withdrawal_finalization': 'Issue bridge transaction',
-    'bridge_attestation': 'Process bridge transaction',
-    'bridge_adjustment': 'Adjust bridge',
     'bridge_migration': 'Order bridge signer migration',
     'bridge_migration_finalization': 'Migrate bridge signer'
   };

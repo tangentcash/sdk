@@ -74,10 +74,7 @@ export type EventData = {
 } | {
   type: EventType.BridgePolicy,
   asset: AssetId,
-  owner: string,
-  securityLevel: BigNumber,
-  acceptsAccountRequests: boolean,
-  acceptsWithdrawalRequests: boolean
+  owner: string
 } | {
   type: EventType.BridgeParticipant,
   owner: string
@@ -110,7 +107,7 @@ export type SummaryState = {
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber }>>,
     accounts: Record<string, Record<string, { asset: AssetId, newAccounts: number}>>,
     queues: Record<string, Record<string, { asset: AssetId, transactionHash: string | null}>>,
-    policies: Record<string, Record<string, { asset: AssetId, securityLevel: number, acceptsAccountRequests: boolean, acceptsWithdrawalRequests: boolean }>>,
+    policies: Record<string, Record<string, { asset: AssetId }>>,
     participants: Set<string>
   },
   witness: {
@@ -346,23 +343,7 @@ export class EventResolver {
           }
           break;
         }
-        case Types.BridgeBalance: {
-          if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
-            const [assetId, owner, value] = event.args;
-            const asset = new AssetId(assetId);
-            const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
-            if (!result.bridge.balances[ownerAddress])
-              result.bridge.balances[ownerAddress] = { };
-            if (!result.bridge.balances[ownerAddress][asset.handle])
-              result.bridge.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0) };
-            
-            const state = result.bridge.balances[ownerAddress][asset.handle];
-            state.supply = state.supply.plus(value);
-            result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: ownerAddress, value: new BigNumber(value) });
-          }
-          break;
-        }
-        case Types.BridgePolicy: {
+        case Types.ValidatorAttestation: {
           if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
             const [assetId, owner, type] = event.args;
             const asset = new AssetId(assetId);
@@ -391,18 +372,31 @@ export class EventResolver {
                 break;
               }
               case 2: {
-                if (event.args.length >= 6 && isNumber(event.args[3]) && typeof event.args[4] == 'boolean' && typeof event.args[5] == 'boolean') {
-                  const [securityLevel, acceptsAccountRequests, acceptsWithdrawalRequests] = event.args.slice(3, 6);
-                  if (!result.bridge.policies[ownerAddress])
-                    result.bridge.policies[ownerAddress] = { };
-                  result.bridge.policies[ownerAddress][asset.handle] = { asset: asset, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests };
-                  result.events.push({ type: EventType.BridgePolicy, asset: asset, owner: ownerAddress, securityLevel: securityLevel, acceptsAccountRequests: acceptsAccountRequests, acceptsWithdrawalRequests: acceptsWithdrawalRequests });
-                }
+                if (!result.bridge.policies[ownerAddress])
+                  result.bridge.policies[ownerAddress] = { };
+                result.bridge.policies[ownerAddress][asset.handle] = { asset: asset };
+                result.events.push({ type: EventType.BridgePolicy, asset: asset, owner: ownerAddress });      
                 break;
               }
               default:
                 break;
             }
+          }
+          break;
+        }
+        case Types.BridgeBalance: {
+          if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
+            const [assetId, owner, value] = event.args;
+            const asset = new AssetId(assetId);
+            const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
+            if (!result.bridge.balances[ownerAddress])
+              result.bridge.balances[ownerAddress] = { };
+            if (!result.bridge.balances[ownerAddress][asset.handle])
+              result.bridge.balances[ownerAddress][asset.handle] = { asset: asset, supply: new BigNumber(0) };
+            
+            const state = result.bridge.balances[ownerAddress][asset.handle];
+            state.supply = state.supply.plus(value);
+            result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: ownerAddress, value: new BigNumber(value) });
           }
           break;
         }
@@ -463,6 +457,7 @@ export class EventResolver {
           break;
         }
         case Types.BridgeAccount: 
+        case Types.BridgeWithdrawal:
         case Types.BridgeMigration: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
@@ -1094,14 +1089,11 @@ export class RPC {
   static getBlockchains(): Promise<any[] | null> {
     return this.fetch('cache', 'getblockchains', []);
   }
-  static getBestBridgeRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
-    return this.fetch('no-cache', 'getbestbridgerewardsforselection', [asset.handle, offset, count]);
+  static getBestValidatorAttestationsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
+    return this.fetch('no-cache', 'getbestvalidatorattestationsforselection', [asset.handle, offset, count]);
   }
   static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getbestbridgebalancesforselection', [asset.handle, offset, count]);
-  }
-  static getBestBridgePoliciesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
-    return this.fetch('no-cache', 'getbestbridgepoliciesforselection', [asset.handle, offset, count]);
   }
   static getNextAccountNonce(address: string): Promise<{ min: BigNumber | string, max: BigNumber | string } | null> {
     return this.fetch('no-cache', 'getnextaccountnonce', [address]);
@@ -1118,8 +1110,8 @@ export class RPC {
   static getValidatorProduction(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorproduction', [address]);
   }
-  static getValidatorParticipations(address: string, offset: number, count: number): Promise<any[] | null> {
-    return this.fetch('no-cache', 'getvalidatorparticipations', [address, offset, count]);
+  static getValidatorParticipation(address: string): Promise<any[] | null> {
+    return this.fetch('no-cache', 'getvalidatorparticipation', [address]);
   }
   static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getvalidatorattestations', [address, offset, count]);

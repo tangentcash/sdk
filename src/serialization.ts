@@ -503,7 +503,12 @@ export class SchemaUtil {
           if (type.length > 1 && type.length % 2 == 0) {
             for (let i = 0; i < type.length; i += 2) {
               const arrayField = type[i + 0];
-              write(arrayField, type[i + 1], element[arrayField]);
+              const fieldType = type[i + 1];
+              let optional = typeof fieldType == 'string' && fieldType?.indexOf('?') != -1;
+              if (optional && value !== undefined)
+                write(arrayField, fieldType?.replace('?', ''), element[arrayField]);
+              else if (!optional)
+                write(arrayField, fieldType, element[arrayField]);
             }
           } else {
             write(type[0], type[1], element);
@@ -602,7 +607,18 @@ export class SchemaUtil {
             if (type.length > 1 && type.length % 2 == 0) {
               for (let i = 0; i < type.length; i += 2) {
                 const arrayField: string = type[i + 0];
-                element[arrayField] = read(arrayField, type[i + 1]);
+                const fieldType: string = type[i + 1];
+                let optional = typeof fieldType == 'string' && fieldType?.indexOf('?') != -1;
+                if (optional) {
+                  let seek = stream.seek;
+                  try {
+                    object[field] = read(arrayField, fieldType?.replace('?', ''));
+                  } catch {
+                    stream.seek = seek;
+                  }
+                } else {
+                  element[arrayField] = read(arrayField, fieldType);
+                }
               }
             } else {
               element = read(type[0], type[1]);

@@ -78,9 +78,6 @@ export type EventData = {
     type: EventType.BridgePolicy;
     asset: AssetId;
     owner: string;
-    securityLevel: BigNumber;
-    acceptsAccountRequests: boolean;
-    acceptsWithdrawalRequests: boolean;
 } | {
     type: EventType.BridgeParticipant;
     owner: string;
@@ -130,9 +127,6 @@ export type SummaryState = {
         }>>;
         policies: Record<string, Record<string, {
             asset: AssetId;
-            securityLevel: number;
-            acceptsAccountRequests: boolean;
-            acceptsWithdrawalRequests: boolean;
         }>>;
         participants: Set<string>;
     };
@@ -292,9 +286,8 @@ export declare class RPC {
     } | null>;
     static getParticipations(): Promise<any[] | null>;
     static getBlockchains(): Promise<any[] | null>;
-    static getBestBridgeRewardsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestValidatorAttestationsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
-    static getBestBridgePoliciesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getNextAccountNonce(address: string): Promise<{
         min: BigNumber | string;
         max: BigNumber | string;
@@ -307,7 +300,7 @@ export declare class RPC {
     static getAccountBalances(address: string, offset: number, count: number): Promise<any[] | null>;
     static getAccountDelegation(address: string): Promise<any | null>;
     static getValidatorProduction(address: string): Promise<any | null>;
-    static getValidatorParticipations(address: string, offset: number, count: number): Promise<any[] | null>;
+    static getValidatorParticipation(address: string): Promise<any[] | null>;
     static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null>;
     static getBridgeBalances(address: string, offset: number, count: number): Promise<any[] | null>;
     static getWitnessAccount(address: string, asset: AssetId, walletAddress: string): Promise<any | null>;

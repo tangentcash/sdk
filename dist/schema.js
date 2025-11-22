@@ -68,14 +68,14 @@ var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
+    class ValidatorAttestation {
+    }
+    ValidatorAttestation.typename = 'validator_attestation';
+    States.ValidatorAttestation = ValidatorAttestation;
     class BridgeBalance {
     }
     BridgeBalance.typename = 'bridge_balance';
     States.BridgeBalance = BridgeBalance;
-    class BridgePolicy {
-    }
-    BridgePolicy.typename = 'bridge_policy';
-    States.BridgePolicy = BridgePolicy;
     class WitnessAccount {
     }
     WitnessAccount.typename = 'witness_account';
@@ -132,16 +132,25 @@ var Transactions;
     class ValidatorAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
-            this.blockProduction = 'boolean';
-            this.blockProductionStake = 'decimal?';
-            this.participationStakes = [
-                'asset', 'assetid',
-                'stake', 'decimal'
-            ];
             this.attestationStakes = [
-                'asset', 'assetid',
-                'stake', 'decimal'
+                'has', 'assetid',
+                'stake', 'decimal',
+                'hasAcceptsAccountRequests', 'boolean',
+                'hasAcceptsWithdrawalRequests', 'boolean',
+                'hasSecurityLevel', 'boolean',
+                'hasIncomingFee', 'boolean',
+                'hasOutgoingFee', 'boolean',
+                'hasParticipationThreshold', 'boolean',
+                'acceptsAccountRequests', 'boolean?',
+                'acceptsWithdrawalRequests', 'boolean?',
+                'securityLevel', 'uint8?',
+                'incomingFee', 'decimal?',
+                'outgoingFee', 'decimal?',
             ];
+            this.hasParticipation = 'boolean';
+            this.participationStake = 'decimal?';
+            this.hasProduction = 'boolean';
+            this.productionStake = 'decimal?';
         }
         getType() { return ValidatorAdjustment.typename; }
     }
@@ -172,20 +181,6 @@ var Transactions;
     }
     BridgeWithdrawal.typename = 'bridge_withdrawal';
     Transactions.BridgeWithdrawal = BridgeWithdrawal;
-    class BridgeAdjustment extends Ledger.Transaction {
-        constructor() {
-            super(...arguments);
-            this.incomingFee = 'decimal';
-            this.outgoingFee = 'decimal';
-            this.participationThreshold = 'decimal';
-            this.securityLevel = 'uint8';
-            this.acceptsAccountRequests = 'boolean';
-            this.acceptsWithdrawalRequests = 'boolean';
-        }
-        getType() { return BridgeAdjustment.typename; }
-    }
-    BridgeAdjustment.typename = 'bridge_adjustment';
-    Transactions.BridgeAdjustment = BridgeAdjustment;
     class BridgeMigration extends Ledger.Transaction {
         constructor() {
             super(...arguments);
@@ -205,12 +200,11 @@ var Transactions;
         'call': 'Call program',
         'rollup': 'Rollup',
         'validator_adjustment': 'Adjust validator',
+        'bridge_attestation': 'Process bridge transaction',
         'bridge_account': 'Order bridge address',
         'bridge_account_finalization': 'Issue bridge address',
         'bridge_withdrawal': 'Order bridge withdrawal',
         'bridge_withdrawal_finalization': 'Issue bridge transaction',
-        'bridge_attestation': 'Process bridge transaction',
-        'bridge_adjustment': 'Adjust bridge',
         'bridge_migration': 'Order bridge signer migration',
         'bridge_migration_finalization': 'Migrate bridge signer'
     };

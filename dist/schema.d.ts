@@ -32,10 +32,10 @@ export declare namespace States {
     class AccountBalance {
         static typename: string;
     }
-    class BridgeBalance {
+    class ValidatorAttestation {
         static typename: string;
     }
-    class BridgePolicy {
+    class BridgeBalance {
         static typename: string;
     }
     class WitnessAccount {
@@ -73,10 +73,11 @@ export declare namespace Transactions {
     }
     class ValidatorAdjustment extends Ledger.Transaction {
         static typename: string;
-        blockProduction: string;
-        blockProductionStake: string;
-        participationStakes: string[];
         attestationStakes: string[];
+        hasParticipation: string;
+        participationStake: string;
+        hasProduction: string;
+        productionStake: string;
         getType(): string;
     }
     class BridgeAccount extends Ledger.Commitment {
@@ -91,16 +92,6 @@ export declare namespace Transactions {
         fromManager: string;
         toManager: string;
         to: string[];
-        getType(): string;
-    }
-    class BridgeAdjustment extends Ledger.Transaction {
-        static typename: string;
-        incomingFee: string;
-        outgoingFee: string;
-        participationThreshold: string;
-        securityLevel: string;
-        acceptsAccountRequests: string;
-        acceptsWithdrawalRequests: string;
         getType(): string;
     }
     class BridgeMigration extends Ledger.Transaction {
