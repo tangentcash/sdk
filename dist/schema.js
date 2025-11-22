@@ -133,7 +133,7 @@ var Transactions;
         constructor() {
             super(...arguments);
             this.attestations = [
-                'has', 'assetid',
+                'asset', 'assetid',
                 'stake', 'decimal',
                 'hasAcceptsAccountRequests', 'boolean',
                 'hasAcceptsWithdrawalRequests', 'boolean',
