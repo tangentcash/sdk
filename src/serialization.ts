@@ -505,7 +505,7 @@ export class SchemaUtil {
               const arrayField = type[i + 0];
               const fieldType = type[i + 1];
               let optional = typeof fieldType == 'string' && fieldType?.indexOf('?') != -1;
-              if (optional && value !== undefined)
+              if (optional && element[arrayField] !== undefined)
                 write(arrayField, fieldType?.replace('?', ''), element[arrayField]);
               else if (!optional)
                 write(arrayField, fieldType, element[arrayField]);
