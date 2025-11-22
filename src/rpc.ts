@@ -1110,7 +1110,7 @@ export class RPC {
   static getValidatorProduction(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorproduction', [address]);
   }
-  static getValidatorParticipation(address: string): Promise<any[] | null> {
+  static getValidatorParticipation(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorparticipation', [address]);
   }
   static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null> {
