@@ -65,8 +65,8 @@ Chain.mainnet = {
     ADDRESS_VERSION: 0x4,
     ADDRESS_PREFIX: 'tc',
     PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [2, 16],
-    MESSAGE_MAGIC: 0x6a513fb6b3b71f02
+    PARTICIPATION_COMMITTEE: [3, 16],
+    MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.testnet = {
     NAME: 'testnet',
@@ -77,8 +77,8 @@ Chain.testnet = {
     ADDRESS_VERSION: 0x5,
     ADDRESS_PREFIX: 'tct',
     PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [2, 16],
-    MESSAGE_MAGIC: 0x6a513fb6b3b71f02
+    PARTICIPATION_COMMITTEE: [3, 16],
+    MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.regtest = {
     NAME: 'regtest',
@@ -90,7 +90,7 @@ Chain.regtest = {
     ADDRESS_PREFIX: 'tcrt',
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [1, 16],
-    MESSAGE_MAGIC: 0x6a513fb6b3b71f02
+    MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.size = {
     HASHSIG: 65,

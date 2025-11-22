@@ -118,6 +118,7 @@ export namespace Transactions {
       'securityLevel', 'uint8?',
       'incomingFee', 'decimal?',
       'outgoingFee', 'decimal?',
+      'participationThreshold', 'decimal?',
     ];
     hasParticipation: string = 'boolean';
     participationStake: string = 'decimal?';

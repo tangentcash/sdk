@@ -146,6 +146,7 @@ var Transactions;
                 'securityLevel', 'uint8?',
                 'incomingFee', 'decimal?',
                 'outgoingFee', 'decimal?',
+                'participationThreshold', 'decimal?',
             ];
             this.hasParticipation = 'boolean';
             this.participationStake = 'decimal?';
