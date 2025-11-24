@@ -23,7 +23,7 @@ class Readability {
         return asset.token || asset.chain || '?';
     }
     static toAssetFallback(asset) {
-        return this.toAssetSymbol(asset)[0];
+        return this.toAssetSymbol(asset).substring(0, 3);
     }
     static toAssetImage(asset) {
         const target = this.toAssetSymbol(asset);
