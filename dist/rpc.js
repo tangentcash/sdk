@@ -620,7 +620,7 @@ class RPC {
                 try {
                     if (this.onNodeRequest)
                         this.onNodeRequest(location[0], method, body, content.length);
-                    let dataContent;
+                    let dataContent, data;
                     try {
                         const response = await fetch(location[0], {
                             headers: { 'Content-Type': 'application/json' },
@@ -628,13 +628,13 @@ class RPC {
                             body: content,
                         });
                         dataContent = await response.text();
+                        data = JSON.parse(dataContent);
                         this.reportAvailability('http', location[1], true);
                     }
                     catch (exception) {
                         this.reportAvailability('http', location[1], false);
                         throw exception;
                     }
-                    const data = JSON.parse(dataContent);
                     if (this.onNodeResponse)
                         this.onNodeResponse(location[0], method, data, dataContent.length);
                     result = this.fetchResult(hash, data);
@@ -651,7 +651,6 @@ class RPC {
             }
             else {
                 const found = await this.fetchIpset('http', 'fetch');
-                console.log(found);
                 if (!found) {
                     break;
                 }
