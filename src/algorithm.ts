@@ -449,8 +449,11 @@ export class AssetId {
       this.chain = segments[0];
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
+      if (!!this.token != !!this.checksum) {
+        this.token = this.checksum = null;
+      }
       if (this.chain == 'TAN')
-        throw false;
+        this.id = (this.token != null || this.checksum != null ? new Uint256(ByteUtil.byteStringToUint8Array(`:${this.token}:${this.checksum}`)).toCompactHex() : '0x0');
     } catch {
       this.id = '0x0';
       this.handle = 'TAN';
@@ -463,10 +466,7 @@ export class AssetId {
     return this.id.toString() == value.id.toString();
   }
   toUint8Array(): Uint8Array {
-    if (this.id == '0x0')
-      return new Uint8Array();
-
-    return ByteUtil.byteStringToUint8Array(this.handle);
+    return ByteUtil.hexStringToUint8Array(this.id);
   }
   toUint256(): Uint256 {
     return new Uint256(this.toUint8Array());
