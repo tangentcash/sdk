@@ -229,7 +229,6 @@ export declare class RPC {
         data: InterfaceProps;
         preload: boolean;
     };
-    static strict: boolean;
     static socket: WebSocket | null;
     static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
