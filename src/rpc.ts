@@ -833,6 +833,7 @@ export class RPC {
         }
       } else {
         const found = await this.fetchIpset('http', 'fetch');
+        console.log(found);
         if (!found) {
           break;
         }
