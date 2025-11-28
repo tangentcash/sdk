@@ -875,9 +875,6 @@ class RPC {
     static getWallet() {
         return this.fetch('no-cache', 'getwallet');
     }
-    static getParticipations() {
-        return this.fetch('no-cache', 'getparticipations');
-    }
     static getBlockchains() {
         return this.fetch('cache', 'getblockchains', []);
     }

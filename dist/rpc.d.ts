@@ -283,7 +283,6 @@ export declare class RPC {
         publicKeyHash: string;
         address: string;
     } | null>;
-    static getParticipations(): Promise<any[] | null>;
     static getBlockchains(): Promise<any[] | null>;
     static getBestValidatorAttestationsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
