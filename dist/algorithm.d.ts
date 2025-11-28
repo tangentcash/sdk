@@ -7,14 +7,16 @@ export type ChainParams = {
     PUBKEY_PREFIX: string;
     ADDRESS_VERSION: number;
     ADDRESS_PREFIX: string;
-    PRODUCTION_COMMITTEE: number;
-    PARTICIPATION_COMMITTEE: [number, number];
     MESSAGE_MAGIC: number;
 };
 export declare class Chain {
     static mainnet: ChainParams;
     static testnet: ChainParams;
     static regtest: ChainParams;
+    static policy: {
+        PRODUCTION_COMMITTEE: number;
+        PARTICIPATION_COMMITTEE: number[];
+    };
     static size: {
         HASHSIG: number;
         SECKEY: number;

@@ -104,6 +104,10 @@ export namespace Transactions {
 
   export class ValidatorAdjustment extends Ledger.Transaction {
     static typename: string = 'validator_adjustment';
+    migrations: string[] = [
+      'bridgeWithdrawalFinalizationHash', 'uint256',
+      'participant', 'pubkeyhash'
+    ];
     attestations: string[] = [
       'asset', 'assetid',
       'stake', 'decimal',
@@ -148,29 +152,17 @@ export namespace Transactions {
     getType() { return BridgeWithdrawal.typename; }
   }
 
-  export class BridgeMigration extends Ledger.Transaction {
-    static typename: string = 'bridge_migration';
-    participants: string[] = [
-      'asset', 'assetid',
-      'manager', 'pubkeyhash',
-      'owner', 'pubkeyhash'
-    ];
-
-    getType() { return BridgeMigration.typename; }
-  }
-
   export const typenames: Record<string, string> = {
     'transfer': 'Transfer',   
     'upgrade': 'Create program',
     'call': 'Call program',
     'rollup': 'Rollup',
     'validator_adjustment': 'Adjust validator',
+    'validator_adjustment_finalization': 'Migrate validator',
     'bridge_attestation': 'Process bridge transaction',
     'bridge_account': 'Order bridge address',
     'bridge_account_finalization': 'Issue bridge address',
     'bridge_withdrawal': 'Order bridge withdrawal',
-    'bridge_withdrawal_finalization': 'Issue bridge transaction',
-    'bridge_migration': 'Order bridge signer migration',
-    'bridge_migration_finalization': 'Migrate bridge signer'
+    'bridge_withdrawal_finalization': 'Issue bridge transaction'
   };
 }

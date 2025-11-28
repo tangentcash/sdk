@@ -132,6 +132,10 @@ var Transactions;
     class ValidatorAdjustment extends Ledger.Transaction {
         constructor() {
             super(...arguments);
+            this.migrations = [
+                'bridgeWithdrawalFinalizationHash', 'uint256',
+                'participant', 'pubkeyhash'
+            ];
             this.attestations = [
                 'asset', 'assetid',
                 'stake', 'decimal',
@@ -181,31 +185,17 @@ var Transactions;
     }
     BridgeWithdrawal.typename = 'bridge_withdrawal';
     Transactions.BridgeWithdrawal = BridgeWithdrawal;
-    class BridgeMigration extends Ledger.Transaction {
-        constructor() {
-            super(...arguments);
-            this.participants = [
-                'asset', 'assetid',
-                'manager', 'pubkeyhash',
-                'owner', 'pubkeyhash'
-            ];
-        }
-        getType() { return BridgeMigration.typename; }
-    }
-    BridgeMigration.typename = 'bridge_migration';
-    Transactions.BridgeMigration = BridgeMigration;
     Transactions.typenames = {
         'transfer': 'Transfer',
         'upgrade': 'Create program',
         'call': 'Call program',
         'rollup': 'Rollup',
         'validator_adjustment': 'Adjust validator',
+        'validator_adjustment_finalization': 'Migrate validator',
         'bridge_attestation': 'Process bridge transaction',
         'bridge_account': 'Order bridge address',
         'bridge_account_finalization': 'Issue bridge address',
         'bridge_withdrawal': 'Order bridge withdrawal',
-        'bridge_withdrawal_finalization': 'Issue bridge transaction',
-        'bridge_migration': 'Order bridge signer migration',
-        'bridge_migration_finalization': 'Migrate bridge signer'
+        'bridge_withdrawal_finalization': 'Issue bridge transaction'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

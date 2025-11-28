@@ -73,6 +73,7 @@ export declare namespace Transactions {
     }
     class ValidatorAdjustment extends Ledger.Transaction {
         static typename: string;
+        migrations: string[];
         attestations: string[];
         hasParticipation: string;
         participationStake: string;
@@ -91,11 +92,6 @@ export declare namespace Transactions {
         onlyIfNotInQueue: string;
         manager: string;
         to: string[];
-        getType(): string;
-    }
-    class BridgeMigration extends Ledger.Transaction {
-        static typename: string;
-        participants: string[];
         getType(): string;
     }
     const typenames: Record<string, string>;

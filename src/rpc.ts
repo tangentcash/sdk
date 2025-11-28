@@ -458,7 +458,7 @@ export class EventResolver {
         }
         case Types.BridgeAccount: 
         case Types.BridgeWithdrawal:
-        case Types.BridgeMigration: {
+        case Types.ValidatorAdjustment: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;

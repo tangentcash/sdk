@@ -64,8 +64,6 @@ Chain.mainnet = {
     PUBKEY_PREFIX: 'pub',
     ADDRESS_VERSION: 0x4,
     ADDRESS_PREFIX: 'tc',
-    PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [3, 16],
     MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.testnet = {
@@ -76,8 +74,6 @@ Chain.testnet = {
     PUBKEY_PREFIX: 'pubt',
     ADDRESS_VERSION: 0x5,
     ADDRESS_PREFIX: 'tct',
-    PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [3, 16],
     MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.regtest = {
@@ -88,9 +84,11 @@ Chain.regtest = {
     PUBKEY_PREFIX: 'pubrt',
     ADDRESS_VERSION: 0x6,
     ADDRESS_PREFIX: 'tcrt',
-    PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [1, 16],
     MESSAGE_MAGIC: 0x73d308e9
+};
+Chain.policy = {
+    PRODUCTION_COMMITTEE: 12,
+    PARTICIPATION_COMMITTEE: [5, 21],
 };
 Chain.size = {
     HASHSIG: 65,
