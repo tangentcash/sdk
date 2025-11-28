@@ -129,6 +129,7 @@ export type SummaryState = {
             asset: AssetId;
         }>>;
         participants: Set<string>;
+        migrations: Record<string, boolean>;
     };
     witness: {
         accounts: Record<string, {

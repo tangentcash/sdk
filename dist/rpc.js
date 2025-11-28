@@ -129,7 +129,8 @@ class EventResolver {
                 accounts: {},
                 queues: {},
                 policies: {},
-                participants: new Set()
+                participants: new Set(),
+                migrations: {}
             },
             witness: {
                 accounts: {},
@@ -316,12 +317,21 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.BridgeAccount:
-                case types_1.Types.BridgeWithdrawal:
-                case types_1.Types.ValidatorAdjustment: {
+                case types_1.Types.BridgeWithdrawal: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
                         result.bridge.participants.add(ownerAddress);
+                        result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
+                    }
+                    break;
+                }
+                case types_1.Types.ValidatorAdjustment: {
+                    if (event.args.length == 2 && typeof event.args[0] == 'boolean' && typeof event.args[1] == 'string') {
+                        const [selfMigration, owner] = event.args;
+                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
+                        result.bridge.participants.add(ownerAddress);
+                        result.bridge.migrations[ownerAddress] = selfMigration;
                         result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
                     }
                     break;

@@ -108,7 +108,8 @@ export type SummaryState = {
     accounts: Record<string, Record<string, { asset: AssetId, newAccounts: number}>>,
     queues: Record<string, Record<string, { asset: AssetId, transactionHash: string | null}>>,
     policies: Record<string, Record<string, { asset: AssetId }>>,
-    participants: Set<string>
+    participants: Set<string>,
+    migrations: Record<string, boolean>
   },
   witness: {
     accounts: Record<string, { asset: AssetId, purpose: 'routing' | 'bridge' | 'witness', aliases: string[] }>
@@ -262,7 +263,8 @@ export class EventResolver {
         accounts: { },
         queues: { },
         policies: { },
-        participants: new Set<string>()
+        participants: new Set<string>(),
+        migrations: { }
       },
       witness: {
         accounts: { },
@@ -457,12 +459,21 @@ export class EventResolver {
           break;
         }
         case Types.BridgeAccount: 
-        case Types.BridgeWithdrawal:
-        case Types.ValidatorAdjustment: {
+        case Types.BridgeWithdrawal: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
             result.bridge.participants.add(ownerAddress);
+            result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
+          }
+          break;
+        }
+        case Types.ValidatorAdjustment: {
+          if (event.args.length == 2 && typeof event.args[0] == 'boolean' && typeof event.args[1] == 'string') {
+            const [selfMigration, owner] = event.args;
+            const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
+            result.bridge.participants.add(ownerAddress);
+            result.bridge.migrations[ownerAddress] = selfMigration;
             result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
           }
           break;
