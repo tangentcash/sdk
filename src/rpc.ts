@@ -1009,6 +1009,16 @@ export class RPC {
   static applyServer(server: string | null): void {
     this.httpInterfaces.overrider = server;
     this.wsInterfaces.overrider = server;
+    if (server != null) {
+      this.httpInterfaces.online.add(server);
+      this.httpInterfaces.offline.delete(server);
+      this.wsInterfaces.online.add(server);
+      this.wsInterfaces.offline.delete(server);
+      if (this.onIpsetStore != null) {
+        this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
+        this.onIpsetStore('ws', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
+      }
+    }
   }
   static applyImplementation(implementation: {
     onNodeMessage?: NodeMessage,
