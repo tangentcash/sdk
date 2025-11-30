@@ -71,7 +71,7 @@ export declare namespace Transactions {
         static typename: string;
         getType(): string;
     }
-    class ValidatorAdjustment extends Ledger.Transaction {
+    class Setup extends Ledger.Transaction {
         static typename: string;
         migrations: string[];
         attestations: string[];
@@ -81,13 +81,13 @@ export declare namespace Transactions {
         productionStake: string;
         getType(): string;
     }
-    class BridgeAccount extends Ledger.Commitment {
+    class Route extends Ledger.Commitment {
         static typename: string;
         manager: string;
         routingAddress: string;
         getType(): string;
     }
-    class BridgeWithdrawal extends Ledger.Transaction {
+    class Withdraw extends Ledger.Transaction {
         static typename: string;
         onlyIfNotInQueue: string;
         manager: string;

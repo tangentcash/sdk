@@ -8,7 +8,7 @@ export class Types {
   static WitnessAccount = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.WitnessAccount.typename));
   static WitnessTransaction = Hashing.hash32(ByteUtil.byteStringToUint8Array(States.WitnessTransaction.typename));
   static Rollup = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Rollup.typename));
-  static ValidatorAdjustment = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.ValidatorAdjustment.typename));
-  static BridgeAccount = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.BridgeAccount.typename));
-  static BridgeWithdrawal = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.BridgeWithdrawal.typename));
+  static Setup = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Setup.typename));
+  static Route = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Route.typename));
+  static Withdraw = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Withdraw.typename));
 }

@@ -458,8 +458,8 @@ export class EventResolver {
           }
           break;
         }
-        case Types.BridgeAccount: 
-        case Types.BridgeWithdrawal: {
+        case Types.Route: 
+        case Types.Withdraw: {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
@@ -468,7 +468,7 @@ export class EventResolver {
           }
           break;
         }
-        case Types.ValidatorAdjustment: {
+        case Types.Setup: {
           if (event.args.length == 2 && typeof event.args[0] == 'boolean' && typeof event.args[1] == 'string') {
             const [selfMigration, owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;

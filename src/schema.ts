@@ -102,10 +102,10 @@ export namespace Transactions {
     getType() { return Rollup.typename; }
   }
 
-  export class ValidatorAdjustment extends Ledger.Transaction {
-    static typename: string = 'validator_adjustment';
+  export class Setup extends Ledger.Transaction {
+    static typename: string = 'setup';
     migrations: string[] = [
-      'bridgeWithdrawalFinalizationHash', 'uint256',
+      'broadcastHash', 'uint256',
       'participant', 'pubkeyhash'
     ];
     attestations: string[] = [
@@ -129,19 +129,19 @@ export namespace Transactions {
     hasProduction: string = 'boolean';
     productionStake: string = 'decimal?';
 
-    getType() { return ValidatorAdjustment.typename; }
+    getType() { return Setup.typename; }
   }
 
-  export class BridgeAccount extends Ledger.Commitment {
-    static typename: string = 'bridge_account';
+  export class Route extends Ledger.Commitment {
+    static typename: string = 'route';
     manager: string = 'pubkeyhash';
     routingAddress: string = 'string';
 
-    getType() { return BridgeAccount.typename; }
+    getType() { return Route.typename; }
   }
 
-  export class BridgeWithdrawal extends Ledger.Transaction {
-    static typename: string = 'bridge_withdrawal';
+  export class Withdraw extends Ledger.Transaction {
+    static typename: string = 'withdraw';
     onlyIfNotInQueue: string = 'boolean';
     manager: string = 'pubkeyhash';
     to: string[] = [
@@ -149,20 +149,20 @@ export namespace Transactions {
       'value', 'decimal'
     ];
 
-    getType() { return BridgeWithdrawal.typename; }
+    getType() { return Withdraw.typename; }
   }
 
   export const typenames: Record<string, string> = {
     'transfer': 'Transfer',   
-    'upgrade': 'Create program',
-    'call': 'Call program',
+    'deploy': 'Deploy',
+    'call': 'Call',
     'rollup': 'Rollup',
-    'validator_adjustment': 'Adjust validator',
-    'validator_adjustment_finalization': 'Migrate validator',
-    'bridge_attestation': 'Process bridge transaction',
-    'bridge_account': 'Order bridge address',
-    'bridge_account_finalization': 'Issue bridge address',
-    'bridge_withdrawal': 'Order bridge withdrawal',
-    'bridge_withdrawal_finalization': 'Issue bridge transaction'
+    'setup': 'Setup validator',
+    'migrate': 'Migrate validator',
+    'attestate': 'Process bridge transaction',
+    'route': 'Order bridge address',
+    'bind': 'Bind bridge address',
+    'withdraw': 'Order bridge withdrawal',
+    'broadcast': 'Broadcast bridge transaction'
   };
 }

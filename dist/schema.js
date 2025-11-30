@@ -129,11 +129,11 @@ var Transactions;
     }
     Rollup.typename = 'rollup';
     Transactions.Rollup = Rollup;
-    class ValidatorAdjustment extends Ledger.Transaction {
+    class Setup extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.migrations = [
-                'bridgeWithdrawalFinalizationHash', 'uint256',
+                'broadcastHash', 'uint256',
                 'participant', 'pubkeyhash'
             ];
             this.attestations = [
@@ -157,21 +157,21 @@ var Transactions;
             this.hasProduction = 'boolean';
             this.productionStake = 'decimal?';
         }
-        getType() { return ValidatorAdjustment.typename; }
+        getType() { return Setup.typename; }
     }
-    ValidatorAdjustment.typename = 'validator_adjustment';
-    Transactions.ValidatorAdjustment = ValidatorAdjustment;
-    class BridgeAccount extends Ledger.Commitment {
+    Setup.typename = 'setup';
+    Transactions.Setup = Setup;
+    class Route extends Ledger.Commitment {
         constructor() {
             super(...arguments);
             this.manager = 'pubkeyhash';
             this.routingAddress = 'string';
         }
-        getType() { return BridgeAccount.typename; }
+        getType() { return Route.typename; }
     }
-    BridgeAccount.typename = 'bridge_account';
-    Transactions.BridgeAccount = BridgeAccount;
-    class BridgeWithdrawal extends Ledger.Transaction {
+    Route.typename = 'route';
+    Transactions.Route = Route;
+    class Withdraw extends Ledger.Transaction {
         constructor() {
             super(...arguments);
             this.onlyIfNotInQueue = 'boolean';
@@ -181,21 +181,21 @@ var Transactions;
                 'value', 'decimal'
             ];
         }
-        getType() { return BridgeWithdrawal.typename; }
+        getType() { return Withdraw.typename; }
     }
-    BridgeWithdrawal.typename = 'bridge_withdrawal';
-    Transactions.BridgeWithdrawal = BridgeWithdrawal;
+    Withdraw.typename = 'withdraw';
+    Transactions.Withdraw = Withdraw;
     Transactions.typenames = {
         'transfer': 'Transfer',
-        'upgrade': 'Create program',
-        'call': 'Call program',
+        'deploy': 'Deploy',
+        'call': 'Call',
         'rollup': 'Rollup',
-        'validator_adjustment': 'Adjust validator',
-        'validator_adjustment_finalization': 'Migrate validator',
-        'bridge_attestation': 'Process bridge transaction',
-        'bridge_account': 'Order bridge address',
-        'bridge_account_finalization': 'Issue bridge address',
-        'bridge_withdrawal': 'Order bridge withdrawal',
-        'bridge_withdrawal_finalization': 'Issue bridge transaction'
+        'setup': 'Setup validator',
+        'migrate': 'Migrate validator',
+        'attestate': 'Process bridge transaction',
+        'route': 'Order bridge address',
+        'bind': 'Bind bridge address',
+        'withdraw': 'Order bridge withdrawal',
+        'broadcast': 'Broadcast bridge transaction'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

@@ -316,8 +316,8 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.BridgeAccount:
-                case types_1.Types.BridgeWithdrawal: {
+                case types_1.Types.Route:
+                case types_1.Types.Withdraw: {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
@@ -326,7 +326,7 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.ValidatorAdjustment: {
+                case types_1.Types.Setup: {
                     if (event.args.length == 2 && typeof event.args[0] == 'boolean' && typeof event.args[1] == 'string') {
                         const [selfMigration, owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
