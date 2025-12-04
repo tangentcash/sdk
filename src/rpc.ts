@@ -1110,7 +1110,7 @@ export class RPC {
   static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getbestbridgebalancesforselection', [asset.handle, offset, count]);
   }
-  static getNextAccountNonce(address: string): Promise<{ min: BigNumber | string, max: BigNumber | string, next: BigNumber | string } | null> {
+  static getNextAccountNonce(address: string): Promise<BigNumber | string | null> {
     return this.fetch('no-cache', 'getnextaccountnonce', [address]);
   }
   static getAccountBalance(address: string, asset: AssetId): Promise<{ supply: BigNumber, reserve: BigNumber, balance: BigNumber } | null> {

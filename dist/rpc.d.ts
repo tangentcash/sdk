@@ -287,11 +287,7 @@ export declare class RPC {
     static getBlockchains(): Promise<any[] | null>;
     static getBestValidatorAttestationsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
-    static getNextAccountNonce(address: string): Promise<{
-        min: BigNumber | string;
-        max: BigNumber | string;
-        next: BigNumber | string;
-    } | null>;
+    static getNextAccountNonce(address: string): Promise<BigNumber | string | null>;
     static getAccountBalance(address: string, asset: AssetId): Promise<{
         supply: BigNumber;
         reserve: BigNumber;
