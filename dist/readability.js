@@ -36,10 +36,9 @@ class Readability {
             return chain + ' ' + (assets_json_1.default[token] || token);
         return assets_json_1.default[chain] || chain;
     }
-    static toAddressIndex(index) {
-        if (!index)
-            return 'ANY';
-        return (index.eq(0) ? 'ROOT' : 'CHILD') + index.toString();
+    static toTaggedAddress(tagAddress) {
+        const [address, tag] = tagAddress.split('#');
+        return { address: address, tag: tag || null };
     }
     static toTransactionType(type) {
         if (typeof type == 'string')

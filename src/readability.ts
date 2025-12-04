@@ -44,11 +44,9 @@ export class Readability {
 
     return (Assets as Record<string, string>)[chain] || chain;
   }
-  static toAddressIndex(index?: BigNumber): string {
-    if (!index)
-      return 'ANY';
-
-    return (index.eq(0) ? 'ROOT' : 'CHILD') + index.toString();
+  static toTaggedAddress(tagAddress: string): { address: string, tag: string | null } {
+    const [address, tag] = tagAddress.split('#');
+    return { address: address, tag: tag || null };
   }
   static toTransactionType(type: string | number): string {
     if (typeof type == 'string')
