@@ -290,6 +290,7 @@ export declare class RPC {
     static getNextAccountNonce(address: string): Promise<{
         min: BigNumber | string;
         max: BigNumber | string;
+        next: BigNumber | string;
     } | null>;
     static getAccountBalance(address: string, asset: AssetId): Promise<{
         supply: BigNumber;
