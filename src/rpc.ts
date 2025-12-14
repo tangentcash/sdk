@@ -1092,8 +1092,8 @@ export class RPC {
   static simulateTransaction(hexMessage: string): Promise<any | null> {
     return this.fetch('no-cache', 'simulatetransaction', [hexMessage]);
   }
-  static submitTransaction(hexMessage: string, validate: boolean): Promise<string | null> {
-    return this.fetch('no-cache', 'submittransaction', [hexMessage, validate]);
+  static submitTransaction(hexMessage: string): Promise<string | null> {
+    return this.fetch('no-cache', 'submittransaction', [hexMessage]);
   }
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, value: BigNumber, method: string, args: any[]): Promise<any | null> {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, value, method, ...args]);
