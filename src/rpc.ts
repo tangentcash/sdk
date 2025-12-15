@@ -1125,11 +1125,20 @@ export class RPC {
   static getValidatorProduction(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorproduction', [address]);
   }
+  static getValidatorProductionWithRewards(address: string): Promise<any | null> {
+    return this.fetch('no-cache', 'getvalidatorproductionwithrewards', [address]);
+  }
   static getValidatorParticipation(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorparticipation', [address]);
   }
+  static getValidatorParticipationWithRewards(address: string): Promise<any | null> {
+    return this.fetch('no-cache', 'getvalidatorparticipationwithrewards', [address]);
+  }
   static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getvalidatorattestations', [address, offset, count]);
+  }
+  static getValidatorAttestationsWithRewards(address: string): Promise<any[] | null> {
+    return this.fetch('no-cache', 'getvalidatorattestationswithrewards', [address]);
   }
   static getBridgeBalances(address: string, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getbridgebalances', [address, offset, count]);

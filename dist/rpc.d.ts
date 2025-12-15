@@ -296,8 +296,11 @@ export declare class RPC {
     static getAccountBalances(address: string, offset: number, count: number): Promise<any[] | null>;
     static getAccountDelegation(address: string): Promise<any | null>;
     static getValidatorProduction(address: string): Promise<any | null>;
+    static getValidatorProductionWithRewards(address: string): Promise<any | null>;
     static getValidatorParticipation(address: string): Promise<any | null>;
+    static getValidatorParticipationWithRewards(address: string): Promise<any | null>;
     static getValidatorAttestations(address: string, offset: number, count: number): Promise<any[] | null>;
+    static getValidatorAttestationsWithRewards(address: string): Promise<any[] | null>;
     static getBridgeBalances(address: string, offset: number, count: number): Promise<any[] | null>;
     static getWitnessAccount(address: string, asset: AssetId, walletAddress: string): Promise<any | null>;
     static getWitnessAccounts(address: string, offset: number, count: number): Promise<any[] | null>;

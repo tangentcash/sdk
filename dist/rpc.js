@@ -919,11 +919,20 @@ class RPC {
     static getValidatorProduction(address) {
         return this.fetch('no-cache', 'getvalidatorproduction', [address]);
     }
+    static getValidatorProductionWithRewards(address) {
+        return this.fetch('no-cache', 'getvalidatorproductionwithrewards', [address]);
+    }
     static getValidatorParticipation(address) {
         return this.fetch('no-cache', 'getvalidatorparticipation', [address]);
     }
+    static getValidatorParticipationWithRewards(address) {
+        return this.fetch('no-cache', 'getvalidatorparticipationwithrewards', [address]);
+    }
     static getValidatorAttestations(address, offset, count) {
         return this.fetch('no-cache', 'getvalidatorattestations', [address, offset, count]);
+    }
+    static getValidatorAttestationsWithRewards(address) {
+        return this.fetch('no-cache', 'getvalidatorattestationswithrewards', [address]);
     }
     static getBridgeBalances(address, offset, count) {
         return this.fetch('no-cache', 'getbridgebalances', [address, offset, count]);
