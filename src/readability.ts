@@ -21,9 +21,9 @@ export class Readability {
   };
 
   static toAssetQuery(asset: AssetId): string {
-    const token: string | null = asset.token?.toUpperCase() || null;
-    const chain: string = asset.chain?.toUpperCase() || 'Unknown';
-    const name: string | null = (Assets as Record<string, string>)[token || chain];
+    const token: string | null = asset.token || null;
+    const chain: string = asset.chain || 'Unknown';
+    const name: string | null = (Assets as Record<string, string>)[token?.toUpperCase() || chain?.toUpperCase()];
     return name ? name + ' ' + (token || chain) : (token || chain);
   }
   static toAssetSymbol(asset: AssetId): string {
@@ -37,12 +37,12 @@ export class Readability {
     return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
   }
   static toAssetName(asset: AssetId, chainOnly?: boolean): string {
-    const token: string | null = chainOnly ? null : asset.token?.toUpperCase() || null;
-    const chain: string = asset.chain?.toUpperCase() || 'Unknown';
+    const token: string | null = chainOnly ? null : asset.token || null;
+    const chain: string = asset.chain || 'Unknown';
     if (token != null)
-      return chain + ' ' + ((Assets as Record<string, string>)[token] || token);
+      return chain + ' ' + ((Assets as Record<string, string>)[token.toUpperCase()] || token);
 
-    return (Assets as Record<string, string>)[chain] || chain;
+    return (Assets as Record<string, string>)[chain.toUpperCase()] || chain;
   }
   static toTaggedAddress(tagAddress: string): { address: string, tag: string | null } {
     const [address, tag] = tagAddress.split('#');

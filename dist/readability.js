@@ -14,9 +14,9 @@ function lerp(a, b, t) {
 }
 class Readability {
     static toAssetQuery(asset) {
-        const token = asset.token?.toUpperCase() || null;
-        const chain = asset.chain?.toUpperCase() || 'Unknown';
-        const name = assets_json_1.default[token || chain];
+        const token = asset.token || null;
+        const chain = asset.chain || 'Unknown';
+        const name = assets_json_1.default[token?.toUpperCase() || chain?.toUpperCase()];
         return name ? name + ' ' + (token || chain) : (token || chain);
     }
     static toAssetSymbol(asset) {
@@ -30,11 +30,11 @@ class Readability {
         return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
     }
     static toAssetName(asset, chainOnly) {
-        const token = chainOnly ? null : asset.token?.toUpperCase() || null;
-        const chain = asset.chain?.toUpperCase() || 'Unknown';
+        const token = chainOnly ? null : asset.token || null;
+        const chain = asset.chain || 'Unknown';
         if (token != null)
-            return chain + ' ' + (assets_json_1.default[token] || token);
-        return assets_json_1.default[chain] || chain;
+            return chain + ' ' + (assets_json_1.default[token.toUpperCase()] || token);
+        return assets_json_1.default[chain.toUpperCase()] || chain;
     }
     static toTaggedAddress(tagAddress) {
         const [address, tag] = tagAddress.split('#');
