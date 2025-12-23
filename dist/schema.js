@@ -176,10 +176,8 @@ var Transactions;
             super(...arguments);
             this.onlyIfNotInQueue = 'boolean';
             this.manager = 'pubkeyhash';
-            this.to = [
-                'to', 'string',
-                'value', 'decimal'
-            ];
+            this.toAddress = 'string';
+            this.toValue = 'decimal';
         }
         getType() { return Withdraw.typename; }
     }

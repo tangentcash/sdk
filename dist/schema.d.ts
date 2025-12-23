@@ -91,7 +91,8 @@ export declare namespace Transactions {
         static typename: string;
         onlyIfNotInQueue: string;
         manager: string;
-        to: string[];
+        toAddress: string;
+        toValue: string;
         getType(): string;
     }
     const typenames: Record<string, string>;

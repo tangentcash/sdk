@@ -144,10 +144,8 @@ export namespace Transactions {
     static typename: string = 'withdraw';
     onlyIfNotInQueue: string = 'boolean';
     manager: string = 'pubkeyhash';
-    to: string[] = [
-      'to', 'string',
-      'value', 'decimal'
-    ];
+    toAddress: string = 'string';
+    toValue: string = 'decimal';
 
     getType() { return Withdraw.typename; }
   }

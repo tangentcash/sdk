@@ -45,7 +45,7 @@ export class Stream {
     return this;
   }
   writeString(value: string): Stream {
-    if (TextUtil.isHexEncoding(value)) {
+    if (TextUtil.isHexEncoding(value, true)) {
       let data = ByteUtil.hexStringToUint8Array(value);
       let source: string = ByteUtil.uint8ArrayToByteString(data);
       if (source.length > StreamUtil.getMaxStringSize()) {
