@@ -157,10 +157,10 @@ export namespace Transactions {
     'rollup': 'Rollup',
     'setup': 'Setup validator',
     'migrate': 'Migrate validator',
-    'attestate': 'Process bridge transaction',
-    'route': 'Order bridge address',
-    'bind': 'Bind bridge address',
-    'withdraw': 'Order bridge withdrawal',
-    'broadcast': 'Broadcast bridge transaction'
+    'attestate': 'Bridge transaction',
+    'route': 'Create bridge',
+    'bind': 'Bind bridge',
+    'withdraw': 'Bridge withdraw',
+    'broadcast': 'Bridge broadcast'
   };
 }
