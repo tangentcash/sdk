@@ -1065,10 +1065,10 @@ export class RPC {
     return this.props.data;
   }
   static requiresSecureTransport(address: string): boolean {
-    if (typeof window != 'undefined' && window?.location?.protocol == 'https:')
-      return true;
-    else if (address == 'localhost')
+    if (address == 'localhost')
       return false;
+    else if (typeof window != 'undefined' && window?.location?.protocol == 'https:')
+      return true;
 
     const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     const ipv6Pattern = /^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$/;
