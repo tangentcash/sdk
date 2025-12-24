@@ -183,17 +183,27 @@ var Transactions;
     }
     Withdraw.typename = 'withdraw';
     Transactions.Withdraw = Withdraw;
+    class Anticast extends Ledger.Transaction {
+        constructor() {
+            super(...arguments);
+            this.broadcastHash = 'uint256';
+        }
+        getType() { return Anticast.typename; }
+    }
+    Anticast.typename = 'anticast';
+    Transactions.Anticast = Anticast;
     Transactions.typenames = {
         'transfer': 'Transfer',
         'deploy': 'Deploy',
         'call': 'Call',
         'rollup': 'Rollup',
         'setup': 'Setup validator',
-        'migrate': 'Migrate validator',
+        'migrate': 'Bridge migrate',
         'attestate': 'Bridge transaction',
         'route': 'Create bridge',
         'bind': 'Bind bridge',
         'withdraw': 'Bridge withdraw',
-        'broadcast': 'Bridge broadcast'
+        'broadcast': 'Bridge broadcast',
+        'anticast': 'Bridge protest'
     };
 })(Transactions || (exports.Transactions = Transactions = {}));

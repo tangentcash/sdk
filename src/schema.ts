@@ -150,17 +150,25 @@ export namespace Transactions {
     getType() { return Withdraw.typename; }
   }
 
+  export class Anticast extends Ledger.Transaction {
+    static typename: string = 'anticast';
+    broadcastHash: string = 'uint256';
+
+    getType() { return Anticast.typename; }
+  }
+
   export const typenames: Record<string, string> = {
     'transfer': 'Transfer',   
     'deploy': 'Deploy',
     'call': 'Call',
     'rollup': 'Rollup',
     'setup': 'Setup validator',
-    'migrate': 'Migrate validator',
+    'migrate': 'Bridge migrate',
     'attestate': 'Bridge transaction',
     'route': 'Create bridge',
     'bind': 'Bind bridge',
     'withdraw': 'Bridge withdraw',
-    'broadcast': 'Bridge broadcast'
+    'broadcast': 'Bridge broadcast',
+    'anticast': 'Bridge protest'
   };
 }

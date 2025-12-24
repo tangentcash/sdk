@@ -95,5 +95,10 @@ export declare namespace Transactions {
         toValue: string;
         getType(): string;
     }
+    class Anticast extends Ledger.Transaction {
+        static typename: string;
+        broadcastHash: string;
+        getType(): string;
+    }
     const typenames: Record<string, string>;
 }
