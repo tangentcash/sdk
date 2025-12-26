@@ -116,8 +116,11 @@ var Transactions;
         constructor() {
             super(...arguments);
             this.callable = 'pubkeyhash';
+            this.pays = [
+                'asset', 'assetid',
+                'value', 'decimal'
+            ];
             this.function = 'string';
-            this.value = 'decimal';
             this.args = 'args';
         }
         getType() { return Call.typename; }

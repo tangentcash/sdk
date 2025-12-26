@@ -62,8 +62,8 @@ export declare namespace Transactions {
     class Call extends Ledger.Transaction {
         static typename: string;
         callable: string;
+        pays: string[];
         function: string;
-        value: string;
         args: string;
         getType(): string;
     }
