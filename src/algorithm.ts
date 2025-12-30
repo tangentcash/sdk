@@ -427,6 +427,7 @@ export class AssetId {
   checksum: string | null;
 
   constructor(data?: number | string | BigNumber | Uint8Array) {
+    const nativeToken = 'TAN';
     data = BigNumber.isBigNumber(data) ? data.toNumber() : data;
     data = typeof data == 'number' ? '0x' + data.toString(16) : data;
     data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
@@ -442,18 +443,18 @@ export class AssetId {
       this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(32 - numeric.byteCount()));
 
       const segments = this.handle.split(':');
-      this.chain = segments[0];
+      this.chain = segments[0] || nativeToken;
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
       if (!!this.token != !!this.checksum) {
         this.token = this.checksum = null;
       }
-      if (this.chain == 'TAN')
+      if (this.chain == nativeToken)
         this.id = (this.token != null || this.checksum != null ? new Uint256(ByteUtil.byteStringToUint8Array(`:${this.token}:${this.checksum}`)).toCompactHex() : '0x0');
     } catch {
       this.id = '0x0';
-      this.handle = 'TAN';
-      this.chain = 'TAN';
+      this.handle = nativeToken;
+      this.chain = nativeToken;
       this.token = null;
       this.checksum = null;
     }
