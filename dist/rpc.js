@@ -889,8 +889,8 @@ class RPC {
     static submitTransaction(hexMessage) {
         return this.fetch('no-cache', 'submittransaction', [hexMessage]);
     }
-    static callTransaction(asset, fromAddress, toAddress, value, method, args) {
-        return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, value, method, ...args]);
+    static callTransaction(asset, fromAddress, toAddress, method, args) {
+        return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
     }
     static getWallet() {
         return this.fetch('no-cache', 'getwallet');
