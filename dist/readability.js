@@ -103,7 +103,7 @@ class Readability {
         if (symbol != null) {
             const prefix = this.prefixes[symbol];
             if (prefix != null) {
-                result = prefix + result;
+                result = result[0] == '-' ? ('-' + prefix + result.substring(1)) : (prefix + result);
             }
             else {
                 result += ' ' + symbol;
