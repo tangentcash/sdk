@@ -480,7 +480,7 @@ export class AssetId {
       handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
       if (contractAddress != null && contractAddress.length > 0) {
         let hash = Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
-        handle = (handle + ':' + hash.substring(0, Chain.size.ASSETID - (handle.length + 1)));
+        handle = (handle + ':' + hash.replace(/-_/g, '').substring(0, Chain.size.ASSETID - (handle.length + 1)));
       }
     } else
       handle = handle.toUpperCase();
