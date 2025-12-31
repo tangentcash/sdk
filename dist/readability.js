@@ -98,7 +98,17 @@ class Readability {
                 text[1] = text[1].substring(0, Math.min(6, text[1].length));
             }
         }
-        const result = text[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (text.length > 1 ? '.' + text[1] : '') + (asset ? ' ' + this.toAssetSymbol(asset) : '');
+        let symbol = asset ? this.toAssetSymbol(asset) : null;
+        let result = text[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (text.length > 1 ? '.' + text[1] : '');
+        if (symbol != null) {
+            const prefix = this.prefixes[symbol];
+            if (prefix != null) {
+                result = prefix + result;
+            }
+            else {
+                result += ' ' + symbol;
+            }
+        }
         return delta ? ((numeric.gt(0) ? '+' : '') + result) : result;
     }
     static toMoney(asset, value, delta) {
@@ -188,4 +198,7 @@ Readability.subscripts = {
     '7': '₇',
     '8': '₉',
     '9': '₉'
+};
+Readability.prefixes = {
+    'USD': '$'
 };

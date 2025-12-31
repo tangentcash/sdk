@@ -2,18 +2,8 @@ import { AssetId } from "./algorithm";
 import BigNumber from "bignumber.js";
 export declare function lerp(a: number, b: number, t: number): number;
 export declare class Readability {
-    static subscripts: {
-        '0': string;
-        '1': string;
-        '2': string;
-        '3': string;
-        '4': string;
-        '5': string;
-        '6': string;
-        '7': string;
-        '8': string;
-        '9': string;
-    };
+    static subscripts: Record<string, string>;
+    static prefixes: Record<string, string>;
     static toAssetQuery(asset: AssetId): string;
     static toAssetSymbol(asset: AssetId): string;
     static toAssetFallback(asset: AssetId): string;

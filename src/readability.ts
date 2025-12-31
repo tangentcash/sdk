@@ -7,7 +7,7 @@ export function lerp(a: number, b: number, t: number): number {
 }
 
 export class Readability {
-  static subscripts = {
+  static subscripts: Record<string, string> = {
     '0': '₀',
     '1': '₁',
     '2': '₂',
@@ -18,6 +18,9 @@ export class Readability {
     '7': '₇',
     '8': '₉',
     '9': '₉'
+  };
+  static prefixes: Record<string, string> = {
+    'USD': '$'
   };
 
   static toAssetQuery(asset: AssetId): string {
@@ -114,7 +117,16 @@ export class Readability {
       }
     }
     
-    const result = text[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (text.length > 1 ? '.' + text[1] : '') + (asset ? ' ' + this.toAssetSymbol(asset) : '');
+    let symbol = asset ? this.toAssetSymbol(asset) : null;
+    let result = text[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (text.length > 1 ? '.' + text[1] : '');
+    if (symbol != null) {
+      const prefix = this.prefixes[symbol];
+      if (prefix != null) {
+        result = prefix + result;
+      } else {
+        result += ' ' + symbol;
+      }
+    }
     return delta ? ((numeric.gt(0) ? '+' : '') + result) : result;
   }
   static toMoney(asset: AssetId | null, value: string | number | BigNumber | null, delta?: boolean): string {
