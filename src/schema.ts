@@ -89,11 +89,11 @@ export namespace Transactions {
   export class Call extends Ledger.Transaction {
     static typename: string = 'call';
     callable: string = 'pubkeyhash';
+    function: string = 'string';
     pays: string[] = [
       'asset', 'assetid',
       'value', 'decimal'
     ];
-    function: string = 'string';
     args: string = 'args';
 
     getType() { return Call.typename; }
