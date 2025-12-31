@@ -56,6 +56,7 @@ export class Chain {
     MESSAGE_MAGIC: 0x73d308e9
   };
   static policy = {
+    TOKEN_NAME: 'TAN',
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [5, 21],
   };
@@ -427,7 +428,6 @@ export class AssetId {
   checksum: string | null;
 
   constructor(data?: number | string | BigNumber | Uint8Array) {
-    const nativeToken = 'TAN';
     data = BigNumber.isBigNumber(data) ? data.toNumber() : data;
     data = typeof data == 'number' ? '0x' + data.toString(16) : data;
     data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
@@ -443,18 +443,18 @@ export class AssetId {
       this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(32 - numeric.byteCount()));
 
       const segments = this.handle.split(':');
-      this.chain = segments[0] || nativeToken;
+      this.chain = segments[0] || Chain.policy.TOKEN_NAME;
       this.token = segments[1] || null;
       this.checksum = segments[2] || null;
       if (!!this.token != !!this.checksum) {
         this.token = this.checksum = null;
       }
-      if (this.chain == nativeToken)
+      if (this.chain == Chain.policy.TOKEN_NAME)
         this.id = (this.token != null || this.checksum != null ? new Uint256(ByteUtil.byteStringToUint8Array(`:${this.token}:${this.checksum}`)).toCompactHex() : '0x0');
     } catch {
       this.id = '0x0';
-      this.handle = nativeToken;
-      this.chain = nativeToken;
+      this.handle = Chain.policy.TOKEN_NAME;
+      this.chain = Chain.policy.TOKEN_NAME;
       this.token = null;
       this.checksum = null;
     }
@@ -475,19 +475,17 @@ export class AssetId {
     return this.id.length > 0 && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
   }
   static fromHandle(chain: string, token?: string, contractAddress?: string): AssetId {
-    let handle = chain.substring(0, 8);
+    let handle = chain == Chain.policy.TOKEN_NAME ? '' : chain.substring(0, 8);
     if (token != null && token.length > 0) {
       handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
-      if (contractAddress != null && contractAddress.length > 0) {
-        let hash = Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
-        handle = (handle + ':' + hash.replace(/[-_]/g, '').substring(0, Chain.size.ASSETID - (handle.length + 1)));
-      }
+      if (contractAddress != null && contractAddress.length > 0)
+        handle = (handle + ':' + this.checksumOf(contractAddress).substring(0, Chain.size.ASSETID - (handle.length + 1)));
     } else
       handle = handle.toUpperCase();
     return new AssetId(ByteUtil.byteStringToUint8Array(handle));
   }
   static checksumOf(contractAddress: string): string {
-    return Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
+    return Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true).replace(/[-_]/g, '');
   }
 }
 

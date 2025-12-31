@@ -14,6 +14,7 @@ export declare class Chain {
     static testnet: ChainParams;
     static regtest: ChainParams;
     static policy: {
+        TOKEN_NAME: string;
         PRODUCTION_COMMITTEE: number;
         PARTICIPATION_COMMITTEE: number[];
     };

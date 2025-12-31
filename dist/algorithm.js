@@ -87,6 +87,7 @@ Chain.regtest = {
     MESSAGE_MAGIC: 0x73d308e9
 };
 Chain.policy = {
+    TOKEN_NAME: 'TAN',
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [5, 21],
 };
@@ -434,7 +435,6 @@ class Pubkeyhash {
 exports.Pubkeyhash = Pubkeyhash;
 class AssetId {
     constructor(data) {
-        const nativeToken = 'TAN';
         data = bignumber_js_1.default.isBigNumber(data) ? data.toNumber() : data;
         data = typeof data == 'number' ? '0x' + data.toString(16) : data;
         data = typeof data == 'string' ? new Uint256(data).toUint8Array() : data;
@@ -447,19 +447,19 @@ class AssetId {
             this.id = numeric.toCompactHex();
             this.handle = ByteUtil.uint8ArrayToByteString(numeric.toUint8Array().slice(32 - numeric.byteCount()));
             const segments = this.handle.split(':');
-            this.chain = segments[0] || nativeToken;
+            this.chain = segments[0] || Chain.policy.TOKEN_NAME;
             this.token = segments[1] || null;
             this.checksum = segments[2] || null;
             if (!!this.token != !!this.checksum) {
                 this.token = this.checksum = null;
             }
-            if (this.chain == nativeToken)
+            if (this.chain == Chain.policy.TOKEN_NAME)
                 this.id = (this.token != null || this.checksum != null ? new Uint256(ByteUtil.byteStringToUint8Array(`:${this.token}:${this.checksum}`)).toCompactHex() : '0x0');
         }
         catch {
             this.id = '0x0';
-            this.handle = nativeToken;
-            this.chain = nativeToken;
+            this.handle = Chain.policy.TOKEN_NAME;
+            this.chain = Chain.policy.TOKEN_NAME;
             this.token = null;
             this.checksum = null;
         }
@@ -480,20 +480,18 @@ class AssetId {
         return this.id.length > 0 && this.handle.length > 0 && this.chain != null && (!this.token || (this.token != null && this.checksum != null));
     }
     static fromHandle(chain, token, contractAddress) {
-        let handle = chain.substring(0, 8);
+        let handle = chain == Chain.policy.TOKEN_NAME ? '' : chain.substring(0, 8);
         if (token != null && token.length > 0) {
             handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
-            if (contractAddress != null && contractAddress.length > 0) {
-                let hash = js_base64_1.Base64.fromUint8Array((0, sha1_1.sha1)(text_1.TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
-                handle = (handle + ':' + hash.replace(/[-_]/g, '').substring(0, Chain.size.ASSETID - (handle.length + 1)));
-            }
+            if (contractAddress != null && contractAddress.length > 0)
+                handle = (handle + ':' + this.checksumOf(contractAddress).substring(0, Chain.size.ASSETID - (handle.length + 1)));
         }
         else
             handle = handle.toUpperCase();
         return new AssetId(ByteUtil.byteStringToUint8Array(handle));
     }
     static checksumOf(contractAddress) {
-        return js_base64_1.Base64.fromUint8Array((0, sha1_1.sha1)(text_1.TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
+        return js_base64_1.Base64.fromUint8Array((0, sha1_1.sha1)(text_1.TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true).replace(/[-_]/g, '');
     }
 }
 exports.AssetId = AssetId;
