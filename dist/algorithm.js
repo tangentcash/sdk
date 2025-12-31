@@ -485,7 +485,7 @@ class AssetId {
             handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
             if (contractAddress != null && contractAddress.length > 0) {
                 let hash = js_base64_1.Base64.fromUint8Array((0, sha1_1.sha1)(text_1.TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true);
-                handle = (handle + ':' + hash.replace(/-_/g, '').substring(0, Chain.size.ASSETID - (handle.length + 1)));
+                handle = (handle + ':' + hash.replace(/[-_]/g, '').substring(0, Chain.size.ASSETID - (handle.length + 1)));
             }
         }
         else
