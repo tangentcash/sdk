@@ -20,5 +20,43 @@ class TextUtil {
     static isAsciiEncoding(data) {
         return /^[\x00-\x7F]*$/.test(data);
     }
+    static toValue(prevValue, nextValue) {
+        try {
+            if (!nextValue.length)
+                return nextValue;
+            let value = nextValue.trim();
+            if (value.endsWith('.'))
+                value += '0';
+            const numeric = new BigNumber(value, 10);
+            if (numeric.isLessThan(0) || numeric.isNaN() || !numeric.isFinite())
+                throw false;
+            return nextValue;
+        }
+        catch {
+            return prevValue;
+        }
+    }
+    static toValueOrPercent(prevValue, nextValue) {
+        if (nextValue.indexOf('%') == -1)
+            return this.toValue(prevValue, nextValue);
+        return this.toValue(prevValue.replace(/%/g, ''), nextValue.replace(/%/g, '')) + '%';
+    }
+    static toPercent(prevValue, nextValue) {
+        if (!nextValue.length)
+            return '';
+        return this.toValue(prevValue.replace(/%/g, ''), nextValue.replace(/%/g, '')) + '%';
+    }
+    static toNumericValue(value) {
+        return new BigNumber(value.length > 0 ? value.replace(/%/g, '') : 0);
+    }
+    static toNumericValueOrPercent(value) {
+        const isAbsolute = value.indexOf('%') == -1;
+        const result = isAbsolute ? this.toNumericValue(value) : this.toNumericValue(value).dividedBy(100);
+        return {
+            relative: isAbsolute ? null : result,
+            absolute: isAbsolute ? result : null,
+            value: result
+        };
+    }
 }
 exports.TextUtil = TextUtil;
