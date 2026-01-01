@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export class TextUtil {
   static findFirstNotOf(data: string, alphabet: string, offset: number = 0) {
     for (let i = offset; i < data.length; ++i) {

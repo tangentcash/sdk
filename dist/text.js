@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TextUtil = void 0;
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
 class TextUtil {
     static findFirstNotOf(data, alphabet, offset = 0) {
         for (let i = offset; i < data.length; ++i) {
@@ -27,7 +31,7 @@ class TextUtil {
             let value = nextValue.trim();
             if (value.endsWith('.'))
                 value += '0';
-            const numeric = new BigNumber(value, 10);
+            const numeric = new bignumber_js_1.default(value, 10);
             if (numeric.isLessThan(0) || numeric.isNaN() || !numeric.isFinite())
                 throw false;
             return nextValue;
@@ -47,7 +51,7 @@ class TextUtil {
         return this.toValue(prevValue.replace(/%/g, ''), nextValue.replace(/%/g, '')) + '%';
     }
     static toNumericValue(value) {
-        return new BigNumber(value.length > 0 ? value.replace(/%/g, '') : 0);
+        return new bignumber_js_1.default(value.length > 0 ? value.replace(/%/g, '') : 0);
     }
     static toNumericValueOrPercent(value) {
         const isAbsolute = value.indexOf('%') == -1;
