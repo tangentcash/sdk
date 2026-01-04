@@ -795,7 +795,9 @@ class RPC {
         this.httpInterfaces.overrider = server;
         this.wsInterfaces.overrider = server;
         if (server != null) {
+            this.httpInterfaces.servers.clear();
             this.httpInterfaces.servers.add(server);
+            this.wsInterfaces.servers.clear();
             this.wsInterfaces.servers.add(server);
             if (this.onIpsetStore != null) {
                 this.onIpsetStore('http', { servers: [...this.httpInterfaces.servers] });
