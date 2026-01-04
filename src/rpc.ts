@@ -13,8 +13,8 @@ export type NodeMessage = (event: { type: string, result: any }) => void;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = (type: 'http' | 'ws') => { online: string[], offline: string[] } | null;
-export type IpsetStore = (type: 'http' | 'ws', ipset: { online: string[], offline: string[] }) => boolean;
+export type IpsetLoad = (type: 'http' | 'ws') => { servers: string[] } | null;
+export type IpsetStore = (type: 'http' | 'ws', ipset: { servers: string[] }) => boolean;
 export type PropsLoad = () => InterfaceProps | null;
 export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
@@ -145,8 +145,7 @@ export type TransactionOutput = {
 }
 
 export type ServerInfo = {
-  online: Set<string>;
-  offline: Set<string>;
+  servers: Set<string>;
   overrider: string | null;
   preload: boolean;
 }
@@ -530,14 +529,12 @@ export class EventResolver {
 export class RPC {
   static resolver: string | null = null;
   static httpInterfaces: ServerInfo = {
-    online: new Set<string>(),
-    offline: new Set<string>(),
+    servers: new Set<string>(),
     overrider: null,
     preload: false
   };
   static wsInterfaces: ServerInfo = {
-    online: new Set<string>(),
-    offline: new Set<string>(),
+    servers: new Set<string>(),
     overrider: null,
     preload: false
   };
@@ -550,6 +547,7 @@ export class RPC {
     preload: false
   };
   static socket: WebSocket | null = null;
+  static addresses: string[] = [];
   static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
   static onNodeRequest: NodeRequest | null = null;
@@ -566,14 +564,12 @@ export class RPC {
   private static reportAvailability(type: 'ws' | 'http', location: string, available: boolean): void {
     const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
     if (available) {
-      interfaces.online.add(location);
-      interfaces.offline.delete(location);
-    } else {  
-      interfaces.online.delete(location);
-      interfaces.offline.add(location);
+      interfaces.servers.add(location);
+    } else {
+      interfaces.servers.delete(location);
     }
     if (this.onIpsetStore != null)
-      this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
+      this.onIpsetStore(type, { servers: [...interfaces.servers] });
   }
   private static fetchObject(data: any): any {
     if (typeof data == 'string') {
@@ -609,7 +605,7 @@ export class RPC {
     return new Error(`${message} — E${hash.substring(0, 8).toUpperCase()}`);
   }
   private static fetchResult(hash: string, data: any): any[] | undefined {    
-    if (Array.isArray(data) || data.result === undefined) {
+    if (!data || Array.isArray(data) || data.result === undefined) {
       return undefined;
     } else if (this.onCacheStore != null && hash != null && data.error == null)
       this.onCacheStore(hash, data.result);
@@ -617,7 +613,7 @@ export class RPC {
   }
   private static fetchNode(type: 'ws' | 'http'): [string, string] | null {
     try {
-      const nodes = Array.from(type == 'ws' ? this.wsInterfaces.online.keys() : this.httpInterfaces.online.keys());
+      const nodes = Array.from(type == 'ws' ? this.wsInterfaces.servers.keys() : this.httpInterfaces.servers.keys());
       const node = nodes[Math.floor(Math.random() * nodes.length)];
       const location = new URL('tcp://' + node);
       const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
@@ -636,16 +632,14 @@ export class RPC {
       return null;
     }
   }
-  private static async fetchIpset(type: 'ws' | 'http', mode: 'preload' | 'fetch'): Promise<number> {
+  private static async fetchIpset(type: 'ws' | 'http', mode: 'preload' | 'fetch', servers?: Set<string>): Promise<number> {
     const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
     if (interfaces.overrider != null) {
       try {
         const scheme = new URL('tcp://' + interfaces.overrider);
         const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-        const retry = interfaces.offline.has(address);
-        interfaces.offline.delete(address);
-        interfaces.online.add(address);
-        return retry ? 0 : 1;
+        interfaces.servers.add(address);
+        return !servers || !servers.has(address) ? 1 : 0;
       } catch {
         return 0;
       }
@@ -657,36 +651,22 @@ export class RPC {
         
         const seeds = this.onIpsetLoad ? this.onIpsetLoad(type) : null;
         interfaces.preload = true;
-        if (!seeds || !Array.isArray(seeds.online) || !Array.isArray(seeds.offline))
+        if (!seeds || !Array.isArray(seeds.servers))
           return 0;
 
         let results = 0;
-        for (let i = 0; i < seeds.offline.length; i++) {
+        for (let i = 0; i < seeds.servers.length; i++) {
           try {
-            const seed = seeds.offline[i];
+            const seed = seeds.servers[i];
             const scheme = new URL('tcp://' + seed);
             const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-            if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
-              interfaces.offline.add(address);
-              interfaces.online.delete(address);
+            if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
+              interfaces.servers.add(address);
               ++results;
             }
           } catch { }
         }
 
-        for (let i = 0; i < seeds.online.length; i++) {
-          try {
-            const seed = seeds.online[i];
-            const scheme = new URL('tcp://' + seed);
-            const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-            if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
-              interfaces.offline.delete(address);
-              interfaces.online.add(address);
-              ++results;
-            }
-          } catch { }
-        }
-        
         return results;
       }
       case 'fetch': {
@@ -716,8 +696,8 @@ export class RPC {
                 }
 
                 let address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-                if (seed.length > 0 && address.length > 0 && !interfaces.online.has(address) && !interfaces.offline.has(address)) {
-                  interfaces.online.add(address);
+                if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
+                  interfaces.servers.add(address);
                   ++results;
                 }
               } catch { }
@@ -732,7 +712,7 @@ export class RPC {
         }
     
         if (this.onIpsetStore != null)
-          this.onIpsetStore(type, { online: [...interfaces.online], offline: [...interfaces.offline] });
+          this.onIpsetStore(type, { servers: [...interfaces.servers] });
         return 0;
       }
       default:
@@ -760,8 +740,11 @@ export class RPC {
         return this.fetchObject(cache);
     }
 
+    if (!this.socket && !this.wsInterfaces.preload)
+      await this.connectSocket();
+
+    let result = undefined;
     if (this.socket != null) {
-      let result = undefined;
       try {
         if (this.onNodeRequest)
           this.onNodeRequest(this.socket.url, method, body, content.length);
@@ -791,10 +774,11 @@ export class RPC {
         if (this.onNodeError)
           this.onNodeError(this.socket?.url || '[unknown]', method, exception);
       }
-      
+    
       if (result !== undefined) {
         if (result instanceof Error)
           throw result;
+
         return result as T;
       }
     }
@@ -806,15 +790,15 @@ export class RPC {
         return null;
     }
 
-    while (this.httpInterfaces.offline.size < this.httpInterfaces.online.size) {
+    let servers = new Set<string>();
+    while (true) {
       const location = this.fetchNode('http');
-      if (location != null) {
-        let result = undefined;
+      if (location && !servers.has(location[1])) {
         try {
           if (this.onNodeRequest)
             this.onNodeRequest(location[0], method, body, content.length);
-  
-          let dataContent: string, data: any;
+
+          let dataContent: string = '', data: any = null;
           try {
             const response = await fetch(location[0], {
               headers: { 'Content-Type': 'application/json' },
@@ -842,22 +826,14 @@ export class RPC {
             throw result;
           return result as T;
         }
-      } else {
-        const found = await this.fetchIpset('http', 'fetch');
-        if (!found) {
-          break;
-        }
+
+        servers.add(location[1]);
+        this.httpInterfaces.servers.delete(location[1]);
+      } else if (!(await this.fetchIpset('http', 'fetch', servers))) {
+        break;
       }
     }
-
-    if (this.httpInterfaces.offline.size >= this.httpInterfaces.online.size) {
-      const found = await this.fetchIpset('http', 'fetch');
-      if (!found) {
-        this.httpInterfaces.online = new Set<string>([...this.httpInterfaces.online, ...this.httpInterfaces.offline]);
-        this.httpInterfaces.offline.clear();
-      }
-    }
-
+    
     if (this.onCacheLoad != null) {
       const cache = this.onCacheLoad(hash);
       if (cache != null)
@@ -891,7 +867,7 @@ export class RPC {
     }
     return result;
   }
-  static async connectSocket(addresses: string[]): Promise<number | null> {
+  static async connectSocket(): Promise<number | null> {
     if (this.socket != null)
       return 0;
     else if (!this.getProps().streaming)
@@ -905,9 +881,10 @@ export class RPC {
         return null;
     }
     
-    while (this.wsInterfaces.offline.size < this.wsInterfaces.online.size) {
+    let servers = new Set<string>();
+    while (true) {
       const location = this.fetchNode('ws');
-      if (location != null) {
+      if (location && !servers.has(location[1])) {
         try {
           if (this.onNodeRequest)
             this.onNodeRequest(location[0], method, null, 0);
@@ -955,28 +932,20 @@ export class RPC {
           };
           this.socket.onclose = () => {
             this.disconnectSocket();
-            this.connectSocket(addresses);
+            this.connectSocket();
           };
-          const events = await this.fetch<number>('no-cache', 'subscribe', [addresses.join(',')]);
+          const events = await this.fetch<number>('no-cache', 'subscribe', [this.addresses.join(',')]);
           this.reportAvailability('ws', location[1], true);
           return events;
         } catch (exception) {
           if (this.onNodeError)
             this.onNodeError(location[0], method, exception);
         }
-      } else {
-        const found = await this.fetchIpset('ws', 'fetch');
-        if (!found) {
-          break;
-        }
-      }
-    }
 
-    if (this.wsInterfaces.offline.size >= this.wsInterfaces.online.size) {
-      const found = await this.fetchIpset('ws', 'fetch');
-      if (!found) {
-        this.wsInterfaces.online = new Set<string>([...this.wsInterfaces.online, ...this.wsInterfaces.offline]);
-        this.wsInterfaces.offline.clear();
+        servers.add(location[1]);
+        this.httpInterfaces.servers.delete(location[1]);
+      } else if (!(await this.fetchIpset('ws', 'fetch', servers))) {
+        break;
       }
     }
 
@@ -1003,6 +972,13 @@ export class RPC {
     this.socket = null;
     return true;
   }
+  static applyAddresses(addresses: string[]): void {
+    this.addresses = addresses;
+    this.httpInterfaces.servers.clear();
+    this.httpInterfaces.preload = false;
+    this.wsInterfaces.servers.clear();
+    this.wsInterfaces.preload = false;
+  }
   static applyResolver(resolver: string | null): void {
     this.resolver = resolver;
   }
@@ -1010,13 +986,11 @@ export class RPC {
     this.httpInterfaces.overrider = server;
     this.wsInterfaces.overrider = server;
     if (server != null) {
-      this.httpInterfaces.online.add(server);
-      this.httpInterfaces.offline.delete(server);
-      this.wsInterfaces.online.add(server);
-      this.wsInterfaces.offline.delete(server);
+      this.httpInterfaces.servers.add(server);
+      this.wsInterfaces.servers.add(server);
       if (this.onIpsetStore != null) {
-        this.onIpsetStore('http', { online: [...this.httpInterfaces.online], offline: [...this.httpInterfaces.offline] });
-        this.onIpsetStore('ws', { online: [...this.wsInterfaces.online], offline: [...this.wsInterfaces.offline] });
+        this.onIpsetStore('http', { servers: [...this.httpInterfaces.servers] });
+        this.onIpsetStore('ws', { servers: [...this.wsInterfaces.servers] });
       }
     }
   }

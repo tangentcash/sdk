@@ -13,12 +13,10 @@ export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
 export type IpsetLoad = (type: 'http' | 'ws') => {
-    online: string[];
-    offline: string[];
+    servers: string[];
 } | null;
 export type IpsetStore = (type: 'http' | 'ws', ipset: {
-    online: string[];
-    offline: string[];
+    servers: string[];
 }) => boolean;
 export type PropsLoad = () => InterfaceProps | null;
 export type PropsStore = (props: InterfaceProps) => boolean;
@@ -176,8 +174,7 @@ export type TransactionOutput = {
     };
 };
 export type ServerInfo = {
-    online: Set<string>;
-    offline: Set<string>;
+    servers: Set<string>;
     overrider: string | null;
     preload: boolean;
 };
@@ -231,6 +228,7 @@ export declare class RPC {
         preload: boolean;
     };
     static socket: WebSocket | null;
+    static addresses: string[];
     static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
     static onNodeRequest: NodeRequest | null;
@@ -252,8 +250,9 @@ export declare class RPC {
     private static fetchIpset;
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
-    static connectSocket(addresses: string[]): Promise<number | null>;
+    static connectSocket(): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
+    static applyAddresses(addresses: string[]): void;
     static applyResolver(resolver: string | null): void;
     static applyServer(server: string | null): void;
     static applyImplementation(implementation: {
