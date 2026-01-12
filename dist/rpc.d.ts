@@ -12,14 +12,12 @@ export type NodeMessage = (event: {
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = (type: 'http' | 'ws') => {
+export type IpsetLoad = () => {
     servers: string[];
 } | null;
-export type IpsetStore = (type: 'http' | 'ws', ipset: {
+export type IpsetStore = (ipset: {
     servers: string[];
 }) => boolean;
-export type PropsLoad = () => InterfaceProps | null;
-export type PropsStore = (props: InterfaceProps) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 export declare enum EventType {
@@ -189,9 +187,6 @@ export declare enum NetworkType {
     Testnet = "testnet",
     Regtest = "regtest"
 }
-export declare class InterfaceProps {
-    streaming: boolean;
-}
 export declare class WalletKeychain {
     type: WalletType | null;
     secretKey: Seckey | null;
@@ -214,18 +209,13 @@ export declare class EventResolver {
 }
 export declare class RPC {
     static resolver: string | null;
-    static httpInterfaces: ServerInfo;
-    static wsInterfaces: ServerInfo;
+    static interfaces: ServerInfo;
     static requests: {
         pending: Map<string, {
             method: string;
             resolve: PromiseCallback;
         }>;
         count: number;
-    };
-    static props: {
-        data: InterfaceProps;
-        preload: boolean;
     };
     static socket: WebSocket | null;
     static addresses: string[];
@@ -239,8 +229,6 @@ export declare class RPC {
     static onCacheKeys: CacheKeys | null;
     static onIpsetLoad: IpsetLoad | null;
     static onIpsetStore: IpsetStore | null;
-    static onPropsLoad: PropsLoad | null;
-    static onPropsStore: PropsStore | null;
     private static reportAvailability;
     private static fetchObject;
     private static fetchData;
@@ -265,11 +253,7 @@ export declare class RPC {
         onCacheKeys?: CacheKeys;
         onIpsetLoad?: IpsetLoad;
         onIpsetStore?: IpsetStore;
-        onPropsLoad?: PropsLoad;
-        onPropsStore?: PropsStore;
     }): void;
-    static saveProps(props: InterfaceProps): void;
-    static getProps(): InterfaceProps;
     static requiresSecureTransport(address: string): boolean;
     static clearCache(): void;
     static forcedPolicy<T>(policy: 'cache' | 'no-cache', callback: () => Promise<T>): Promise<T>;

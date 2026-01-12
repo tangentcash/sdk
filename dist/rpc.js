@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.InterfaceProps = exports.NetworkType = exports.WalletType = exports.EventType = void 0;
+exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.NetworkType = exports.WalletType = exports.EventType = void 0;
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const algorithm_1 = require("./algorithm");
 const types_1 = require("./types");
@@ -37,12 +37,6 @@ var NetworkType;
     NetworkType["Testnet"] = "testnet";
     NetworkType["Regtest"] = "regtest";
 })(NetworkType || (exports.NetworkType = NetworkType = {}));
-class InterfaceProps {
-    constructor() {
-        this.streaming = true;
-    }
-}
-exports.InterfaceProps = InterfaceProps;
 class WalletKeychain {
     constructor() {
         this.type = null;
@@ -386,16 +380,15 @@ class EventResolver {
 }
 exports.EventResolver = EventResolver;
 class RPC {
-    static reportAvailability(type, location, available) {
-        const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
+    static reportAvailability(location, available) {
         if (available) {
-            interfaces.servers.add(location);
+            this.interfaces.servers.add(location);
         }
         else {
-            interfaces.servers.delete(location);
+            this.interfaces.servers.delete(location);
         }
         if (this.onIpsetStore != null)
-            this.onIpsetStore(type, { servers: [...interfaces.servers] });
+            this.onIpsetStore({ servers: [...this.interfaces.servers] });
     }
     static fetchObject(data) {
         if (typeof data == 'string') {
@@ -439,35 +432,34 @@ class RPC {
             this.onCacheStore(hash, data.result);
         return this.fetchData(data);
     }
-    static fetchNode(type) {
+    static fetchNode() {
         try {
-            const nodes = Array.from(type == 'ws' ? this.wsInterfaces.servers.keys() : this.httpInterfaces.servers.keys());
+            const nodes = Array.from(this.interfaces.servers.keys());
             const node = nodes[Math.floor(Math.random() * nodes.length)];
             const location = new URL('tcp://' + node);
             const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
-            return [`${type}${secure ? 's' : ''}://${node}/`, node];
+            return [`ws${secure ? 's' : ''}://${node}/`, node];
         }
         catch {
             return null;
         }
     }
-    static fetchResolver(type) {
+    static fetchResolver() {
         try {
             if (!this.resolver)
                 return null;
-            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
+            return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1`, this.resolver];
         }
         catch {
             return null;
         }
     }
-    static async fetchIpset(type, mode, servers) {
-        const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
-        if (interfaces.overrider != null) {
+    static async fetchIpset(mode, servers) {
+        if (this.interfaces.overrider != null) {
             try {
-                const scheme = new URL('tcp://' + interfaces.overrider);
+                const scheme = new URL('tcp://' + this.interfaces.overrider);
                 const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-                interfaces.servers.add(address);
+                this.interfaces.servers.add(address);
                 return !servers || !servers.has(address) ? 1 : 0;
             }
             catch {
@@ -476,10 +468,10 @@ class RPC {
         }
         switch (mode) {
             case 'preload': {
-                if (interfaces.preload)
+                if (this.interfaces.preload)
                     return 0;
-                const seeds = this.onIpsetLoad ? this.onIpsetLoad(type) : null;
-                interfaces.preload = true;
+                const seeds = this.onIpsetLoad ? this.onIpsetLoad() : null;
+                this.interfaces.preload = true;
                 if (!seeds || !Array.isArray(seeds.servers))
                     return 0;
                 let results = 0;
@@ -489,7 +481,7 @@ class RPC {
                         const scheme = new URL('tcp://' + seed);
                         const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
                         if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-                            interfaces.servers.add(address);
+                            this.interfaces.servers.add(address);
                             ++results;
                         }
                     }
@@ -498,7 +490,7 @@ class RPC {
                 return results;
             }
             case 'fetch': {
-                const location = this.fetchResolver(type);
+                const location = this.fetchResolver();
                 if (location != null) {
                     try {
                         if (this.onNodeRequest)
@@ -522,7 +514,7 @@ class RPC {
                                 }
                                 let address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
                                 if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-                                    interfaces.servers.add(address);
+                                    this.interfaces.servers.add(address);
                                     ++results;
                                 }
                             }
@@ -537,7 +529,7 @@ class RPC {
                     }
                 }
                 if (this.onIpsetStore != null)
-                    this.onIpsetStore(type, { servers: [...interfaces.servers] });
+                    this.onIpsetStore({ servers: [...this.interfaces.servers] });
                 return 0;
             }
             default:
@@ -563,93 +555,44 @@ class RPC {
             if (cache != null)
                 return this.fetchObject(cache);
         }
-        if (!this.socket && !this.wsInterfaces.preload)
-            await this.connectSocket();
         let result = undefined;
-        if (this.socket != null) {
-            try {
-                if (this.onNodeRequest)
-                    this.onNodeRequest(this.socket.url, method, body, content.length);
-                const data = await new Promise((resolve, reject) => {
-                    const context = { method: method, resolve: (_) => { } };
-                    const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
-                    context.resolve = (data) => {
-                        this.requests.pending.delete(id);
-                        clearTimeout(timeout);
-                        if (data instanceof Error)
-                            reject(data);
-                        else
-                            resolve(data);
-                    };
-                    this.requests.pending.set(id, context);
-                    if (this.socket != null)
-                        this.socket.send(content);
+        try {
+            await this.connectSocket();
+            if (!this.socket)
+                throw new Error('connection not acquired');
+            if (this.onNodeRequest)
+                this.onNodeRequest(this.socket?.url || '[unknown]', method, body, content.length);
+            const data = await new Promise((resolve, reject) => {
+                const context = { method: method, resolve: (_) => { } };
+                const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
+                context.resolve = (data) => {
+                    this.requests.pending.delete(id);
+                    clearTimeout(timeout);
+                    if (data instanceof Error)
+                        reject(data);
                     else
-                        context.resolve(new Error('connection reset'));
-                });
-                if (this.onNodeResponse)
-                    this.onNodeResponse(this.socket?.url || '[unknown]', method, data[0], data[1]);
-                result = this.fetchResult(hash, data[0]);
-            }
-            catch (exception) {
-                if (this.onNodeError)
-                    this.onNodeError(this.socket?.url || '[unknown]', method, exception);
-            }
-            if (result !== undefined) {
-                if (result instanceof Error)
-                    throw result;
-                return result;
-            }
+                        resolve(data);
+                };
+                this.requests.pending.set(id, context);
+                if (this.socket != null)
+                    this.socket.send(content);
+                else
+                    context.resolve(new Error('connection reset'));
+            });
+            if (this.onNodeResponse)
+                this.onNodeResponse(this.socket?.url || '[unknown]', method, data[0], data[1]);
+            result = this.fetchResult(hash, data[0]);
         }
-        if (!this.httpInterfaces.preload) {
-            let preloadSize = await this.fetchIpset('http', 'preload');
-            let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('http', 'fetch');
-            if (!preloadSize && !fetchSize)
-                return null;
+        catch (exception) {
+            if (this.onNodeError)
+                this.onNodeError(this.socket?.url || '[unknown]', method, exception);
         }
-        let servers = new Set();
-        while (true) {
-            const location = this.fetchNode('http');
-            if (location && !servers.has(location[1])) {
-                try {
-                    if (this.onNodeRequest)
-                        this.onNodeRequest(location[0], method, body, content.length);
-                    let dataContent = '', data = null;
-                    try {
-                        const response = await fetch(location[0], {
-                            headers: { 'Content-Type': 'application/json' },
-                            method: 'POST',
-                            body: content,
-                        });
-                        dataContent = await response.text();
-                        data = JSON.parse(dataContent);
-                        this.reportAvailability('http', location[1], true);
-                    }
-                    catch (exception) {
-                        this.reportAvailability('http', location[1], false);
-                        throw exception;
-                    }
-                    if (this.onNodeResponse)
-                        this.onNodeResponse(location[0], method, data, dataContent.length);
-                    result = this.fetchResult(hash, data);
-                }
-                catch (exception) {
-                    if (this.onNodeError)
-                        this.onNodeError(location[0], method, exception);
-                }
-                if (result !== undefined) {
-                    if (result instanceof Error)
-                        throw result;
-                    return result;
-                }
-                servers.add(location[1]);
-                this.httpInterfaces.servers.delete(location[1]);
-            }
-            else if (!(await this.fetchIpset('http', 'fetch', servers))) {
-                break;
-            }
+        if (result !== undefined) {
+            if (result instanceof Error)
+                throw result;
+            return result;
         }
-        if (this.onCacheLoad != null) {
+        else if (this.onCacheLoad != null) {
             const cache = this.onCacheLoad(hash);
             if (cache != null)
                 return this.fetchObject(cache);
@@ -683,18 +626,16 @@ class RPC {
     static async connectSocket() {
         if (this.socket != null)
             return 0;
-        else if (!this.getProps().streaming)
-            return null;
         const method = 'connect';
-        if (!this.wsInterfaces.preload) {
-            let preloadSize = await this.fetchIpset('ws', 'preload');
-            let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('ws', 'fetch');
+        if (!this.interfaces.preload) {
+            let preloadSize = await this.fetchIpset('preload');
+            let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('fetch');
             if (!preloadSize && !fetchSize)
                 return null;
         }
         let servers = new Set();
         while (true) {
-            const location = this.fetchNode('ws');
+            const location = this.fetchNode();
             if (location && !servers.has(location[1])) {
                 try {
                     if (this.onNodeRequest)
@@ -708,7 +649,7 @@ class RPC {
                         });
                     }
                     catch (exception) {
-                        this.reportAvailability('ws', location[1], false);
+                        this.reportAvailability(location[1], false);
                         throw exception;
                     }
                     if (this.onNodeResponse)
@@ -746,7 +687,7 @@ class RPC {
                         this.connectSocket();
                     };
                     const events = await this.fetch('no-cache', 'subscribe', [this.addresses.join(',')]);
-                    this.reportAvailability('ws', location[1], true);
+                    this.reportAvailability(location[1], true);
                     return events;
                 }
                 catch (exception) {
@@ -754,9 +695,8 @@ class RPC {
                         this.onNodeError(location[0], method, exception);
                 }
                 servers.add(location[1]);
-                this.httpInterfaces.servers.delete(location[1]);
             }
-            else if (!(await this.fetchIpset('ws', 'fetch', servers))) {
+            else if (!(await this.fetchIpset('fetch', servers))) {
                 break;
             }
         }
@@ -783,25 +723,19 @@ class RPC {
     }
     static applyAddresses(addresses) {
         this.addresses = addresses;
-        this.httpInterfaces.servers.clear();
-        this.httpInterfaces.preload = false;
-        this.wsInterfaces.servers.clear();
-        this.wsInterfaces.preload = false;
+        this.interfaces.servers.clear();
+        this.interfaces.preload = false;
     }
     static applyResolver(resolver) {
         this.resolver = resolver;
     }
     static applyServer(server) {
-        this.httpInterfaces.overrider = server;
-        this.wsInterfaces.overrider = server;
+        this.interfaces.overrider = server;
         if (server != null) {
-            this.httpInterfaces.servers.clear();
-            this.httpInterfaces.servers.add(server);
-            this.wsInterfaces.servers.clear();
-            this.wsInterfaces.servers.add(server);
+            this.interfaces.servers.clear();
+            this.interfaces.servers.add(server);
             if (this.onIpsetStore != null) {
-                this.onIpsetStore('http', { servers: [...this.httpInterfaces.servers] });
-                this.onIpsetStore('ws', { servers: [...this.wsInterfaces.servers] });
+                this.onIpsetStore({ servers: [...this.interfaces.servers] });
             }
         }
     }
@@ -815,25 +749,6 @@ class RPC {
         this.onCacheKeys = implementation.onCacheKeys || null;
         this.onIpsetLoad = implementation.onIpsetLoad || null;
         this.onIpsetStore = implementation.onIpsetStore || null;
-        this.onPropsLoad = implementation.onPropsLoad || null;
-        this.onPropsStore = implementation.onPropsStore || null;
-    }
-    static saveProps(props) {
-        if (this.onPropsStore != null)
-            this.onPropsStore(props);
-        this.props.data = props;
-        this.props.preload = true;
-    }
-    static getProps() {
-        if (this.props.preload)
-            return this.props.data;
-        if (this.onPropsLoad != null) {
-            const props = this.onPropsLoad();
-            if (props != null)
-                this.props.data = props;
-        }
-        this.props.preload = true;
-        return this.props.data;
     }
     static requiresSecureTransport(address) {
         if (address == 'localhost')
@@ -968,12 +883,7 @@ class RPC {
 }
 exports.RPC = RPC;
 RPC.resolver = null;
-RPC.httpInterfaces = {
-    servers: new Set(),
-    overrider: null,
-    preload: false
-};
-RPC.wsInterfaces = {
+RPC.interfaces = {
     servers: new Set(),
     overrider: null,
     preload: false
@@ -981,10 +891,6 @@ RPC.wsInterfaces = {
 RPC.requests = {
     pending: new Map(),
     count: 0
-};
-RPC.props = {
-    data: new InterfaceProps(),
-    preload: false
 };
 RPC.socket = null;
 RPC.addresses = [];
@@ -998,5 +904,3 @@ RPC.onCacheLoad = null;
 RPC.onCacheKeys = null;
 RPC.onIpsetLoad = null;
 RPC.onIpsetStore = null;
-RPC.onPropsLoad = null;
-RPC.onPropsStore = null;

@@ -13,10 +13,8 @@ export type NodeMessage = (event: { type: string, result: any }) => void;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = (type: 'http' | 'ws') => { servers: string[] } | null;
-export type IpsetStore = (type: 'http' | 'ws', ipset: { servers: string[] }) => boolean;
-export type PropsLoad = () => InterfaceProps | null;
-export type PropsStore = (props: InterfaceProps) => boolean;
+export type IpsetLoad = () => { servers: string[] } | null;
+export type IpsetStore = (ipset: { servers: string[] }) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 
@@ -161,10 +159,6 @@ export enum NetworkType {
   Mainnet = 'mainnet',
   Testnet = 'testnet',
   Regtest = 'regtest'
-}
-
-export class InterfaceProps {
-  streaming: boolean = true;
 }
 
 export class WalletKeychain {
@@ -528,12 +522,7 @@ export class EventResolver {
 
 export class RPC {
   static resolver: string | null = null;
-  static httpInterfaces: ServerInfo = {
-    servers: new Set<string>(),
-    overrider: null,
-    preload: false
-  };
-  static wsInterfaces: ServerInfo = {
+  static interfaces: ServerInfo = {
     servers: new Set<string>(),
     overrider: null,
     preload: false
@@ -541,10 +530,6 @@ export class RPC {
   static requests = {
     pending: new Map<string, { method: string, resolve: PromiseCallback } >(),
     count: 0
-  };
-  static props = {
-    data: new InterfaceProps(),
-    preload: false
   };
   static socket: WebSocket | null = null;
   static addresses: string[] = [];
@@ -558,18 +543,15 @@ export class RPC {
   static onCacheKeys: CacheKeys | null = null;
   static onIpsetLoad: IpsetLoad | null = null;
   static onIpsetStore: IpsetStore | null = null;
-  static onPropsLoad: PropsLoad | null = null;
-  static onPropsStore: PropsStore | null = null;
 
-  private static reportAvailability(type: 'ws' | 'http', location: string, available: boolean): void {
-    const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
+  private static reportAvailability(location: string, available: boolean): void {
     if (available) {
-      interfaces.servers.add(location);
+      this.interfaces.servers.add(location);
     } else {
-      interfaces.servers.delete(location);
+      this.interfaces.servers.delete(location);
     }
     if (this.onIpsetStore != null)
-      this.onIpsetStore(type, { servers: [...interfaces.servers] });
+      this.onIpsetStore({ servers: [...this.interfaces.servers] });
   }
   private static fetchObject(data: any): any {
     if (typeof data == 'string') {
@@ -611,34 +593,33 @@ export class RPC {
       this.onCacheStore(hash, data.result);
     return this.fetchData(data);   
   }
-  private static fetchNode(type: 'ws' | 'http'): [string, string] | null {
+  private static fetchNode(): [string, string] | null {
     try {
-      const nodes = Array.from(type == 'ws' ? this.wsInterfaces.servers.keys() : this.httpInterfaces.servers.keys());
+      const nodes = Array.from(this.interfaces.servers.keys());
       const node = nodes[Math.floor(Math.random() * nodes.length)];
       const location = new URL('tcp://' + node);
       const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
-      return [`${type}${secure ? 's' : ''}://${node}/`, node];
+      return [`ws${secure ? 's' : ''}://${node}/`, node];
     } catch {
       return null;
     }
   }
-  private static fetchResolver(type: 'ws' | 'http'): [string, string] | null {
+  private static fetchResolver(): [string, string] | null {
     try {
       if (!this.resolver)
         return null;
       
-      return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1${type == 'ws' ? '&rpc_web_sockets=1' : ''}`, this.resolver];
+      return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1`, this.resolver];
     } catch {
       return null;
     }
   }
-  private static async fetchIpset(type: 'ws' | 'http', mode: 'preload' | 'fetch', servers?: Set<string>): Promise<number> {
-    const interfaces = type == 'ws' ? this.wsInterfaces : this.httpInterfaces;
-    if (interfaces.overrider != null) {
+  private static async fetchIpset(mode: 'preload' | 'fetch', servers?: Set<string>): Promise<number> {
+    if (this.interfaces.overrider != null) {
       try {
-        const scheme = new URL('tcp://' + interfaces.overrider);
+        const scheme = new URL('tcp://' + this.interfaces.overrider);
         const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-        interfaces.servers.add(address);
+        this.interfaces.servers.add(address);
         return !servers || !servers.has(address) ? 1 : 0;
       } catch {
         return 0;
@@ -646,11 +627,11 @@ export class RPC {
     }
     switch (mode) {
       case 'preload': {
-        if (interfaces.preload)
+        if (this.interfaces.preload)
           return 0;
         
-        const seeds = this.onIpsetLoad ? this.onIpsetLoad(type) : null;
-        interfaces.preload = true;
+        const seeds = this.onIpsetLoad ? this.onIpsetLoad() : null;
+        this.interfaces.preload = true;
         if (!seeds || !Array.isArray(seeds.servers))
           return 0;
 
@@ -661,7 +642,7 @@ export class RPC {
             const scheme = new URL('tcp://' + seed);
             const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
             if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-              interfaces.servers.add(address);
+              this.interfaces.servers.add(address);
               ++results;
             }
           } catch { }
@@ -670,7 +651,7 @@ export class RPC {
         return results;
       }
       case 'fetch': {
-        const location = this.fetchResolver(type);
+        const location = this.fetchResolver();
         if (location != null) {
           try {
             if (this.onNodeRequest)
@@ -697,7 +678,7 @@ export class RPC {
 
                 let address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
                 if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-                  interfaces.servers.add(address);
+                  this.interfaces.servers.add(address);
                   ++results;
                 }
               } catch { }
@@ -712,7 +693,7 @@ export class RPC {
         }
     
         if (this.onIpsetStore != null)
-          this.onIpsetStore(type, { servers: [...interfaces.servers] });
+          this.onIpsetStore({ servers: [...this.interfaces.servers] });
         return 0;
       }
       default:
@@ -740,101 +721,47 @@ export class RPC {
         return this.fetchObject(cache);
     }
 
-    if (!this.socket && !this.wsInterfaces.preload)
-      await this.connectSocket();
-
     let result = undefined;
-    if (this.socket != null) {
-      try {
-        if (this.onNodeRequest)
-          this.onNodeRequest(this.socket.url, method, body, content.length);
+    try {
+      await this.connectSocket();
+      if (!this.socket)
+        throw new Error('connection not acquired');
 
-        const data: [any, number] = await new Promise((resolve, reject) => {
-          const context = { method: method, resolve: (_: any) => { } };
-          const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
-          context.resolve = (data: [any, number] | Error) => {
-            this.requests.pending.delete(id);
-            clearTimeout(timeout);
-            if (data instanceof Error)
-              reject(data);
-            else
-              resolve(data);
-          };
-          this.requests.pending.set(id, context);
-          if (this.socket != null)
-            this.socket.send(content);
+      if (this.onNodeRequest)
+        this.onNodeRequest(this.socket?.url || '[unknown]', method, body, content.length);
+
+      const data: [any, number] = await new Promise((resolve, reject) => {
+        const context = { method: method, resolve: (_: any) => { } };
+        const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
+        context.resolve = (data: [any, number] | Error) => {
+          this.requests.pending.delete(id);
+          clearTimeout(timeout);
+          if (data instanceof Error)
+            reject(data);
           else
-            context.resolve(new Error('connection reset'));
-        });
-        if (this.onNodeResponse)
-          this.onNodeResponse(this.socket?.url || '[unknown]', method, data[0], data[1]);
-        
-        result = this.fetchResult(hash, data[0]);
-      } catch (exception) {
-        if (this.onNodeError)
-          this.onNodeError(this.socket?.url || '[unknown]', method, exception);
-      }
-    
-      if (result !== undefined) {
-        if (result instanceof Error)
-          throw result;
-
-        return result as T;
-      }
+            resolve(data);
+        };
+        this.requests.pending.set(id, context);
+        if (this.socket != null)
+          this.socket.send(content);
+        else
+          context.resolve(new Error('connection reset'));
+      });
+      if (this.onNodeResponse)
+        this.onNodeResponse(this.socket?.url || '[unknown]', method, data[0], data[1]);
+      
+      result = this.fetchResult(hash, data[0]);
+    } catch (exception) {
+      if (this.onNodeError)
+        this.onNodeError(this.socket?.url || '[unknown]', method, exception);
     }
+  
+    if (result !== undefined) {
+      if (result instanceof Error)
+        throw result;
 
-    if (!this.httpInterfaces.preload) {
-      let preloadSize = await this.fetchIpset('http', 'preload');
-      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('http', 'fetch');
-      if (!preloadSize && !fetchSize)
-        return null;
-    }
-
-    let servers = new Set<string>();
-    while (true) {
-      const location = this.fetchNode('http');
-      if (location && !servers.has(location[1])) {
-        try {
-          if (this.onNodeRequest)
-            this.onNodeRequest(location[0], method, body, content.length);
-
-          let dataContent: string = '', data: any = null;
-          try {
-            const response = await fetch(location[0], {
-              headers: { 'Content-Type': 'application/json' },
-              method: 'POST',
-              body: content,
-            });
-            dataContent = await response.text();
-            data = JSON.parse(dataContent);
-            this.reportAvailability('http', location[1], true);
-          } catch (exception) {
-            this.reportAvailability('http', location[1], false);
-            throw exception;
-          }
-          if (this.onNodeResponse)
-            this.onNodeResponse(location[0], method, data, dataContent.length);
-
-          result = this.fetchResult(hash, data);
-        } catch (exception) {
-          if (this.onNodeError)
-            this.onNodeError(location[0], method, exception);
-        }
-        
-        if (result !== undefined) {
-          if (result instanceof Error)
-            throw result;
-          return result as T;
-        }
-
-        servers.add(location[1]);
-        this.httpInterfaces.servers.delete(location[1]);
-      } else if (!(await this.fetchIpset('http', 'fetch', servers))) {
-        break;
-      }
-    }
-    
-    if (this.onCacheLoad != null) {
+      return result as T;
+    } else if (this.onCacheLoad != null) {
       const cache = this.onCacheLoad(hash);
       if (cache != null)
         return this.fetchObject(cache);
@@ -870,20 +797,18 @@ export class RPC {
   static async connectSocket(): Promise<number | null> {
     if (this.socket != null)
       return 0;
-    else if (!this.getProps().streaming)
-      return null;
     
     const method = 'connect';
-    if (!this.wsInterfaces.preload) {
-      let preloadSize = await this.fetchIpset('ws', 'preload');
-      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('ws', 'fetch');
+    if (!this.interfaces.preload) {
+      let preloadSize = await this.fetchIpset('preload');
+      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('fetch');
       if (!preloadSize && !fetchSize)
         return null;
     }
     
     let servers = new Set<string>();
     while (true) {
-      const location = this.fetchNode('ws');
+      const location = this.fetchNode();
       if (location && !servers.has(location[1])) {
         try {
           if (this.onNodeRequest)
@@ -897,7 +822,7 @@ export class RPC {
               socket.onerror = () => reject(new Error('websocket connection error'));
             });
           } catch (exception) {
-            this.reportAvailability('ws', location[1], false);
+            this.reportAvailability(location[1], false);
             throw exception;
           }
           if (this.onNodeResponse)
@@ -935,7 +860,7 @@ export class RPC {
             this.connectSocket();
           };
           const events = await this.fetch<number>('no-cache', 'subscribe', [this.addresses.join(',')]);
-          this.reportAvailability('ws', location[1], true);
+          this.reportAvailability(location[1], true);
           return events;
         } catch (exception) {
           if (this.onNodeError)
@@ -943,8 +868,7 @@ export class RPC {
         }
 
         servers.add(location[1]);
-        this.httpInterfaces.servers.delete(location[1]);
-      } else if (!(await this.fetchIpset('ws', 'fetch', servers))) {
+      } else if (!(await this.fetchIpset('fetch', servers))) {
         break;
       }
     }
@@ -974,25 +898,19 @@ export class RPC {
   }
   static applyAddresses(addresses: string[]): void {
     this.addresses = addresses;
-    this.httpInterfaces.servers.clear();
-    this.httpInterfaces.preload = false;
-    this.wsInterfaces.servers.clear();
-    this.wsInterfaces.preload = false;
+    this.interfaces.servers.clear();
+    this.interfaces.preload = false;
   }
   static applyResolver(resolver: string | null): void {
     this.resolver = resolver;
   }
   static applyServer(server: string | null): void {
-    this.httpInterfaces.overrider = server;
-    this.wsInterfaces.overrider = server;
+    this.interfaces.overrider = server;
     if (server != null) {
-      this.httpInterfaces.servers.clear();
-      this.httpInterfaces.servers.add(server);
-      this.wsInterfaces.servers.clear();
-      this.wsInterfaces.servers.add(server);
+      this.interfaces.servers.clear();
+      this.interfaces.servers.add(server);
       if (this.onIpsetStore != null) {
-        this.onIpsetStore('http', { servers: [...this.httpInterfaces.servers] });
-        this.onIpsetStore('ws', { servers: [...this.wsInterfaces.servers] });
+        this.onIpsetStore({ servers: [...this.interfaces.servers] });
       }
     }
   }
@@ -1005,9 +923,7 @@ export class RPC {
     onCacheLoad?: CacheLoad,
     onCacheKeys?: CacheKeys,
     onIpsetLoad?: IpsetLoad,
-    onIpsetStore?: IpsetStore,
-    onPropsLoad?: PropsLoad,
-    onPropsStore?: PropsStore
+    onIpsetStore?: IpsetStore
   }): void {
     this.onNodeMessage = implementation.onNodeMessage || null;
     this.onNodeRequest = implementation.onNodeRequest || null;
@@ -1018,27 +934,6 @@ export class RPC {
     this.onCacheKeys = implementation.onCacheKeys || null;
     this.onIpsetLoad = implementation.onIpsetLoad || null;
     this.onIpsetStore = implementation.onIpsetStore || null;
-    this.onPropsLoad = implementation.onPropsLoad || null;
-    this.onPropsStore = implementation.onPropsStore || null;
-  }
-  static saveProps(props: InterfaceProps): void {
-    if (this.onPropsStore != null)
-      this.onPropsStore(props);
-    this.props.data = props;
-    this.props.preload = true;
-  }
-  static getProps(): InterfaceProps {
-    if (this.props.preload)
-      return this.props.data;
-
-    if (this.onPropsLoad != null) {
-      const props = this.onPropsLoad();
-      if (props != null)
-        this.props.data = props;
-    }
-    
-    this.props.preload = true;
-    return this.props.data;
   }
   static requiresSecureTransport(address: string): boolean {
     if (address == 'localhost')
