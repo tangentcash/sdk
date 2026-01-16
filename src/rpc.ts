@@ -597,6 +597,9 @@ export class RPC {
     try {
       const nodes = Array.from(this.interfaces.servers.keys());
       const node = nodes[Math.floor(Math.random() * nodes.length)];
+      if (!node)
+        throw false;
+
       const location = new URL('tcp://' + node);
       const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
       return [`ws${secure ? 's' : ''}://${node}/`, node];
