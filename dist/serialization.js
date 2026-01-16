@@ -110,7 +110,7 @@ class Stream {
             this.write(new Uint8Array([type]));
             return this;
         }
-        let numeric = value.toString().split('.');
+        let numeric = algorithm_1.ByteUtil.bigNumberToString(value).split('.');
         let type = numeric.length > 1 ? (value.isNegative() ? Viewable.DecimalNeg2 : Viewable.DecimalPos2) : (value.isNegative() ? Viewable.DecimalNeg1 : Viewable.DecimalPos1);
         this.write(new Uint8Array([type]));
         this.writeInteger(new algorithm_1.Uint256(numeric[0].replace('-', '')));
@@ -737,7 +737,7 @@ class SchemaUtil {
                 let value = stream.readDecimal(type);
                 if (value == null)
                     break;
-                result.push(value.isLessThan(new bignumber_js_1.default(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : value.toString());
+                result.push(value.isLessThan(new bignumber_js_1.default(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : algorithm_1.ByteUtil.bigNumberToString(value));
             }
             else if ([Viewable.True, Viewable.False].includes(type)) {
                 let value = stream.readBoolean(type);

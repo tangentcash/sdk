@@ -460,7 +460,7 @@ export class AssetId {
     }
   }
   equals(value: AssetId): boolean {
-    return this.id.toString() == value.id.toString();
+    return this.id == value.id;
   }
   toUint8Array(): Uint8Array {
     return ByteUtil.hexStringToUint8Array(this.id);
@@ -824,5 +824,17 @@ export class ByteUtil {
       }
     }
     return result;
+  }
+  static bigNumberToString(data: BigNumber) {
+    const text = data.toFixed(18);
+    const index = text.indexOf('.');
+    if (index === -1)
+      return text;
+    
+    let length = text.length;
+    while (length > index + 1 && text[length - 1] === '0')
+        length--;
+    
+    return text.substring(0, length === index + 1 ? index : length);
   }
 }

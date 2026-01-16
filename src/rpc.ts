@@ -558,7 +558,7 @@ export class RPC {
       try {
         if (!data.startsWith('0x')) {
           const numeric = new BigNumber(data, 10).dp(18);
-          if (data.startsWith(numeric.toString()))
+          if (data.startsWith(ByteUtil.bigNumberToString(numeric)))
             return numeric;
         }
       } catch { }

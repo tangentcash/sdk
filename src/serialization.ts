@@ -107,7 +107,7 @@ export class Stream {
       return this;
     }
 
-    let numeric = value.toString().split('.');
+    let numeric = ByteUtil.bigNumberToString(value).split('.');
     let type = numeric.length > 1 ? (value.isNegative() ? Viewable.DecimalNeg2 : Viewable.DecimalPos2) : (value.isNegative() ? Viewable.DecimalNeg1 : Viewable.DecimalPos1);
     this.write(new Uint8Array([type]));
     this.writeInteger(new Uint256(numeric[0].replace('-', '')));
@@ -802,7 +802,7 @@ export class SchemaUtil {
         if (value == null)
           break;
 
-        result.push(value.isLessThan(new BigNumber(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : value.toString());
+        result.push(value.isLessThan(new BigNumber(Number.MAX_SAFE_INTEGER)) && (value.decimalPlaces() || 0) < 6 ? value.toNumber() : ByteUtil.bigNumberToString(value));
       }
       else if ([Viewable.True, Viewable.False].includes(type)) {
         let value = stream.readBoolean(type);

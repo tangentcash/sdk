@@ -171,4 +171,5 @@ export declare class ByteUtil {
     static uint8ArrayToUtf8String(data: Uint8Array): string;
     static uint8ArrayCompare(a: Uint8Array, b: Uint8Array): boolean;
     static uint8ArraySwapEndianness(data: Uint8Array): Uint8Array;
+    static bigNumberToString(data: BigNumber): string;
 }

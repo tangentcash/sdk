@@ -100,7 +100,7 @@ export class Readability {
       return 'N/A';
 
     const places = numeric.decimalPlaces();
-    const text: string[] = (places ? numeric.toFormat(places) : numeric.toString()).split('.');
+    const text: string[] = (places ? numeric.toFormat(places) : ByteUtil.bigNumberToString(numeric)).split('.');
     if (trailing && text.length < 2)
       text.push('0');
     

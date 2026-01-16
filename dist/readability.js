@@ -83,7 +83,7 @@ class Readability {
         if (numeric.isNaN())
             return 'N/A';
         const places = numeric.decimalPlaces();
-        const text = (places ? numeric.toFormat(places) : numeric.toString()).split('.');
+        const text = (places ? numeric.toFormat(places) : algorithm_1.ByteUtil.bigNumberToString(numeric)).split('.');
         if (trailing && text.length < 2)
             text.push('0');
         if (text.length > 1) {
