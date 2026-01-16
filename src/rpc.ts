@@ -1063,7 +1063,7 @@ export class RPC {
   static getBlockTipNumber(): Promise<BigNumber | string | null> {
     return this.fetch('no-cache', 'getblocktipnumber', []);
   }
-  static getGasPrice(asset: AssetId, percentile?: number): Promise<any | null> {
+  static getGasPrice(asset: AssetId, percentile?: number): Promise<{ price: BigNumber, paid: boolean } | null> {
     return this.fetch('no-cache', 'getgasprice', percentile != null ? [asset.handle, percentile] : [asset.handle]);
   }
 }
