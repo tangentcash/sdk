@@ -63,7 +63,7 @@ export class Readability {
 
     return 'Non-standard';
   }
-  static toFunctionName(method: string): string {
+  static toFunction(method: string): string {
     let start = method.indexOf(' ');
     if (start != -1) {
       while (start + 1 < method.length && !method[start].trim().length)
@@ -75,7 +75,10 @@ export class Readability {
       }
     }
 
-    method = method
+    return method;
+  }
+  static toFunctionName(method: string): string {
+    method = this.toFunction(method)
         .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
         .replace(/([a-z\d])([A-Z])/g, '$1 $2')
         .replace(/_/g, ' ')
