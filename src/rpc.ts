@@ -560,6 +560,8 @@ export class RPC {
           const numeric = new BigNumber(data, 10).dp(18);
           if (data.startsWith(ByteUtil.bigNumberToString(numeric)))
             return numeric;
+
+          console.log(data, ByteUtil.bigNumberToString(numeric));
         }
       } catch { }
     }

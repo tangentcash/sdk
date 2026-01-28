@@ -397,6 +397,7 @@ class RPC {
                     const numeric = new bignumber_js_1.default(data, 10).dp(18);
                     if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)))
                         return numeric;
+                    console.log(data, algorithm_1.ByteUtil.bigNumberToString(numeric));
                 }
             }
             catch { }
