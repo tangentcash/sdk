@@ -3,6 +3,8 @@ import { AssetId, ByteUtil, Hashing, Pubkey, Pubkeyhash, Seckey, Hashsig, Signin
 import { Ledger } from "./schema";
 import { Types } from "./types";
 
+BigNumber.config({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
+
 const WEBSOCKET_TIMEOUT = 24000;
 
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
@@ -560,8 +562,6 @@ export class RPC {
           const numeric = new BigNumber(data, 10).dp(18);
           if (data.startsWith(ByteUtil.bigNumberToString(numeric)))
             return numeric;
-
-          console.log(data, ByteUtil.bigNumberToString(numeric));
         }
       } catch { }
     }

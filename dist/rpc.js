@@ -7,6 +7,7 @@ exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.NetworkTy
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const algorithm_1 = require("./algorithm");
 const types_1 = require("./types");
+bignumber_js_1.default.config({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
 const WEBSOCKET_TIMEOUT = 24000;
 var EventType;
 (function (EventType) {
@@ -397,7 +398,6 @@ class RPC {
                     const numeric = new bignumber_js_1.default(data, 10).dp(18);
                     if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)))
                         return numeric;
-                    console.log(data, algorithm_1.ByteUtil.bigNumberToString(numeric));
                 }
             }
             catch { }
