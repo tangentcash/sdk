@@ -217,8 +217,12 @@ export declare class RPC {
         }>;
         count: number;
     };
+    static topics: {
+        blocks?: boolean;
+        transactions?: boolean;
+        addresses: string[];
+    };
     static socket: WebSocket | null;
-    static addresses: string[];
     static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
     static onNodeRequest: NodeRequest | null;
@@ -240,7 +244,7 @@ export declare class RPC {
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
     static connectSocket(): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
-    static applyAddresses(addresses: string[]): void;
+    static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void;
     static applyResolver(resolver: string | null): void;
     static applyServer(server: string | null): void;
     static applyImplementation(implementation: {

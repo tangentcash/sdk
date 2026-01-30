@@ -533,8 +533,16 @@ export class RPC {
     pending: new Map<string, { method: string, resolve: PromiseCallback } >(),
     count: 0
   };
+  static topics: {
+    blocks?: boolean,
+    transactions?: boolean,
+    addresses: string[],
+  } = {
+    blocks: undefined,
+    transactions: undefined,
+    addresses: []
+  };
   static socket: WebSocket | null = null;
-  static addresses: string[] = [];
   static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
   static onNodeRequest: NodeRequest | null = null;
@@ -811,6 +819,12 @@ export class RPC {
         return null;
     }
     
+    const topics: any[] = [this.topics.addresses.join(',')];
+    if (typeof this.topics.blocks == 'boolean')
+      topics.push(this.topics.blocks);
+    if (typeof this.topics.transactions == 'boolean')
+      topics.push(this.topics.transactions);
+
     let servers = new Set<string>();
     while (true) {
       const location = this.fetchNode();
@@ -864,7 +878,7 @@ export class RPC {
             this.disconnectSocket();
             this.connectSocket();
           };
-          const events = await this.fetch<number>('no-cache', 'subscribe', [this.addresses.join(',')]);
+          const events = await this.fetch<number>('no-cache', 'subscribe', topics);
           this.reportAvailability(location[1], true);
           return events;
         } catch (exception) {
@@ -901,8 +915,10 @@ export class RPC {
     this.socket = null;
     return true;
   }
-  static applyAddresses(addresses: string[]): void {
-    this.addresses = addresses;
+  static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void {
+    this.topics.blocks = blocks;
+    this.topics.transactions = transactions;
+    this.topics.addresses = addresses;
     this.interfaces.servers.clear();
     this.interfaces.preload = false;
   }

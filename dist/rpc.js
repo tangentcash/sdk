@@ -636,6 +636,11 @@ class RPC {
             if (!preloadSize && !fetchSize)
                 return null;
         }
+        const topics = [this.topics.addresses.join(',')];
+        if (typeof this.topics.blocks == 'boolean')
+            topics.push(this.topics.blocks);
+        if (typeof this.topics.transactions == 'boolean')
+            topics.push(this.topics.transactions);
         let servers = new Set();
         while (true) {
             const location = this.fetchNode();
@@ -689,7 +694,7 @@ class RPC {
                         this.disconnectSocket();
                         this.connectSocket();
                     };
-                    const events = await this.fetch('no-cache', 'subscribe', [this.addresses.join(',')]);
+                    const events = await this.fetch('no-cache', 'subscribe', topics);
                     this.reportAvailability(location[1], true);
                     return events;
                 }
@@ -724,8 +729,10 @@ class RPC {
         this.socket = null;
         return true;
     }
-    static applyAddresses(addresses) {
-        this.addresses = addresses;
+    static applyTopics(addresses, blocks, transactions) {
+        this.topics.blocks = blocks;
+        this.topics.transactions = transactions;
+        this.topics.addresses = addresses;
         this.interfaces.servers.clear();
         this.interfaces.preload = false;
     }
@@ -895,8 +902,12 @@ RPC.requests = {
     pending: new Map(),
     count: 0
 };
+RPC.topics = {
+    blocks: undefined,
+    transactions: undefined,
+    addresses: []
+};
 RPC.socket = null;
-RPC.addresses = [];
 RPC.forcePolicy = null;
 RPC.onNodeMessage = null;
 RPC.onNodeRequest = null;
