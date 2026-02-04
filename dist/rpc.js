@@ -15,15 +15,16 @@ var EventType;
     EventType[EventType["Transfer"] = 1] = "Transfer";
     EventType[EventType["TransferIsolated"] = 2] = "TransferIsolated";
     EventType[EventType["TransferFee"] = 3] = "TransferFee";
-    EventType[EventType["BridgeTransfer"] = 4] = "BridgeTransfer";
-    EventType[EventType["BridgeAccount"] = 5] = "BridgeAccount";
-    EventType[EventType["BridgeQueue"] = 6] = "BridgeQueue";
-    EventType[EventType["BridgePolicy"] = 7] = "BridgePolicy";
-    EventType[EventType["BridgeParticipant"] = 8] = "BridgeParticipant";
-    EventType[EventType["WitnessAccount"] = 9] = "WitnessAccount";
-    EventType[EventType["WitnessTransaction"] = 10] = "WitnessTransaction";
-    EventType[EventType["RollupReceipt"] = 11] = "RollupReceipt";
-    EventType[EventType["Unknown"] = 12] = "Unknown";
+    EventType[EventType["BridgePolicy"] = 4] = "BridgePolicy";
+    EventType[EventType["BridgeTransaction"] = 5] = "BridgeTransaction";
+    EventType[EventType["BridgeAccount"] = 6] = "BridgeAccount";
+    EventType[EventType["BridgeTransfer"] = 7] = "BridgeTransfer";
+    EventType[EventType["BridgeAttester"] = 8] = "BridgeAttester";
+    EventType[EventType["BridgeParticipant"] = 9] = "BridgeParticipant";
+    EventType[EventType["WitnessAccount"] = 10] = "WitnessAccount";
+    EventType[EventType["WitnessTransaction"] = 11] = "WitnessTransaction";
+    EventType[EventType["RollupReceipt"] = 12] = "RollupReceipt";
+    EventType[EventType["Unknown"] = 13] = "Unknown";
 })(EventType || (exports.EventType = EventType = {}));
 var WalletType;
 (function (WalletType) {
@@ -120,10 +121,11 @@ class EventResolver {
                 fees: {}
             },
             bridge: {
+                policies: {},
                 balances: {},
                 accounts: {},
-                queues: {},
-                policies: {},
+                transactions: {},
+                attesters: new Set(),
                 participants: new Set(),
                 migrations: {}
             },
@@ -202,59 +204,46 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.ValidatorAttestation: {
-                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
-                        const [assetId, owner, type] = event.args;
-                        const asset = new algorithm_1.AssetId(assetId);
-                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        switch (type.toNumber()) {
-                            case 0: {
-                                if (event.args.length >= 4 && isNumber(event.args[3])) {
-                                    const newAccounts = event.args[3];
-                                    if (!result.bridge.accounts[ownerAddress])
-                                        result.bridge.accounts[ownerAddress] = {};
-                                    if (!result.bridge.accounts[ownerAddress][asset.handle])
-                                        result.bridge.accounts[ownerAddress][asset.handle] = { asset: asset, newAccounts: 0 };
-                                    result.bridge.accounts[ownerAddress][asset.handle].newAccounts += newAccounts.toNumber();
-                                    result.events.push({ type: EventType.BridgeAccount, asset: asset, owner: ownerAddress, accounts: newAccounts });
-                                }
-                                break;
-                            }
-                            case 1: {
-                                if (event.args.length >= 4 && (isNumber(event.args[3]) || typeof event.args[3] == 'string')) {
-                                    const transactionHash = event.args[3];
-                                    if (!result.bridge.queues[ownerAddress])
-                                        result.bridge.queues[ownerAddress] = {};
-                                    result.bridge.queues[ownerAddress][asset.handle] = { asset: asset, transactionHash: isNumber(transactionHash) ? null : transactionHash };
-                                    result.events.push({ type: EventType.BridgeQueue, asset: asset, owner: ownerAddress, transactionHash: isNumber(transactionHash) ? null : transactionHash });
-                                }
-                                break;
-                            }
-                            case 2: {
-                                if (!result.bridge.policies[ownerAddress])
-                                    result.bridge.policies[ownerAddress] = {};
-                                result.bridge.policies[ownerAddress][asset.handle] = { asset: asset };
-                                result.events.push({ type: EventType.BridgePolicy, asset: asset, owner: ownerAddress });
-                                break;
-                            }
-                            default:
-                                break;
-                        }
+                case types_1.Types.BridgeInstance: {
+                    if (event.args.length < 2 || !(isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2]))
+                        break;
+                    const [assetId, bridgeHash] = event.args;
+                    const asset = new algorithm_1.AssetId(assetId);
+                    const hash = new algorithm_1.Uint256(bridgeHash.toString());
+                    if (event.args.length == 2) {
+                        if (!result.bridge.policies[hash.toString()])
+                            result.bridge.policies[hash.toString()] = {};
+                        result.bridge.policies[hash.toString()][asset.handle] = { asset: asset };
+                        result.events.push({ type: EventType.BridgePolicy, asset: asset, bridgeHash: hash });
+                    }
+                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 0) {
+                        const nonce = new bignumber_js_1.default(event.args[2].toString());
+                        if (!result.bridge.transactions[hash.toString()])
+                            result.bridge.transactions[hash.toString()] = {};
+                        result.bridge.transactions[hash.toString()][asset.handle] = { asset: asset, nonce: nonce };
+                        result.events.push({ type: EventType.BridgeTransaction, asset: asset, bridgeHash: hash, nonce: nonce });
+                    }
+                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 1) {
+                        const nonce = new bignumber_js_1.default(event.args[2].toString());
+                        if (!result.bridge.accounts[hash.toString()])
+                            result.bridge.accounts[hash.toString()] = {};
+                        result.bridge.accounts[hash.toString()][asset.handle] = { asset: asset, nonce: nonce };
+                        result.events.push({ type: EventType.BridgeAccount, asset: asset, bridgeHash: hash, nonce: nonce });
                     }
                     break;
                 }
                 case types_1.Types.BridgeBalance: {
-                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2])) {
-                        const [assetId, owner, value] = event.args;
+                    if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && isNumber(event.args[2])) {
+                        const [assetId, bridgeHash, value] = event.args;
                         const asset = new algorithm_1.AssetId(assetId);
-                        const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        if (!result.bridge.balances[ownerAddress])
-                            result.bridge.balances[ownerAddress] = {};
-                        if (!result.bridge.balances[ownerAddress][asset.handle])
-                            result.bridge.balances[ownerAddress][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
-                        const state = result.bridge.balances[ownerAddress][asset.handle];
+                        const hash = new algorithm_1.Uint256(bridgeHash.toString());
+                        if (!result.bridge.balances[hash.toString()])
+                            result.bridge.balances[hash.toString()] = {};
+                        if (!result.bridge.balances[hash.toString()][asset.handle])
+                            result.bridge.balances[hash.toString()][asset.handle] = { asset: asset, supply: new bignumber_js_1.default(0) };
+                        const state = result.bridge.balances[hash.toString()][asset.handle];
                         state.supply = state.supply.plus(value);
-                        result.events.push({ type: EventType.BridgeTransfer, asset: asset, owner: ownerAddress, value: new bignumber_js_1.default(value) });
+                        result.events.push({ type: EventType.BridgeTransfer, asset: asset, bridgeHash: hash, value: new bignumber_js_1.default(value) });
                     }
                     break;
                 }
@@ -316,8 +305,14 @@ class EventResolver {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        result.bridge.participants.add(ownerAddress);
-                        result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
+                        if (i == 0) {
+                            result.bridge.attesters.add(ownerAddress);
+                            result.events.push({ type: EventType.BridgeAttester, owner: ownerAddress });
+                        }
+                        else {
+                            result.bridge.participants.add(ownerAddress);
+                            result.events.push({ type: EventType.BridgeParticipant, owner: ownerAddress });
+                        }
                     }
                     break;
                 }
@@ -354,28 +349,30 @@ class EventResolver {
     }
     static isSummaryStateEmpty(state, address) {
         if (address != null) {
-            return !state.account.balances[address] &&
+            return !state.errors.length &&
+                !state.account.balances[address] &&
                 !state.bridge.balances[address] &&
-                !Object.keys(state.bridge.queues).length &&
+                !state.bridge.attesters.size &&
+                !state.bridge.participants.size &&
+                !Object.keys(state.bridge.transactions).length &&
                 !Object.keys(state.bridge.accounts).length &&
                 !Object.keys(state.bridge.policies).length &&
-                !state.bridge.participants.size &&
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
-                !Object.keys(state.receipts).length &&
-                !state.errors.length;
+                !Object.keys(state.receipts).length;
         }
         else {
-            return !Object.keys(state.account.balances).length &&
+            return !state.errors.length &&
+                !state.bridge.attesters.size &&
+                !state.bridge.participants.size &&
                 !Object.keys(state.bridge.balances).length &&
-                !Object.keys(state.bridge.queues).length &&
+                !Object.keys(state.bridge.transactions).length &&
                 !Object.keys(state.bridge.accounts).length &&
                 !Object.keys(state.bridge.policies).length &&
-                !state.bridge.participants.size &&
+                !Object.keys(state.account.balances).length &&
                 !Object.keys(state.witness.accounts).length &&
                 !Object.keys(state.witness.transactions).length &&
-                !Object.keys(state.receipts).length &&
-                !state.errors.length;
+                !Object.keys(state.receipts).length;
         }
     }
 }
@@ -799,11 +796,11 @@ class RPC {
     static getBlockchains() {
         return this.fetch('cache', 'getblockchains', []);
     }
-    static getBestValidatorAttestationsForSelection(asset, offset, count) {
-        return this.fetch('no-cache', 'getbestvalidatorattestationsforselection', [asset.handle, offset, count]);
+    static getBestBridgeInstancesBySecurity(asset, offset, count) {
+        return this.fetch('no-cache', 'getbestbridgeinstancesbysecurity', [asset.handle, offset, count]);
     }
-    static getBestBridgeBalancesForSelection(asset, offset, count) {
-        return this.fetch('no-cache', 'getbestbridgebalancesforselection', [asset.handle, offset, count]);
+    static getBestBridgeInstancesByBalance(asset, offset, count) {
+        return this.fetch('no-cache', 'getbestbridgeinstancesbybalance', [asset.handle, offset, count]);
     }
     static getNextAccountNonce(address) {
         return this.fetch('no-cache', 'getnextaccountnonce', [address]);

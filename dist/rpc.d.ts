@@ -25,15 +25,16 @@ export declare enum EventType {
     Transfer = 1,
     TransferIsolated = 2,
     TransferFee = 3,
-    BridgeTransfer = 4,
-    BridgeAccount = 5,
-    BridgeQueue = 6,
-    BridgePolicy = 7,
-    BridgeParticipant = 8,
-    WitnessAccount = 9,
-    WitnessTransaction = 10,
-    RollupReceipt = 11,
-    Unknown = 12
+    BridgePolicy = 4,
+    BridgeTransaction = 5,
+    BridgeAccount = 6,
+    BridgeTransfer = 7,
+    BridgeAttester = 8,
+    BridgeParticipant = 9,
+    WitnessAccount = 10,
+    WitnessTransaction = 11,
+    RollupReceipt = 12,
+    Unknown = 13
 }
 export type EventData = {
     type: EventType.Error;
@@ -56,23 +57,26 @@ export type EventData = {
     owner: string;
     fee: BigNumber;
 } | {
-    type: EventType.BridgeTransfer;
+    type: EventType.BridgePolicy;
     asset: AssetId;
-    owner: string;
-    value: BigNumber;
+    bridgeHash: Uint256;
+} | {
+    type: EventType.BridgeTransaction;
+    asset: AssetId;
+    bridgeHash: Uint256;
+    nonce: BigNumber;
 } | {
     type: EventType.BridgeAccount;
     asset: AssetId;
-    owner: string;
-    accounts: BigNumber;
+    bridgeHash: Uint256;
+    nonce: BigNumber;
 } | {
-    type: EventType.BridgeQueue;
+    type: EventType.BridgeTransfer;
     asset: AssetId;
-    owner: string;
-    transactionHash: string;
+    bridgeHash: Uint256;
+    value: BigNumber;
 } | {
-    type: EventType.BridgePolicy;
-    asset: AssetId;
+    type: EventType.BridgeAttester;
     owner: string;
 } | {
     type: EventType.BridgeParticipant;
@@ -109,21 +113,22 @@ export type SummaryState = {
         }>>;
     };
     bridge: {
+        policies: Record<string, Record<string, {
+            asset: AssetId;
+        }>>;
+        transactions: Record<string, Record<string, {
+            asset: AssetId;
+            nonce: BigNumber;
+        }>>;
+        accounts: Record<string, Record<string, {
+            asset: AssetId;
+            nonce: BigNumber;
+        }>>;
         balances: Record<string, Record<string, {
             asset: AssetId;
             supply: BigNumber;
         }>>;
-        accounts: Record<string, Record<string, {
-            asset: AssetId;
-            newAccounts: number;
-        }>>;
-        queues: Record<string, Record<string, {
-            asset: AssetId;
-            transactionHash: string | null;
-        }>>;
-        policies: Record<string, Record<string, {
-            asset: AssetId;
-        }>>;
+        attesters: Set<string>;
         participants: Set<string>;
         migrations: Record<string, boolean>;
     };
@@ -272,8 +277,8 @@ export declare class RPC {
         address: string;
     } | null>;
     static getBlockchains(): Promise<any[] | null>;
-    static getBestValidatorAttestationsForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
-    static getBestBridgeBalancesForSelection(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestBridgeInstancesBySecurity(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
+    static getBestBridgeInstancesByBalance(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getNextAccountNonce(address: string): Promise<BigNumber | string | null>;
     static getAccountBalance(address: string, asset: AssetId): Promise<{
         supply: BigNumber;

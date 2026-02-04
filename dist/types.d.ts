@@ -1,6 +1,6 @@
 export declare class Types {
     static AccountBalance: number;
-    static ValidatorAttestation: number;
+    static BridgeInstance: number;
     static BridgeBalance: number;
     static WitnessAccount: number;
     static WitnessTransaction: number;

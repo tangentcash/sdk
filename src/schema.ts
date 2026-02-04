@@ -48,8 +48,8 @@ export namespace States {
     static typename: string = 'account_balance';
   }
 
-  export class ValidatorAttestation {
-    static typename: string = 'validator_attestation';
+  export class BridgeInstance {
+    static typename: string = 'bridge_instance';
   }
 
   export class BridgeBalance {
@@ -114,18 +114,13 @@ export namespace Transactions {
     attestations: string[] = [
       'asset', 'assetid',
       'stake', 'decimal',
-      'hasAcceptsAccountRequests', 'boolean',
-      'hasAcceptsWithdrawalRequests', 'boolean',
-      'hasSecurityLevel', 'boolean',
-      'hasIncomingFee', 'boolean',
-      'hasOutgoingFee', 'boolean',
-      'hasParticipationThreshold', 'boolean',
-      'acceptsAccountRequests', 'boolean?',
-      'acceptsWithdrawalRequests', 'boolean?',
-      'securityLevel', 'uint8?',
-      'incomingFee', 'decimal?',
-      'outgoingFee', 'decimal?',
-      'participationThreshold', 'decimal?',
+      'hasMinFee', 'boolean',
+      'minFee', 'decimal?'
+    ];
+    bridges: string[] = [
+      'asset', 'assetid',
+      'securityLevel', 'uint8',
+      'feeRate', 'decimal'
     ];
     hasParticipation: string = 'boolean';
     participationStake: string = 'decimal?';
@@ -137,7 +132,7 @@ export namespace Transactions {
 
   export class Route extends Ledger.Commitment {
     static typename: string = 'route';
-    manager: string = 'pubkeyhash';
+    bridgeHash: string = 'uint256';
     routingAddress: string = 'string';
 
     getType() { return Route.typename; }
@@ -145,10 +140,9 @@ export namespace Transactions {
 
   export class Withdraw extends Ledger.Transaction {
     static typename: string = 'withdraw';
-    onlyIfNotInQueue: string = 'boolean';
-    manager: string = 'pubkeyhash';
-    toAddress: string = 'string';
-    toValue: string = 'decimal';
+    bridgeHash: string = 'uint256';
+    address: string = 'string';
+    value: string = 'decimal';
 
     getType() { return Withdraw.typename; }
   }

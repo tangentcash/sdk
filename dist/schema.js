@@ -68,10 +68,10 @@ var States;
     }
     AccountBalance.typename = 'account_balance';
     States.AccountBalance = AccountBalance;
-    class ValidatorAttestation {
+    class BridgeInstance {
     }
-    ValidatorAttestation.typename = 'validator_attestation';
-    States.ValidatorAttestation = ValidatorAttestation;
+    BridgeInstance.typename = 'bridge_instance';
+    States.BridgeInstance = BridgeInstance;
     class BridgeBalance {
     }
     BridgeBalance.typename = 'bridge_balance';
@@ -142,18 +142,13 @@ var Transactions;
             this.attestations = [
                 'asset', 'assetid',
                 'stake', 'decimal',
-                'hasAcceptsAccountRequests', 'boolean',
-                'hasAcceptsWithdrawalRequests', 'boolean',
-                'hasSecurityLevel', 'boolean',
-                'hasIncomingFee', 'boolean',
-                'hasOutgoingFee', 'boolean',
-                'hasParticipationThreshold', 'boolean',
-                'acceptsAccountRequests', 'boolean?',
-                'acceptsWithdrawalRequests', 'boolean?',
-                'securityLevel', 'uint8?',
-                'incomingFee', 'decimal?',
-                'outgoingFee', 'decimal?',
-                'participationThreshold', 'decimal?',
+                'hasMinFee', 'boolean',
+                'minFee', 'decimal?'
+            ];
+            this.bridges = [
+                'asset', 'assetid',
+                'securityLevel', 'uint8',
+                'feeRate', 'decimal'
             ];
             this.hasParticipation = 'boolean';
             this.participationStake = 'decimal?';
@@ -167,7 +162,7 @@ var Transactions;
     class Route extends Ledger.Commitment {
         constructor() {
             super(...arguments);
-            this.manager = 'pubkeyhash';
+            this.bridgeHash = 'uint256';
             this.routingAddress = 'string';
         }
         getType() { return Route.typename; }
@@ -177,10 +172,9 @@ var Transactions;
     class Withdraw extends Ledger.Transaction {
         constructor() {
             super(...arguments);
-            this.onlyIfNotInQueue = 'boolean';
-            this.manager = 'pubkeyhash';
-            this.toAddress = 'string';
-            this.toValue = 'decimal';
+            this.bridgeHash = 'uint256';
+            this.address = 'string';
+            this.value = 'decimal';
         }
         getType() { return Withdraw.typename; }
     }
