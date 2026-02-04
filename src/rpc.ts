@@ -60,21 +60,21 @@ export type EventData = {
 } | {
   type: EventType.BridgePolicy,
   asset: AssetId,
-  bridgeHash: Uint256
+  bridgeHash: string
 } | {
   type: EventType.BridgeTransaction,
   asset: AssetId,
-  bridgeHash: Uint256,
+  bridgeHash: string,
   nonce: BigNumber
 } | {
   type: EventType.BridgeAccount,
   asset: AssetId,
-  bridgeHash: Uint256,
+  bridgeHash: string,
   nonce: BigNumber
 } | {
   type: EventType.BridgeTransfer,
   asset: AssetId,
-  bridgeHash: Uint256,
+  bridgeHash: string,
   value: BigNumber
 } | {
   type: EventType.BridgeAttester,
@@ -352,23 +352,23 @@ export class EventResolver {
 
           const [assetId, bridgeHash] = event.args;
           const asset = new AssetId(assetId);
-          const hash = new Uint256(bridgeHash.toString());
+          const hash = new Uint256(bridgeHash.toString()).toString();
           if (event.args.length == 2) {
-            if (!result.bridge.policies[hash.toString()])
-              result.bridge.policies[hash.toString()] = { };
-            result.bridge.policies[hash.toString()][asset.handle] = { asset: asset };
+            if (!result.bridge.policies[hash])
+              result.bridge.policies[hash] = { };
+            result.bridge.policies[hash][asset.handle] = { asset: asset };
             result.events.push({ type: EventType.BridgePolicy, asset: asset, bridgeHash: hash });
           } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 0) {
             const nonce = new BigNumber(event.args[2].toString());
-            if (!result.bridge.transactions[hash.toString()])
-              result.bridge.transactions[hash.toString()] = { };
-            result.bridge.transactions[hash.toString()][asset.handle] = { asset: asset, nonce: nonce };
+            if (!result.bridge.transactions[hash])
+              result.bridge.transactions[hash] = { };
+            result.bridge.transactions[hash][asset.handle] = { asset: asset, nonce: nonce };
             result.events.push({ type: EventType.BridgeTransaction, asset: asset, bridgeHash: hash, nonce: nonce });
           } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 1) {
             const nonce = new BigNumber(event.args[2].toString());
-            if (!result.bridge.accounts[hash.toString()])
-              result.bridge.accounts[hash.toString()] = { };
-            result.bridge.accounts[hash.toString()][asset.handle] = { asset: asset, nonce: nonce };
+            if (!result.bridge.accounts[hash])
+              result.bridge.accounts[hash] = { };
+            result.bridge.accounts[hash][asset.handle] = { asset: asset, nonce: nonce };
             result.events.push({ type: EventType.BridgeAccount, asset: asset, bridgeHash: hash, nonce: nonce });
           }
           break;
@@ -377,13 +377,13 @@ export class EventResolver {
           if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && isNumber(event.args[2])) {
             const [assetId, bridgeHash, value] = event.args;
             const asset = new AssetId(assetId);
-            const hash = new Uint256(bridgeHash.toString());
-            if (!result.bridge.balances[hash.toString()])
-              result.bridge.balances[hash.toString()] = { };
-            if (!result.bridge.balances[hash.toString()][asset.handle])
-              result.bridge.balances[hash.toString()][asset.handle] = { asset: asset, supply: new BigNumber(0) };
+            const hash = new Uint256(bridgeHash.toString()).toString();
+            if (!result.bridge.balances[hash])
+              result.bridge.balances[hash] = { };
+            if (!result.bridge.balances[hash][asset.handle])
+              result.bridge.balances[hash][asset.handle] = { asset: asset, supply: new BigNumber(0) };
             
-            const state = result.bridge.balances[hash.toString()][asset.handle];
+            const state = result.bridge.balances[hash][asset.handle];
             state.supply = state.supply.plus(value);
             result.events.push({ type: EventType.BridgeTransfer, asset: asset, bridgeHash: hash, value: new BigNumber(value) });
           }

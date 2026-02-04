@@ -59,21 +59,21 @@ export type EventData = {
 } | {
     type: EventType.BridgePolicy;
     asset: AssetId;
-    bridgeHash: Uint256;
+    bridgeHash: string;
 } | {
     type: EventType.BridgeTransaction;
     asset: AssetId;
-    bridgeHash: Uint256;
+    bridgeHash: string;
     nonce: BigNumber;
 } | {
     type: EventType.BridgeAccount;
     asset: AssetId;
-    bridgeHash: Uint256;
+    bridgeHash: string;
     nonce: BigNumber;
 } | {
     type: EventType.BridgeTransfer;
     asset: AssetId;
-    bridgeHash: Uint256;
+    bridgeHash: string;
     value: BigNumber;
 } | {
     type: EventType.BridgeAttester;
