@@ -352,7 +352,7 @@ export class EventResolver {
 
           const [assetId, bridgeHash] = event.args;
           const asset = new AssetId(assetId);
-          const hash = new Uint256(bridgeHash.toString()).toString();
+          const hash = new Uint256(bridgeHash.toString()).toHex();
           if (event.args.length == 2) {
             if (!result.bridge.policies[hash])
               result.bridge.policies[hash] = { };

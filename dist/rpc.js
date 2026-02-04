@@ -209,7 +209,7 @@ class EventResolver {
                         break;
                     const [assetId, bridgeHash] = event.args;
                     const asset = new algorithm_1.AssetId(assetId);
-                    const hash = new algorithm_1.Uint256(bridgeHash.toString()).toString();
+                    const hash = new algorithm_1.Uint256(bridgeHash.toString()).toHex();
                     if (event.args.length == 2) {
                         if (!result.bridge.policies[hash])
                             result.bridge.policies[hash] = {};
