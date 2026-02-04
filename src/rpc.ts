@@ -450,7 +450,7 @@ export class EventResolver {
           if (event.args.length == 1 && typeof event.args[0] == 'string') {
             const [owner] = event.args;
             const ownerAddress = Signing.encodeAddress(new Pubkeyhash(owner)) || owner;
-            if (i == 0) {
+            if (!result.bridge.attesters.size && !result.bridge.participants.size) {
               result.bridge.attesters.add(ownerAddress);
               result.events.push({ type: EventType.BridgeAttester, owner: ownerAddress });
             } else {

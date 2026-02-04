@@ -305,7 +305,7 @@ class EventResolver {
                     if (event.args.length == 1 && typeof event.args[0] == 'string') {
                         const [owner] = event.args;
                         const ownerAddress = algorithm_1.Signing.encodeAddress(new algorithm_1.Pubkeyhash(owner)) || owner;
-                        if (i == 0) {
+                        if (!result.bridge.attesters.size && !result.bridge.participants.size) {
                             result.bridge.attesters.add(ownerAddress);
                             result.events.push({ type: EventType.BridgeAttester, owner: ownerAddress });
                         }
