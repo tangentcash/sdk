@@ -377,7 +377,7 @@ export class EventResolver {
           if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && isNumber(event.args[2])) {
             const [assetId, bridgeHash, value] = event.args;
             const asset = new AssetId(assetId);
-            const hash = new Uint256(bridgeHash.toString()).toString();
+            const hash = new Uint256(bridgeHash.toString()).toHex();
             if (!result.bridge.balances[hash])
               result.bridge.balances[hash] = { };
             if (!result.bridge.balances[hash][asset.handle])
