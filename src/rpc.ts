@@ -358,13 +358,13 @@ export class EventResolver {
               result.bridge.policies[hash] = { };
             result.bridge.policies[hash][asset.handle] = { asset: asset };
             result.events.push({ type: EventType.BridgePolicy, asset: asset, bridgeHash: hash });
-          } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && !event.args[3]) {
+          } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && event.args[3]) {
             const nonce = new BigNumber(event.args[2].toString());
             if (!result.bridge.transactions[hash])
               result.bridge.transactions[hash] = { };
             result.bridge.transactions[hash][asset.handle] = { asset: asset, nonce: nonce };
             result.events.push({ type: EventType.BridgeTransaction, asset: asset, bridgeHash: hash, nonce: nonce });
-          } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && event.args[3]) {
+          } else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && !event.args[3]) {
             const nonce = new BigNumber(event.args[2].toString());
             if (!result.bridge.accounts[hash])
               result.bridge.accounts[hash] = { };
