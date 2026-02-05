@@ -20,7 +20,16 @@ export class Readability {
     '9': '₉'
   };
   static prefixes: Record<string, string> = {
-    'USD': '$'
+    "USD": "$",
+    "GBP": "£",
+    "JPY": "¥",
+    "KPW": "₩",
+    "EUR": "€",
+    "KZT": "₸",
+    "INR": "₹",
+    "TRY": "₺",
+    "RUB": "₽",
+    "BTC": "₿"
   };
 
   static toAssetQuery(asset: AssetId): string {

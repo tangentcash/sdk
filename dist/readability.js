@@ -203,5 +203,14 @@ Readability.subscripts = {
     '9': '₉'
 };
 Readability.prefixes = {
-    'USD': '$'
+    "USD": "$",
+    "GBP": "£",
+    "JPY": "¥",
+    "KPW": "₩",
+    "EUR": "€",
+    "KZT": "₸",
+    "INR": "₹",
+    "TRY": "₺",
+    "RUB": "₽",
+    "BTC": "₿"
 };
