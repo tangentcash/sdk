@@ -205,7 +205,7 @@ class EventResolver {
                     break;
                 }
                 case types_1.Types.BridgeInstance: {
-                    if (event.args.length < 2 || !(isNumber(event.args[0]) || typeof event.args[0] == 'string') && typeof event.args[1] == 'string' && isNumber(event.args[2]))
+                    if (event.args.length < 2 || !(isNumber(event.args[0]) || typeof event.args[0] == 'string') || !(typeof event.args[1] == 'string' || isNumber(event.args[1])))
                         break;
                     const [assetId, bridgeHash] = event.args;
                     const asset = new algorithm_1.AssetId(assetId);
@@ -216,14 +216,14 @@ class EventResolver {
                         result.bridge.policies[hash][asset.handle] = { asset: asset };
                         result.events.push({ type: EventType.BridgePolicy, asset: asset, bridgeHash: hash });
                     }
-                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 0) {
+                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && !event.args[3]) {
                         const nonce = new bignumber_js_1.default(event.args[2].toString());
                         if (!result.bridge.transactions[hash])
                             result.bridge.transactions[hash] = {};
                         result.bridge.transactions[hash][asset.handle] = { asset: asset, nonce: nonce };
                         result.events.push({ type: EventType.BridgeTransaction, asset: asset, bridgeHash: hash, nonce: nonce });
                     }
-                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && parseInt(event.args[3].toString()) == 1) {
+                    else if (event.args.length == 4 && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && event.args[3]) {
                         const nonce = new bignumber_js_1.default(event.args[2].toString());
                         if (!result.bridge.accounts[hash])
                             result.bridge.accounts[hash] = {};
