@@ -21,14 +21,6 @@ export class Readability {
   };
   static prefixes: Record<string, string> = {
     "USD": "$",
-    "GBP": "£",
-    "JPY": "¥",
-    "KPW": "₩",
-    "EUR": "€",
-    "KZT": "₸",
-    "INR": "₹",
-    "TRY": "₺",
-    "RUB": "₽",
     "BTC": "₿"
   };
 
