@@ -203,6 +203,5 @@ Readability.subscripts = {
     '9': '₉'
 };
 Readability.prefixes = {
-    "USD": "$",
-    "BTC": "₿"
+    "USD": "$"
 };

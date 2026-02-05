@@ -20,8 +20,7 @@ export class Readability {
     '9': '₉'
   };
   static prefixes: Record<string, string> = {
-    "USD": "$",
-    "BTC": "₿"
+    "USD": "$"
   };
 
   static toAssetQuery(asset: AssetId): string {
