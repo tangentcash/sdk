@@ -72,6 +72,10 @@ var States;
     }
     BridgeInstance.typename = 'bridge_instance';
     States.BridgeInstance = BridgeInstance;
+    class BridgeQueue {
+    }
+    BridgeQueue.typename = 'bridge_queue';
+    States.BridgeQueue = BridgeQueue;
     class BridgeBalance {
     }
     BridgeBalance.typename = 'bridge_balance';

@@ -28,6 +28,7 @@ export enum EventType {
   BridgePolicy,
   BridgeTransaction,
   BridgeAccount,
+  BridgeQueue,
   BridgeTransfer,
   BridgeAttester,
   BridgeParticipant,
@@ -72,6 +73,11 @@ export type EventData = {
   bridgeHash: string,
   nonce: BigNumber
 } | {
+  type: EventType.BridgeQueue,
+  asset: AssetId,
+  bridgeHash: string,
+  size: BigNumber
+} | {
   type: EventType.BridgeTransfer,
   asset: AssetId,
   bridgeHash: string,
@@ -111,6 +117,7 @@ export type SummaryState = {
     policies: Record<string, Record<string, { asset: AssetId }>>,
     transactions: Record<string, Record<string, { asset: AssetId, nonce: BigNumber }>>,
     accounts: Record<string, Record<string, { asset: AssetId, nonce: BigNumber }>>,
+    queues: Record<string, Record<string, { asset: AssetId, size: BigNumber }>>,
     balances: Record<string, Record<string, { asset: AssetId, supply: BigNumber }>>,
     attesters: Set<string>,
     participants: Set<string>,
@@ -260,9 +267,10 @@ export class EventResolver {
       },
       bridge: {
         policies: { },
-        balances: { },
-        accounts: { },
         transactions: { },
+        accounts: { },
+        queues: { },
+        balances: { },
         attesters: new Set<string>(),
         participants: new Set<string>(),
         migrations: { }
@@ -370,6 +378,21 @@ export class EventResolver {
               result.bridge.accounts[hash] = { };
             result.bridge.accounts[hash][asset.handle] = { asset: asset, nonce: nonce };
             result.events.push({ type: EventType.BridgeAccount, asset: asset, bridgeHash: hash, nonce: nonce });
+          }
+          break;
+        }
+        case Types.BridgeQueue: {
+          if (event.args.length >= 3 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && isNumber(event.args[2])) {
+            const [assetId, bridgeHash, size] = event.args;
+            const asset = new AssetId(assetId);
+            const hash = new Uint256(bridgeHash.toString()).toHex();
+            if (!result.bridge.queues[hash])
+              result.bridge.queues[hash] = { };
+            if (!result.bridge.queues[hash][asset.handle])
+              result.bridge.queues[hash][asset.handle] = { asset: asset, size: new BigNumber(size) };
+            else
+              result.bridge.queues[hash][asset.handle].size = new BigNumber(size);
+            result.events.push({ type: EventType.BridgeQueue, asset: asset, bridgeHash: hash, size: new BigNumber(size) });
           }
           break;
         }

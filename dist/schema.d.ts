@@ -35,6 +35,9 @@ export declare namespace States {
     class BridgeInstance {
         static typename: string;
     }
+    class BridgeQueue {
+        static typename: string;
+    }
     class BridgeBalance {
         static typename: string;
     }

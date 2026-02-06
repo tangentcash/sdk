@@ -28,13 +28,14 @@ export declare enum EventType {
     BridgePolicy = 4,
     BridgeTransaction = 5,
     BridgeAccount = 6,
-    BridgeTransfer = 7,
-    BridgeAttester = 8,
-    BridgeParticipant = 9,
-    WitnessAccount = 10,
-    WitnessTransaction = 11,
-    RollupReceipt = 12,
-    Unknown = 13
+    BridgeQueue = 7,
+    BridgeTransfer = 8,
+    BridgeAttester = 9,
+    BridgeParticipant = 10,
+    WitnessAccount = 11,
+    WitnessTransaction = 12,
+    RollupReceipt = 13,
+    Unknown = 14
 }
 export type EventData = {
     type: EventType.Error;
@@ -70,6 +71,11 @@ export type EventData = {
     asset: AssetId;
     bridgeHash: string;
     nonce: BigNumber;
+} | {
+    type: EventType.BridgeQueue;
+    asset: AssetId;
+    bridgeHash: string;
+    size: BigNumber;
 } | {
     type: EventType.BridgeTransfer;
     asset: AssetId;
@@ -123,6 +129,10 @@ export type SummaryState = {
         accounts: Record<string, Record<string, {
             asset: AssetId;
             nonce: BigNumber;
+        }>>;
+        queues: Record<string, Record<string, {
+            asset: AssetId;
+            size: BigNumber;
         }>>;
         balances: Record<string, Record<string, {
             asset: AssetId;
