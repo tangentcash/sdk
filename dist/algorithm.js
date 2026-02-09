@@ -482,12 +482,12 @@ class AssetId {
     static fromHandle(chain, token, contractAddress) {
         let handle = chain == Chain.policy.TOKEN_NAME ? '' : chain.substring(0, 8);
         if (token != null && token.length > 0) {
-            handle = (handle + ':' + token.substring(0, 8)).toUpperCase();
-            if (contractAddress != null && contractAddress.length > 0)
+            let normalizedToken = token.split('').filter(x => x.charCodeAt(0) >= 0x20 && x.charCodeAt(0) < 0x7F).join('').trim();
+            handle = (handle + ':' + normalizedToken.substring(0, 11)).toUpperCase();
+            if (contractAddress != null && contractAddress.length > 0) {
                 handle = (handle + ':' + this.checksumOf(contractAddress).substring(0, Chain.size.ASSETID - (handle.length + 1)));
+            }
         }
-        else
-            handle = handle.toUpperCase();
         return new AssetId(ByteUtil.byteStringToUint8Array(handle));
     }
     static checksumOf(contractAddress) {
