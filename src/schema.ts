@@ -164,12 +164,12 @@ export namespace Transactions {
     'call': 'Call',
     'rollup': 'Rollup',
     'setup': 'Setup validator',
-    'migrate': 'Bridge migrate',
-    'attestate': 'Bridge transaction',
-    'route': 'Create bridge',
-    'bind': 'Bind bridge',
+    'migrate': 'Rotate bridge',
+    'route': 'Link bridge',
+    'bind': 'New bridge',
     'withdraw': 'Bridge withdraw',
     'broadcast': 'Bridge broadcast',
-    'anticast': 'Bridge protest'
+    'anticast': 'Bridge protest',
+    'attestate': 'Bridge transaction'
   };
 }
