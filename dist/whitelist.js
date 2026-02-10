@@ -4,5 +4,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Whitelist = void 0;
+const algorithm_1 = require("./algorithm");
 const whitelist_json_1 = __importDefault(require("./whitelist.json"));
-exports.Whitelist = whitelist_json_1.default;
+class Whitelist {
+    static tokens() {
+        return this.whitelistOfTokens;
+    }
+    static ids() {
+        if (!this.whitelistOfIds) {
+            const result = new Set();
+            for (let symbol in Whitelist) {
+                const defs = Whitelist[symbol];
+                for (let chain in defs) {
+                    const contractAddress = defs[chain];
+                    if (Array.isArray(contractAddress)) {
+                        for (let i = 0; i < contractAddress.length; i++) {
+                            result.add(algorithm_1.AssetId.fromHandle(chain, symbol, contractAddress[i]).id);
+                        }
+                    }
+                    else {
+                        result.add(algorithm_1.AssetId.fromHandle(chain, symbol, contractAddress).id);
+                    }
+                }
+            }
+            this.whitelistOfIds = result;
+        }
+        return this.whitelistOfIds;
+    }
+    static has(asset) {
+        return !asset.token || !asset.checksum ? true : this.ids().has(asset.id);
+    }
+    static contractAddressOf(asset) {
+        if (!asset.token || !asset.checksum)
+            return true;
+        const contracts = this.whitelistOfTokens[asset.token];
+        if (!contracts)
+            return false;
+        for (let chain in contracts) {
+            if (asset.chain != chain)
+                continue;
+            const target = contracts[chain];
+            if (Array.isArray(target)) {
+                for (let i = 0; i < target.length; i++) {
+                    if (asset.checksum == algorithm_1.Hashing.atca160ascii(target[i]).substring(0, asset.checksum.length)) {
+                        return target[i];
+                    }
+                }
+            }
+            else if (asset.checksum == algorithm_1.Hashing.atca160ascii(target).substring(0, asset.checksum.length)) {
+                return target;
+            }
+        }
+        return false;
+    }
+}
+exports.Whitelist = Whitelist;
+Whitelist.whitelistOfTokens = whitelist_json_1.default;
+Whitelist.whitelistOfIds = null;
