@@ -33,7 +33,7 @@ export class Readability {
     return asset.token || asset.chain || '?';
   }
   static toAssetFallback(asset: AssetId): string {
-    return this.toAssetSymbol(asset).substring(0, 3);
+    return this.toAssetSymbol(asset).substring(0, 2);
   }
   static toAssetImage(asset: AssetId): string {
     const target = this.toAssetSymbol(asset);
