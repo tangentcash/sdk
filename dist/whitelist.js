@@ -13,8 +13,8 @@ class Whitelist {
     static ids() {
         if (!this.whitelistOfIds) {
             const result = new Set();
-            for (let symbol in Whitelist) {
-                const defs = Whitelist[symbol];
+            for (let symbol in this.whitelistOfTokens) {
+                const defs = this.whitelistOfTokens[symbol];
                 for (let chain in defs) {
                     const contractAddress = defs[chain];
                     if (Array.isArray(contractAddress)) {

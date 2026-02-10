@@ -8,11 +8,11 @@ export class Whitelist {
     static tokens(): Record<string, Record<string, string | string[]>> {
         return this.whitelistOfTokens;
     }
-    static ids(): Set<string> { 
+    static ids(): Set<string> {
         if (!this.whitelistOfIds) {
             const result = new Set<string>();
-            for (let symbol in Whitelist) {
-                const defs = (Whitelist as any)[symbol];
+            for (let symbol in this.whitelistOfTokens) {
+                const defs = this.whitelistOfTokens[symbol];
                 for (let chain in defs) {
                     const contractAddress = defs[chain];
                     if (Array.isArray(contractAddress)) {
