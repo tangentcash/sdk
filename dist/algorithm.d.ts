@@ -117,7 +117,6 @@ export declare class AssetId {
     toHex(): string;
     isValid(): boolean;
     static fromHandle(chain: string, token?: string, contractAddress?: string): AssetId;
-    static checksumOf(contractAddress: string): string;
 }
 export declare class Segwit {
     static tweak(outputBits: number, input: Uint8Array, inputBits: number, padding: number): Uint8Array | null;
@@ -161,6 +160,7 @@ export declare class Hashing {
     static hash160(data: Uint8Array): Uint8Array;
     static hash256(data: Uint8Array): Uint8Array;
     static hash512(data: Uint8Array): Uint8Array;
+    static atca160ascii(contractAddress: string): string;
 }
 export declare class ByteUtil {
     static hexStringToUint8Array(data: string): Uint8Array;

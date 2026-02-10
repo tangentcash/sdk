@@ -476,17 +476,16 @@ export class AssetId {
   }
   static fromHandle(chain: string, token?: string, contractAddress?: string): AssetId {
     let handle = chain == Chain.policy.TOKEN_NAME ? '' : chain.substring(0, 8);
-    if (token != null && token.length > 0) {
-      let normalizedToken = token.split('').filter(x => x.charCodeAt(0) >= 0x20 && x.charCodeAt(0) < 0x7F).join('').trim();
-      handle = (handle + ':' + normalizedToken.substring(0, 11)).toUpperCase();
-      if (contractAddress != null && contractAddress.length > 0) {
-        handle = (handle + ':' + this.checksumOf(contractAddress).substring(0, Chain.size.ASSETID - (handle.length + 1)));
-      }
+    if (token || contractAddress) {
+      let symbol = token ? token.split('').filter(x => x.charCodeAt(0) >= 0x20 && x.charCodeAt(0) < 0x7F).join('').trim() : '';
+      if (token && !symbol.length)
+        symbol = Hashing.atca160ascii(token);
+
+      let hash = Hashing.atca160ascii(contractAddress ? contractAddress : token as string);
+      handle = (handle + ':' + (symbol.length > 0 ? symbol : hash).substring(0, 11)).toUpperCase();    
+      handle = (handle + ':' + hash.substring(0, Chain.size.ASSETID - (handle.length + 1)));
     }
     return new AssetId(ByteUtil.byteStringToUint8Array(handle));
-  }
-  static checksumOf(contractAddress: string): string {
-    return Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true).replace(/[-_]/g, '');
   }
 }
 
@@ -779,6 +778,9 @@ export class Hashing {
   }
   static hash512(data: Uint8Array): Uint8Array {
     return sha3_512(data);
+  }
+  static atca160ascii(contractAddress: string): string {
+    return Base64.fromUint8Array(sha1(TextUtil.isHexEncoding(contractAddress) ? ByteUtil.hexStringToUint8Array(contractAddress) : contractAddress), true).replace(/[-_]/g, '');
   }
 }
 
