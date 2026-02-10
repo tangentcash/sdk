@@ -22,3 +22,4 @@ __exportStar(require("./readability"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./rpc"), exports);
 __exportStar(require("./auth"), exports);
+__exportStar(require("./whitelist"), exports);
