@@ -249,12 +249,12 @@ export declare class RPC {
     static onIpsetLoad: IpsetLoad | null;
     static onIpsetStore: IpsetStore | null;
     private static reportAvailability;
-    private static fetchObject;
     private static fetchData;
     private static fetchResult;
     private static fetchNode;
     private static fetchResolver;
     private static fetchIpset;
+    static fetchObject(data: any): any;
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
     static connectSocket(): Promise<number | null>;

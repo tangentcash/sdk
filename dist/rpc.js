@@ -405,32 +405,6 @@ class RPC {
         if (this.onIpsetStore != null)
             this.onIpsetStore({ servers: [...this.interfaces.servers] });
     }
-    static fetchObject(data) {
-        if (typeof data == 'string') {
-            try {
-                if (!data.startsWith('0x')) {
-                    const numeric = new bignumber_js_1.default(data, 10).dp(18);
-                    if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)))
-                        return numeric;
-                }
-            }
-            catch { }
-        }
-        else if (typeof data == 'number') {
-            return new bignumber_js_1.default(data);
-        }
-        else if (typeof data == 'object') {
-            for (let key in data) {
-                data[key] = this.fetchObject(data[key]);
-            }
-        }
-        else if (Array.isArray(data)) {
-            for (let i = 0; i < data.length; i++) {
-                data[i] = this.fetchObject(data[i]);
-            }
-        }
-        return data;
-    }
     static fetchData(data) {
         if (!data.error)
             return this.fetchObject(data.result);
@@ -552,6 +526,32 @@ class RPC {
             default:
                 return 0;
         }
+    }
+    static fetchObject(data) {
+        if (typeof data == 'string') {
+            try {
+                if (!data.startsWith('0x')) {
+                    const numeric = new bignumber_js_1.default(data, 10).dp(18);
+                    if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)))
+                        return numeric;
+                }
+            }
+            catch { }
+        }
+        else if (typeof data == 'number') {
+            return new bignumber_js_1.default(data);
+        }
+        else if (typeof data == 'object') {
+            for (let key in data) {
+                data[key] = this.fetchObject(data[key]);
+            }
+        }
+        else if (Array.isArray(data)) {
+            for (let i = 0; i < data.length; i++) {
+                data[i] = this.fetchObject(data[i]);
+            }
+        }
+        return data;
     }
     static async fetch(policy, method, args) {
         if (this.forcePolicy != null) {
