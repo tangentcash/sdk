@@ -486,7 +486,7 @@ class AssetId {
             if (token && !symbol.length)
                 symbol = Hashing.atca160ascii(token);
             let hash = Hashing.atca160ascii(contractAddress ? contractAddress : token);
-            handle = (handle + ':' + (symbol.length > 0 ? symbol : hash).substring(0, 11)).toUpperCase();
+            handle = (handle + ':' + (symbol.length > 0 ? symbol : hash).substring(0, 11));
             handle = (handle + ':' + hash.substring(0, Chain.size.ASSETID - (handle.length + 1)));
         }
         return new AssetId(ByteUtil.byteStringToUint8Array(handle));
