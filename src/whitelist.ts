@@ -2,6 +2,7 @@ import { AssetId, Hashing } from './algorithm';
 import TokenWhitelist from './whitelist.json';
 
 export class Whitelist {
+    static idToContractAddress: Record<string, boolean | string> = { };
     static whitelistOfTokens: Record<string, Record<string, string | string[]>> = TokenWhitelist;
     static whitelistOfIds: Set<string> | null = null;
 
@@ -31,7 +32,16 @@ export class Whitelist {
     static has(asset: AssetId): boolean {
         return !asset.token || !asset.checksum ? true : this.ids().has(asset.id);
     }
-    static contractAddressOf(asset: AssetId): boolean | string {
+    static fake(asset: AssetId, contractAddress?: string | boolean) {
+        return asset.token != null && !(contractAddress !== undefined ? contractAddress : this.contractAddressOf(asset)) && !!this.whitelistOfTokens[asset.token];
+    }
+    static contractAddressOf(asset: AssetId): string | boolean {
+        let contractAddress = this.idToContractAddress[asset.id];
+        if (typeof contractAddress != 'boolean' && typeof contractAddress != 'string')
+            contractAddress = this.idToContractAddress[asset.id] = this.queryContractAddressOf(asset);
+        return contractAddress;
+    }
+    private static queryContractAddressOf(asset: AssetId): boolean | string {
         if (!asset.token || !asset.checksum)
             return true;
 

@@ -34,7 +34,16 @@ class Whitelist {
     static has(asset) {
         return !asset.token || !asset.checksum ? true : this.ids().has(asset.id);
     }
+    static fake(asset, contractAddress) {
+        return asset.token != null && !(contractAddress !== undefined ? contractAddress : this.contractAddressOf(asset)) && !!this.whitelistOfTokens[asset.token];
+    }
     static contractAddressOf(asset) {
+        let contractAddress = this.idToContractAddress[asset.id];
+        if (typeof contractAddress != 'boolean' && typeof contractAddress != 'string')
+            contractAddress = this.idToContractAddress[asset.id] = this.queryContractAddressOf(asset);
+        return contractAddress;
+    }
+    static queryContractAddressOf(asset) {
         if (!asset.token || !asset.checksum)
             return true;
         const contracts = this.whitelistOfTokens[asset.token];
@@ -59,5 +68,6 @@ class Whitelist {
     }
 }
 exports.Whitelist = Whitelist;
+Whitelist.idToContractAddress = {};
 Whitelist.whitelistOfTokens = whitelist_json_1.default;
 Whitelist.whitelistOfIds = null;
