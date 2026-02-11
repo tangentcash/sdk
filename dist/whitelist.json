@@ -13626,7 +13626,8 @@
     "USDT": {
         "SOL": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
         "ETH": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        "TRX": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        "TRX": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+        "TAN": "tc1y50rlgymultky6dyd9dvxr33rn2k2qervlpqkmf"
     },
     "XAUt0": {
         "SOL": "AymATz4TCL9sWNEEV9Kvyz45CHVhDZ6kUgjTJPzLpU9P"
@@ -14555,7 +14556,8 @@
     "USDC": {
         "SOL": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         "ETH": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        "TRX": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8"
+        "TRX": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+        "TAN": "tc1y50rlgymultky6dyd9dvxr33rn2k2qervlpqkmf"
     },
     "USDS": {
         "SOL": "USDSwr9ApdHk5bvJKMjzff41FfuX8bSxdKcR81vTwcA",
