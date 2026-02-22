@@ -58,7 +58,7 @@ export class Chain {
   static policy = {
     TOKEN_NAME: 'TAN',
     PRODUCTION_COMMITTEE: 12,
-    PARTICIPATION_COMMITTEE: [5, 23],
+    PARTICIPATION_COMMITTEE: [7, 23],
   };
   static size = {
     HASHSIG: 65,
