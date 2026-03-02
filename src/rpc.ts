@@ -1027,14 +1027,14 @@ export class RPC {
   static getNextAccountNonce(address: string): Promise<BigNumber | string | null> {
     return this.fetch('no-cache', 'getnextaccountnonce', [address]);
   }
+  static getAccountProgram(address: string): Promise<{ hashcode: string } | null> {
+    return this.fetch('cache', 'getaccountprogram', [address]);
+  }
   static getAccountBalance(address: string, asset: AssetId): Promise<{ supply: BigNumber, reserve: BigNumber, balance: BigNumber } | null> {
     return this.fetch('no-cache', 'getaccountbalance', [address, asset.handle]);
   }
   static getAccountBalances(address: string, offset: number, count: number): Promise<any[] | null> {
     return this.fetch('no-cache', 'getaccountbalances', [address, offset, count]);
-  }
-  static getAccountDelegation(address: string): Promise<any | null> {
-    return this.fetch('no-cache', 'getaccountdelegation', [address]);
   }
   static getValidatorProduction(address: string): Promise<any | null> {
     return this.fetch('no-cache', 'getvalidatorproduction', [address]);

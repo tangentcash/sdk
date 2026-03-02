@@ -822,14 +822,14 @@ class RPC {
     static getNextAccountNonce(address) {
         return this.fetch('no-cache', 'getnextaccountnonce', [address]);
     }
+    static getAccountProgram(address) {
+        return this.fetch('cache', 'getaccountprogram', [address]);
+    }
     static getAccountBalance(address, asset) {
         return this.fetch('no-cache', 'getaccountbalance', [address, asset.handle]);
     }
     static getAccountBalances(address, offset, count) {
         return this.fetch('no-cache', 'getaccountbalances', [address, offset, count]);
-    }
-    static getAccountDelegation(address) {
-        return this.fetch('no-cache', 'getaccountdelegation', [address]);
     }
     static getValidatorProduction(address) {
         return this.fetch('no-cache', 'getvalidatorproduction', [address]);
