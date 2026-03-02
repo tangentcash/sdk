@@ -188,17 +188,20 @@ export class Readability {
     asset.chain = numeric.eq(1) ? name : (name + 's');
     return this.toValue(asset, numeric, delta || false, false);
   }
-  static toHash(value?: string, size?: number): string {
+  static toEllipsisText(size: number, value?: string): string {
     if (!value)
       return 'N/A';
+    else if (value.length <= size)
+      return value;
 
-    return value.length <= (size || 16) ? value : (value.substring(0, size || 16) + '...' + value.substring(value.length - (size || 16)));
+    let start = value.substring(0, size);
+    return start + '...' + value.substring(Math.max(start.length, value.length - size));
+  }
+  static toHash(value?: string, size?: number): string {
+    return this.toEllipsisText(size || 16, value);
   }
   static toAddress(value?: string, size?: number): string {
-    if (!value)
-      return 'N/A';
-    
-    return value.length <= (size || 8) ? value : (value.substring(0, size || 8) + '...' + value.substring(value.length - (size || 8)));
+    return this.toEllipsisText(size || 8, value);
   }
   static toPercentageDelta(prevValue: string | number | BigNumber, nextValue: string | number | BigNumber): string {
     const delta = this.toPercentageDeltaNumber(prevValue, nextValue);

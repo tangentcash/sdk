@@ -169,15 +169,19 @@ class Readability {
         asset.chain = numeric.eq(1) ? name : (name + 's');
         return this.toValue(asset, numeric, delta || false, false);
     }
-    static toHash(value, size) {
+    static toEllipsisText(size, value) {
         if (!value)
             return 'N/A';
-        return value.length <= (size || 16) ? value : (value.substring(0, size || 16) + '...' + value.substring(value.length - (size || 16)));
+        else if (value.length <= size)
+            return value;
+        let start = value.substring(0, size);
+        return start + '...' + value.substring(Math.max(start.length, value.length - size));
+    }
+    static toHash(value, size) {
+        return this.toEllipsisText(size || 16, value);
     }
     static toAddress(value, size) {
-        if (!value)
-            return 'N/A';
-        return value.length <= (size || 8) ? value : (value.substring(0, size || 8) + '...' + value.substring(value.length - (size || 8)));
+        return this.toEllipsisText(size || 8, value);
     }
     static toPercentageDelta(prevValue, nextValue) {
         const delta = this.toPercentageDeltaNumber(prevValue, nextValue);

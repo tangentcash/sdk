@@ -24,6 +24,7 @@ export declare class Readability {
     static toTimespan(value: string | number | BigNumber | null, delta?: boolean): string;
     static toTimePassed(time: Date): string;
     static toCount(name: string, value: string | number | BigNumber | null, delta?: boolean): string;
+    static toEllipsisText(size: number, value?: string): string;
     static toHash(value?: string, size?: number): string;
     static toAddress(value?: string, size?: number): string;
     static toPercentageDelta(prevValue: string | number | BigNumber, nextValue: string | number | BigNumber): string;
