@@ -290,6 +290,10 @@ export declare class RPC {
     static getBestBridgeInstancesBySecurity(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getBestBridgeInstancesByBalance(asset: AssetId, offset: number, count: number): Promise<any[] | null>;
     static getNextAccountNonce(address: string): Promise<BigNumber | string | null>;
+    static getWitnessProgram(hashcode: string): Promise<{
+        hashcode: string;
+        storage: string;
+    } | null>;
     static getAccountProgram(address: string): Promise<{
         hashcode: string;
     } | null>;

@@ -1027,6 +1027,9 @@ export class RPC {
   static getNextAccountNonce(address: string): Promise<BigNumber | string | null> {
     return this.fetch('no-cache', 'getnextaccountnonce', [address]);
   }
+  static getWitnessProgram(hashcode: string): Promise<{ hashcode: string, storage: string } | null> {
+    return this.fetch('cache', 'getwitnessprogram', [hashcode]);
+  }
   static getAccountProgram(address: string): Promise<{ hashcode: string } | null> {
     return this.fetch('cache', 'getaccountprogram', [address]);
   }

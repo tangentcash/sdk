@@ -822,6 +822,9 @@ class RPC {
     static getNextAccountNonce(address) {
         return this.fetch('no-cache', 'getnextaccountnonce', [address]);
     }
+    static getWitnessProgram(hashcode) {
+        return this.fetch('cache', 'getwitnessprogram', [hashcode]);
+    }
     static getAccountProgram(address) {
         return this.fetch('cache', 'getaccountprogram', [address]);
     }
