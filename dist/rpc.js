@@ -667,7 +667,7 @@ class RPC {
                         connection = await new Promise((resolve, reject) => {
                             const socket = new WebSocket(location[0]);
                             socket.onopen = () => resolve(socket);
-                            socket.onerror = () => reject(new Error('websocket connection error'));
+                            socket.onerror = (error) => reject(new Error('websocket connection error - ' + error.type));
                         });
                     }
                     catch (exception) {
