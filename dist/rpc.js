@@ -532,7 +532,7 @@ class RPC {
             try {
                 if (!data.startsWith('0x')) {
                     const numeric = new bignumber_js_1.default(data, 10).dp(18);
-                    if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)))
+                    if (data.startsWith(algorithm_1.ByteUtil.bigNumberToString(numeric)) || data.startsWith(numeric.toExponential()))
                         return numeric;
                 }
             }

@@ -716,7 +716,7 @@ export class RPC {
       try {
         if (!data.startsWith('0x')) {
           const numeric = new BigNumber(data, 10).dp(18);
-          if (data.startsWith(ByteUtil.bigNumberToString(numeric)))
+          if (data.startsWith(ByteUtil.bigNumberToString(numeric)) || data.startsWith(numeric.toExponential()))
             return numeric;
         }
       } catch { }
