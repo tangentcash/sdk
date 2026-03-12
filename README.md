@@ -2,7 +2,7 @@
 <div align="center">
     <br />
     <img src="https://github.com/tangentcash/cash/blob/main/var/favicon.png?raw=true" alt="Tangent Protocol Logo" width="100" />
-    <h3>Tangent Protocol / TypeScript SDK</h3>
+    <h3>Tangent Cash / TypeScript SDK</h3>
 </div>
 <div align="center">
 
