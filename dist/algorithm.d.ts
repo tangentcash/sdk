@@ -17,6 +17,7 @@ export declare class Chain {
         TOKEN_NAME: string;
         PRODUCTION_COMMITTEE: number;
         PARTICIPATION_COMMITTEE: number[];
+        BLOCK_TIME: number;
     };
     static size: {
         HASHSIG: number;

@@ -90,6 +90,7 @@ Chain.policy = {
     TOKEN_NAME: 'TAN',
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [7, 23],
+    BLOCK_TIME: 12000
 };
 Chain.size = {
     HASHSIG: 65,
