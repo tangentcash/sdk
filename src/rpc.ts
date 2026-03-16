@@ -1091,6 +1091,9 @@ export class RPC {
       args.push(unrolling);
     return this.fetch('no-cache', 'gettransactionsbyowner', args);
   }
+  static getTransactionsByHash(hash: string, unrolling?: number): Promise<any | null> {
+    return this.fetch('cache', 'gettransactionsbyhash', unrolling != null ? [hash, unrolling] : [hash]);
+  }
   static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null> {
     return this.fetch('cache', 'gettransactionbyhash', unrolling != null ? [hash, unrolling] : [hash]);
   }
