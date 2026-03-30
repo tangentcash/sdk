@@ -530,15 +530,26 @@ class RPC {
         }
         return result;
     }
-    static async connectSocket() {
-        if (this.socket != null)
-            return 0;
+    static connectSocket() {
+        return new Promise((resolve) => {
+            if (!this.socket) {
+                this.awaitables.push(resolve);
+                if (this.awaitables.length == 1)
+                    this.connectSocketInternal();
+            }
+            else {
+                resolve(0);
+            }
+        });
+    }
+    static async connectSocketInternal() {
         const method = 'connect';
         const topics = [this.topics.addresses.join(',')];
         if (typeof this.topics.blocks == 'boolean')
             topics.push(this.topics.blocks);
         if (typeof this.topics.transactions == 'boolean')
             topics.push(this.topics.transactions);
+        let response = null;
         try {
             if (!this.validator) {
                 if (!this.onValidatorLoad)
@@ -592,14 +603,20 @@ class RPC {
                 this.connectSocket();
             };
             this.status = ValidatorStatus.Online;
-            return await this.fetch('no-cache', 'subscribe', topics);
+            response = await this.fetch('no-cache', 'subscribe', topics);
         }
         catch (exception) {
             this.status = ValidatorStatus.Offline;
             if (this.onNodeError)
                 this.onNodeError(method, exception);
         }
-        return null;
+        if (this.awaitables != null) {
+            for (let i = 0; i < this.awaitables.length; i++) {
+                this.awaitables[i](response);
+            }
+            this.awaitables = [];
+        }
+        return response;
     }
     static async disconnectSocket() {
         this.status = ValidatorStatus.Offline;
@@ -792,6 +809,7 @@ RPC.topics = {
     transactions: undefined,
     addresses: []
 };
+RPC.awaitables = [];
 RPC.socket = null;
 RPC.forcePolicy = null;
 RPC.onNodeMessage = null;

@@ -560,6 +560,7 @@ export class RPC {
     transactions: undefined,
     addresses: []
   };
+  static awaitables: ((tip: number | null) => void)[] = [];
   static socket: WebSocket | null = null;
   static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
@@ -706,10 +707,18 @@ export class RPC {
     }
     return result;
   }
-  static async connectSocket(): Promise<number | null> {
-    if (this.socket != null)
-      return 0;
-    
+  static connectSocket(): Promise<number | null> {
+    return new Promise<number | null>((resolve) => {
+      if (!this.socket) {
+        this.awaitables.push(resolve);
+        if (this.awaitables.length == 1)
+          this.connectSocketInternal();
+      } else {
+        resolve(0);
+      }
+    });
+  }
+  static async connectSocketInternal(): Promise<number | null> {
     const method = 'connect';
     const topics: any[] = [this.topics.addresses.join(',')];
     if (typeof this.topics.blocks == 'boolean')
@@ -717,6 +726,7 @@ export class RPC {
     if (typeof this.topics.transactions == 'boolean')
       topics.push(this.topics.transactions);
 
+    let response: number | null = null;
     try {
       if (!this.validator) {
         if (!this.onValidatorLoad)
@@ -773,14 +783,21 @@ export class RPC {
         this.connectSocket();
       };
       this.status = ValidatorStatus.Online;
-      return await this.fetch<number>('no-cache', 'subscribe', topics);
+      response = await this.fetch<number>('no-cache', 'subscribe', topics);
     } catch (exception) {
       this.status = ValidatorStatus.Offline;
       if (this.onNodeError)
         this.onNodeError(method, exception);
     }
-      
-    return null;
+  
+    if (this.awaitables != null) {
+      for (let i = 0; i < this.awaitables.length; i++) {
+        this.awaitables[i](response);
+      }
+      this.awaitables = [];
+    }
+    
+    return response;
   }
   static async disconnectSocket(): Promise<boolean> {
     this.status = ValidatorStatus.Offline;

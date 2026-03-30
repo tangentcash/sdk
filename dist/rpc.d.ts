@@ -233,6 +233,7 @@ export declare class RPC {
         transactions?: boolean;
         addresses: string[];
     };
+    static awaitables: ((tip: number | null) => void)[];
     static socket: WebSocket | null;
     static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
@@ -250,6 +251,7 @@ export declare class RPC {
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
     static connectSocket(): Promise<number | null>;
+    static connectSocketInternal(): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
     static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void;
     static applyValidator(validator: string | null): void;
