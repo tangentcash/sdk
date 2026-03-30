@@ -258,6 +258,8 @@ export declare class RPC {
         onNodeRequest?: NodeRequest;
         onNodeResponse?: NodeResponse;
         onNodeError?: NodeError;
+        onValidatorStore?: ValidatorStore;
+        onValidatorLoad?: ValidatorLoad;
         onCacheStore?: CacheStore;
         onCacheLoad?: CacheLoad;
         onCacheKeys?: CacheKeys;

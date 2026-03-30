@@ -718,8 +718,14 @@ export class RPC {
       topics.push(this.topics.transactions);
 
     try {
-      if (!this.validator)
-        throw false;
+      if (!this.validator) {
+        if (!this.onValidatorLoad)
+          throw false;
+
+        this.validator = this.onValidatorLoad();
+        if (!this.validator)
+          throw false;
+      }
 
       const target = new URL('tcp://' + this.validator);
       const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
@@ -806,20 +812,26 @@ export class RPC {
   static applyValidator(validator: string | null): void {
     this.validator = validator;
     this.status = ValidatorStatus.Unknown;
+    if (this.onValidatorStore)
+      this.onValidatorStore(validator);
   }
   static applyImplementation(implementation: {
     onNodeMessage?: NodeMessage,
     onNodeRequest?: NodeRequest,
     onNodeResponse?: NodeResponse,
     onNodeError?: NodeError,
+    onValidatorStore?: ValidatorStore,
+    onValidatorLoad?: ValidatorLoad,
     onCacheStore?: CacheStore,
     onCacheLoad?: CacheLoad,
-    onCacheKeys?: CacheKeys
+    onCacheKeys?: CacheKeys,
   }): void {
     this.onNodeMessage = implementation.onNodeMessage || null;
     this.onNodeRequest = implementation.onNodeRequest || null;
     this.onNodeResponse = implementation.onNodeResponse || null;
     this.onNodeError = implementation.onNodeError || null;
+    this.onValidatorStore = implementation.onValidatorStore || null;
+    this.onValidatorLoad = implementation.onValidatorLoad || null;
     this.onCacheStore = implementation.onCacheStore || null;
     this.onCacheLoad = implementation.onCacheLoad || null;
     this.onCacheKeys = implementation.onCacheKeys || null;

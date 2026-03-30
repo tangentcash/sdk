@@ -540,8 +540,13 @@ class RPC {
         if (typeof this.topics.transactions == 'boolean')
             topics.push(this.topics.transactions);
         try {
-            if (!this.validator)
-                throw false;
+            if (!this.validator) {
+                if (!this.onValidatorLoad)
+                    throw false;
+                this.validator = this.onValidatorLoad();
+                if (!this.validator)
+                    throw false;
+            }
             const target = new URL('tcp://' + this.validator);
             const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
             const location = [`ws${secure ? 's' : ''}://${this.validator}/`, this.validator];
@@ -624,12 +629,16 @@ class RPC {
     static applyValidator(validator) {
         this.validator = validator;
         this.status = ValidatorStatus.Unknown;
+        if (this.onValidatorStore)
+            this.onValidatorStore(validator);
     }
     static applyImplementation(implementation) {
         this.onNodeMessage = implementation.onNodeMessage || null;
         this.onNodeRequest = implementation.onNodeRequest || null;
         this.onNodeResponse = implementation.onNodeResponse || null;
         this.onNodeError = implementation.onNodeError || null;
+        this.onValidatorStore = implementation.onValidatorStore || null;
+        this.onValidatorLoad = implementation.onValidatorLoad || null;
         this.onCacheStore = implementation.onCacheStore || null;
         this.onCacheLoad = implementation.onCacheLoad || null;
         this.onCacheKeys = implementation.onCacheKeys || null;
