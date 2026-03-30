@@ -2,9 +2,9 @@ import BigNumber from "bignumber.js";
 import { AssetId, Pubkey, Pubkeyhash, Seckey, Hashsig, Uint256 } from "./algorithm";
 import { Ledger } from "./schema";
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
-export type NodeError = (address: string, method: string, error: unknown) => void;
-export type NodeRequest = (address: string, method: string, message: any, size: number) => void;
-export type NodeResponse = (address: string, method: string, message: any, size: number) => void;
+export type NodeError = (method: string, error: unknown) => void;
+export type NodeRequest = (method: string, message: any, size: number) => void;
+export type NodeResponse = (method: string, message: any, size: number) => void;
 export type NodeMessage = (event: {
     type: string;
     result: any;
@@ -12,12 +12,6 @@ export type NodeMessage = (event: {
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = () => {
-    servers: string[];
-} | null;
-export type IpsetStore = (ipset: {
-    servers: string[];
-}) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 export declare enum EventType {
@@ -186,11 +180,6 @@ export type TransactionOutput = {
         [key: string]: any;
     };
 };
-export type ServerInfo = {
-    servers: Set<string>;
-    overrider: string | null;
-    preload: boolean;
-};
 export declare enum WalletType {
     Mnemonic = "mnemonic",
     SecretKey = "secretkey",
@@ -201,6 +190,11 @@ export declare enum NetworkType {
     Mainnet = "mainnet",
     Testnet = "testnet",
     Regtest = "regtest"
+}
+export declare enum ServerStatus {
+    Unknown = 0,
+    Offline = 1,
+    Online = 2
 }
 export declare class WalletKeychain {
     type: WalletType | null;
@@ -223,8 +217,8 @@ export declare class EventResolver {
     static isSummaryStateEmpty(state: SummaryState, address?: string): boolean;
 }
 export declare class RPC {
-    static resolver: string | null;
-    static interfaces: ServerInfo;
+    static server: string | null;
+    static status: ServerStatus;
     static requests: {
         pending: Map<string, {
             method: string;
@@ -246,21 +240,14 @@ export declare class RPC {
     static onCacheStore: CacheStore | null;
     static onCacheLoad: CacheLoad | null;
     static onCacheKeys: CacheKeys | null;
-    static onIpsetLoad: IpsetLoad | null;
-    static onIpsetStore: IpsetStore | null;
-    private static reportAvailability;
     private static fetchData;
     private static fetchResult;
-    private static fetchNode;
-    private static fetchResolver;
-    private static fetchIpset;
     static fetchObject(data: any): any;
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
     static connectSocket(): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
     static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void;
-    static applyResolver(resolver: string | null): void;
     static applyServer(server: string | null): void;
     static applyImplementation(implementation: {
         onNodeMessage?: NodeMessage;
@@ -270,8 +257,6 @@ export declare class RPC {
         onCacheStore?: CacheStore;
         onCacheLoad?: CacheLoad;
         onCacheKeys?: CacheKeys;
-        onIpsetLoad?: IpsetLoad;
-        onIpsetStore?: IpsetStore;
     }): void;
     static requiresSecureTransport(address: string): boolean;
     static clearCache(): void;

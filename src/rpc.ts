@@ -8,15 +8,13 @@ BigNumber.config({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
 const WEBSOCKET_TIMEOUT = 24000;
 
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
-export type NodeError = (address: string, method: string, error: unknown) => void;
-export type NodeRequest = (address: string, method: string, message: any, size: number) => void;
-export type NodeResponse = (address: string, method: string, message: any, size: number) => void;
+export type NodeError = (method: string, error: unknown) => void;
+export type NodeRequest = (method: string, message: any, size: number) => void;
+export type NodeResponse = (method: string, message: any, size: number) => void;
 export type NodeMessage = (event: { type: string, result: any }) => void;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
-export type IpsetLoad = () => { servers: string[] } | null;
-export type IpsetStore = (ipset: { servers: string[] }) => boolean;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 
@@ -156,12 +154,6 @@ export type TransactionOutput = {
   } & { [key: string]: any }
 }
 
-export type ServerInfo = {
-  servers: Set<string>;
-  overrider: string | null;
-  preload: boolean;
-}
-
 export enum WalletType {
   Mnemonic = 'mnemonic',
   SecretKey = 'secretkey',
@@ -173,6 +165,12 @@ export enum NetworkType {
   Mainnet = 'mainnet',
   Testnet = 'testnet',
   Regtest = 'regtest'
+}
+
+export enum ServerStatus {
+  Unknown = 0,
+  Offline = 1,
+  Online = 2
 }
 
 export class WalletKeychain {
@@ -545,12 +543,8 @@ export class EventResolver {
 }
 
 export class RPC {
-  static resolver: string | null = null;
-  static interfaces: ServerInfo = {
-    servers: new Set<string>(),
-    overrider: null,
-    preload: false
-  };
+  static server: string | null = null;
+  static status: ServerStatus = ServerStatus.Unknown;
   static requests = {
     pending: new Map<string, { method: string, resolve: PromiseCallback } >(),
     count: 0
@@ -573,18 +567,7 @@ export class RPC {
   static onCacheStore: CacheStore | null = null;
   static onCacheLoad: CacheLoad | null = null;
   static onCacheKeys: CacheKeys | null = null;
-  static onIpsetLoad: IpsetLoad | null = null;
-  static onIpsetStore: IpsetStore | null = null;
 
-  private static reportAvailability(location: string, available: boolean): void {
-    if (available) {
-      this.interfaces.servers.add(location);
-    } else {
-      this.interfaces.servers.delete(location);
-    }
-    if (this.onIpsetStore != null)
-      this.onIpsetStore({ servers: [...this.interfaces.servers] });
-  }
   private static fetchData(data: any): any {
     if (!data.error)
       return this.fetchObject(data.result)
@@ -600,116 +583,6 @@ export class RPC {
     } else if (this.onCacheStore != null && hash != null && data.error == null)
       this.onCacheStore(hash, data.result);
     return this.fetchData(data);   
-  }
-  private static fetchNode(): [string, string] | null {
-    try {
-      const nodes = Array.from(this.interfaces.servers.keys());
-      const node = nodes[Math.floor(Math.random() * nodes.length)];
-      if (!node)
-        throw false;
-
-      const location = new URL('tcp://' + node);
-      const secure = (location.port == '443' || this.requiresSecureTransport(location.hostname));
-      return [`ws${secure ? 's' : ''}://${node}/`, node];
-    } catch {
-      return null;
-    }
-  }
-  private static fetchResolver(): [string, string] | null {
-    try {
-      if (!this.resolver)
-        return null;
-      
-      return [`${this.resolver}${this.resolver.endsWith('/') ? '' : '/'}?port=rpc&rpc=1&rpc_external_access=1&rpc_public_access=1`, this.resolver];
-    } catch {
-      return null;
-    }
-  }
-  private static async fetchIpset(mode: 'preload' | 'fetch', servers?: Set<string>): Promise<number> {
-    if (this.interfaces.overrider != null) {
-      try {
-        const scheme = new URL('tcp://' + this.interfaces.overrider);
-        const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-        this.interfaces.servers.add(address);
-        return !servers || !servers.has(address) ? 1 : 0;
-      } catch {
-        return 0;
-      }
-    }
-    switch (mode) {
-      case 'preload': {
-        if (this.interfaces.preload)
-          return 0;
-        
-        const seeds = this.onIpsetLoad ? this.onIpsetLoad() : null;
-        this.interfaces.preload = true;
-        if (!seeds || !Array.isArray(seeds.servers))
-          return 0;
-
-        let results = 0;
-        for (let i = 0; i < seeds.servers.length; i++) {
-          try {
-            const seed = seeds.servers[i];
-            const scheme = new URL('tcp://' + seed);
-            const address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-            if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-              this.interfaces.servers.add(address);
-              ++results;
-            }
-          } catch { }
-        }
-
-        return results;
-      }
-      case 'fetch': {
-        const location = this.fetchResolver();
-        if (location != null) {
-          try {
-            if (this.onNodeRequest)
-              this.onNodeRequest(location[0], 'discover', null, 0);
-    
-            const response = await fetch(location[0]);
-            const dataContent = await response.text();
-            const data = JSON.parse(dataContent);
-            if (this.onNodeResponse)
-              this.onNodeResponse(location[0], 'discover', data, dataContent.length);
-            if (!Array.isArray(data))
-              throw false;
-    
-            let results = 0;
-            for (let i = 0; i < data.length; i++) {
-              try {
-                const seed = data[i];
-                let scheme = new URL(seed);
-                if (scheme.hostname == 'selfhost') {
-                  const port = scheme.port;
-                  scheme = new URL(location[1]);
-                  scheme.port = port;
-                }
-
-                let address = scheme.hostname + (scheme.port.length > 0 ? ':' + scheme.port : '');
-                if (seed.length > 0 && address.length > 0 && (!servers || !servers.has(address))) {
-                  this.interfaces.servers.add(address);
-                  ++results;
-                }
-              } catch { }
-            }
-    
-            if (results > 0)
-              return results;
-          } catch (exception) {
-            if (this.onNodeResponse)
-              this.onNodeResponse(location[0], 'discover', exception, (exception as Error).message.length);
-          }
-        }
-    
-        if (this.onIpsetStore != null)
-          this.onIpsetStore({ servers: [...this.interfaces.servers] });
-        return 0;
-      }
-      default:
-        return 0;
-    }
   }
   static fetchObject(data: any): any {
     if (typeof data == 'string') {
@@ -763,7 +636,7 @@ export class RPC {
         throw new Error('connection not acquired');
 
       if (this.onNodeRequest)
-        this.onNodeRequest(this.socket?.url || '[unknown]', method, body, content.length);
+        this.onNodeRequest(method, body, content.length);
 
       const data: [any, number] = await new Promise((resolve, reject) => {
         const context = { method: method, resolve: (_: any) => { } };
@@ -783,12 +656,12 @@ export class RPC {
           context.resolve(new Error('connection reset'));
       });
       if (this.onNodeResponse)
-        this.onNodeResponse(this.socket?.url || '[unknown]', method, data[0], data[1]);
+        this.onNodeResponse(method, data[0], data[1]);
       
       result = this.fetchResult(hash, data[0]);
     } catch (exception) {
       if (this.onNodeError)
-        this.onNodeError(this.socket?.url || '[unknown]', method, exception);
+        this.onNodeError(method, exception);
     }
   
     if (result !== undefined) {
@@ -834,89 +707,73 @@ export class RPC {
       return 0;
     
     const method = 'connect';
-    if (!this.interfaces.preload) {
-      let preloadSize = await this.fetchIpset('preload');
-      let fetchSize = preloadSize > 0 ? 0 : await this.fetchIpset('fetch');
-      if (!preloadSize && !fetchSize)
-        return null;
-    }
-    
     const topics: any[] = [this.topics.addresses.join(',')];
     if (typeof this.topics.blocks == 'boolean')
       topics.push(this.topics.blocks);
     if (typeof this.topics.transactions == 'boolean')
       topics.push(this.topics.transactions);
 
-    let servers = new Set<string>();
-    while (true) {
-      const location = this.fetchNode();
-      if (location && !servers.has(location[1])) {
+    try {
+      if (!this.server)
+        throw false;
+
+      const target = new URL('tcp://' + this.server);
+      const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
+      const location = [`ws${secure ? 's' : ''}://${this.server}/`, this.server];
+      if (this.onNodeRequest)
+        this.onNodeRequest(method, null, 0);
+
+      let connection = await new Promise<WebSocket>((resolve, reject) => {
+        const socket = new WebSocket(location[0]);
+        socket.onopen = () => resolve(socket);
+        socket.onerror = (error) => reject(new Error('websocket connection error - ' + error.type));
+      });
+      if (this.onNodeResponse)
+        this.onNodeResponse(method, null, 0);
+
+      this.socket = connection;
+      this.socket.onopen = null;
+      this.socket.onerror = null;
+      this.socket.onmessage = (event) => {
+        const message = event.data;
+        if (!this.socket || typeof message != 'string')
+          return;
+
         try {
-          if (this.onNodeRequest)
-            this.onNodeRequest(location[0], method, null, 0);
-  
-          let connection: WebSocket;
-          try {
-            connection = await new Promise<WebSocket>((resolve, reject) => {
-              const socket = new WebSocket(location[0]);
-              socket.onopen = () => resolve(socket);
-              socket.onerror = (error) => reject(new Error('websocket connection error - ' + error.type));
-            });
-          } catch (exception) {
-            this.reportAvailability(location[1], false);
-            throw exception;
-          }
-          if (this.onNodeResponse)
-            this.onNodeResponse(location[0], method, null, 0);
-
-          this.socket = connection;
-          this.socket.onopen = null;
-          this.socket.onerror = null;
-          this.socket.onmessage = (event) => {
-            const message = event.data;
-            if (!this.socket || typeof message != 'string')
-              return;
-
-            try {
-              const data: any = JSON.parse(message);
-              if (data != null && typeof data.id != 'undefined') {
-                if (typeof data.notification == 'object') {
-                  const notification = data.notification;
-                  if (notification != null && typeof notification.type == 'string' && typeof notification.result != 'undefined') {
-                    if (this.onNodeMessage)
-                      this.onNodeMessage(notification);
-                    if (this.onNodeResponse)
-                      this.onNodeResponse(this.socket.url, 'notification', data, message.length);
-                  }
-                } else if (typeof data.result != 'undefined' && data.id != null) {
-                  const response = this.requests.pending.get(data.id.toString());
-                  if (response != null)
-                    response.resolve([data, message.length]);
-                }
+          const data: any = JSON.parse(message);
+          if (data != null && typeof data.id != 'undefined') {
+            if (typeof data.notification == 'object') {
+              const notification = data.notification;
+              if (notification != null && typeof notification.type == 'string' && typeof notification.result != 'undefined') {
+                if (this.onNodeMessage)
+                  this.onNodeMessage(notification);
+                if (this.onNodeResponse)
+                  this.onNodeResponse('notification', data, message.length);
               }
-            } catch { }
-          };
-          this.socket.onclose = () => {
-            this.disconnectSocket();
-            this.connectSocket();
-          };
-          const events = await this.fetch<number>('no-cache', 'subscribe', topics);
-          this.reportAvailability(location[1], true);
-          return events;
-        } catch (exception) {
-          if (this.onNodeError)
-            this.onNodeError(location[0], method, exception);
-        }
-
-        servers.add(location[1]);
-      } else if (!(await this.fetchIpset('fetch', servers))) {
-        break;
-      }
+            } else if (typeof data.result != 'undefined' && data.id != null) {
+              const response = this.requests.pending.get(data.id.toString());
+              if (response != null)
+                response.resolve([data, message.length]);
+            }
+          }
+        } catch { }
+      };
+      this.socket.onclose = () => {
+        this.disconnectSocket();
+        this.connectSocket();
+      };
+      this.status = ServerStatus.Online;
+      return await this.fetch<number>('no-cache', 'subscribe', topics);
+    } catch (exception) {
+      this.status = ServerStatus.Offline;
+      if (this.onNodeError)
+        this.onNodeError(method, exception);
     }
-
+      
     return null;
   }
   static async disconnectSocket(): Promise<boolean> {
+    this.status = ServerStatus.Offline;
     for (let id in this.requests.pending) {
       const response = this.requests.pending.get(id);
       if (response != null)
@@ -927,7 +784,7 @@ export class RPC {
     if (!this.socket)
       return true;
     else if (this.onNodeResponse)
-      this.onNodeResponse(this.socket.url, 'disconnect', null, 0);
+      this.onNodeResponse('disconnect', null, 0);
  
     this.socket.onopen = null;
     this.socket.onerror = null;
@@ -941,21 +798,10 @@ export class RPC {
     this.topics.blocks = blocks;
     this.topics.transactions = transactions;
     this.topics.addresses = addresses;
-    this.interfaces.servers.clear();
-    this.interfaces.preload = false;
-  }
-  static applyResolver(resolver: string | null): void {
-    this.resolver = resolver;
   }
   static applyServer(server: string | null): void {
-    this.interfaces.overrider = server;
-    if (server != null) {
-      this.interfaces.servers.clear();
-      this.interfaces.servers.add(server);
-      if (this.onIpsetStore != null) {
-        this.onIpsetStore({ servers: [...this.interfaces.servers] });
-      }
-    }
+    this.server = server;
+    this.status = ServerStatus.Unknown;
   }
   static applyImplementation(implementation: {
     onNodeMessage?: NodeMessage,
@@ -964,9 +810,7 @@ export class RPC {
     onNodeError?: NodeError,
     onCacheStore?: CacheStore,
     onCacheLoad?: CacheLoad,
-    onCacheKeys?: CacheKeys,
-    onIpsetLoad?: IpsetLoad,
-    onIpsetStore?: IpsetStore
+    onCacheKeys?: CacheKeys
   }): void {
     this.onNodeMessage = implementation.onNodeMessage || null;
     this.onNodeRequest = implementation.onNodeRequest || null;
@@ -975,8 +819,6 @@ export class RPC {
     this.onCacheStore = implementation.onCacheStore || null;
     this.onCacheLoad = implementation.onCacheLoad || null;
     this.onCacheKeys = implementation.onCacheKeys || null;
-    this.onIpsetLoad = implementation.onIpsetLoad || null;
-    this.onIpsetStore = implementation.onIpsetStore || null;
   }
   static requiresSecureTransport(address: string): boolean {
     if (address == 'localhost')
