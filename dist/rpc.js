@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.ServerStatus = exports.NetworkType = exports.WalletType = exports.EventType = void 0;
+exports.RPC = exports.EventResolver = exports.WalletKeychain = exports.ValidatorStatus = exports.NetworkType = exports.WalletType = exports.EventType = void 0;
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const algorithm_1 = require("./algorithm");
 const types_1 = require("./types");
@@ -40,12 +40,12 @@ var NetworkType;
     NetworkType["Testnet"] = "testnet";
     NetworkType["Regtest"] = "regtest";
 })(NetworkType || (exports.NetworkType = NetworkType = {}));
-var ServerStatus;
-(function (ServerStatus) {
-    ServerStatus[ServerStatus["Unknown"] = 0] = "Unknown";
-    ServerStatus[ServerStatus["Offline"] = 1] = "Offline";
-    ServerStatus[ServerStatus["Online"] = 2] = "Online";
-})(ServerStatus || (exports.ServerStatus = ServerStatus = {}));
+var ValidatorStatus;
+(function (ValidatorStatus) {
+    ValidatorStatus[ValidatorStatus["Unknown"] = 0] = "Unknown";
+    ValidatorStatus[ValidatorStatus["Offline"] = 1] = "Offline";
+    ValidatorStatus[ValidatorStatus["Online"] = 2] = "Online";
+})(ValidatorStatus || (exports.ValidatorStatus = ValidatorStatus = {}));
 class WalletKeychain {
     constructor() {
         this.type = null;
@@ -540,11 +540,11 @@ class RPC {
         if (typeof this.topics.transactions == 'boolean')
             topics.push(this.topics.transactions);
         try {
-            if (!this.server)
+            if (!this.validator)
                 throw false;
-            const target = new URL('tcp://' + this.server);
+            const target = new URL('tcp://' + this.validator);
             const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
-            const location = [`ws${secure ? 's' : ''}://${this.server}/`, this.server];
+            const location = [`ws${secure ? 's' : ''}://${this.validator}/`, this.validator];
             if (this.onNodeRequest)
                 this.onNodeRequest(method, null, 0);
             let connection = await new Promise((resolve, reject) => {
@@ -586,18 +586,18 @@ class RPC {
                 this.disconnectSocket();
                 this.connectSocket();
             };
-            this.status = ServerStatus.Online;
+            this.status = ValidatorStatus.Online;
             return await this.fetch('no-cache', 'subscribe', topics);
         }
         catch (exception) {
-            this.status = ServerStatus.Offline;
+            this.status = ValidatorStatus.Offline;
             if (this.onNodeError)
                 this.onNodeError(method, exception);
         }
         return null;
     }
     static async disconnectSocket() {
-        this.status = ServerStatus.Offline;
+        this.status = ValidatorStatus.Offline;
         for (let id in this.requests.pending) {
             const response = this.requests.pending.get(id);
             if (response != null)
@@ -621,9 +621,9 @@ class RPC {
         this.topics.transactions = transactions;
         this.topics.addresses = addresses;
     }
-    static applyServer(server) {
-        this.server = server;
-        this.status = ServerStatus.Unknown;
+    static applyValidator(validator) {
+        this.validator = validator;
+        this.status = ValidatorStatus.Unknown;
     }
     static applyImplementation(implementation) {
         this.onNodeMessage = implementation.onNodeMessage || null;
@@ -772,8 +772,8 @@ class RPC {
     }
 }
 exports.RPC = RPC;
-RPC.server = null;
-RPC.status = ServerStatus.Unknown;
+RPC.validator = null;
+RPC.status = ValidatorStatus.Unknown;
 RPC.requests = {
     pending: new Map(),
     count: 0
@@ -789,6 +789,8 @@ RPC.onNodeMessage = null;
 RPC.onNodeRequest = null;
 RPC.onNodeResponse = null;
 RPC.onNodeError = null;
+RPC.onValidatorStore = null;
+RPC.onValidatorLoad = null;
 RPC.onCacheStore = null;
 RPC.onCacheLoad = null;
 RPC.onCacheKeys = null;

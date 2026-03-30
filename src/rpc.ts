@@ -12,6 +12,8 @@ export type NodeError = (method: string, error: unknown) => void;
 export type NodeRequest = (method: string, message: any, size: number) => void;
 export type NodeResponse = (method: string, message: any, size: number) => void;
 export type NodeMessage = (event: { type: string, result: any }) => void;
+export type ValidatorStore = (value: string | null) => void;
+export type ValidatorLoad = () => string | null;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
@@ -167,7 +169,7 @@ export enum NetworkType {
   Regtest = 'regtest'
 }
 
-export enum ServerStatus {
+export enum ValidatorStatus {
   Unknown = 0,
   Offline = 1,
   Online = 2
@@ -543,8 +545,8 @@ export class EventResolver {
 }
 
 export class RPC {
-  static server: string | null = null;
-  static status: ServerStatus = ServerStatus.Unknown;
+  static validator: string | null = null;
+  static status: ValidatorStatus = ValidatorStatus.Unknown;
   static requests = {
     pending: new Map<string, { method: string, resolve: PromiseCallback } >(),
     count: 0
@@ -564,6 +566,8 @@ export class RPC {
   static onNodeRequest: NodeRequest | null = null;
   static onNodeResponse: NodeResponse | null = null;
   static onNodeError: NodeError | null = null;
+  static onValidatorStore: ValidatorStore | null = null;
+  static onValidatorLoad: ValidatorLoad | null = null;
   static onCacheStore: CacheStore | null = null;
   static onCacheLoad: CacheLoad | null = null;
   static onCacheKeys: CacheKeys | null = null;
@@ -714,12 +718,12 @@ export class RPC {
       topics.push(this.topics.transactions);
 
     try {
-      if (!this.server)
+      if (!this.validator)
         throw false;
 
-      const target = new URL('tcp://' + this.server);
+      const target = new URL('tcp://' + this.validator);
       const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
-      const location = [`ws${secure ? 's' : ''}://${this.server}/`, this.server];
+      const location = [`ws${secure ? 's' : ''}://${this.validator}/`, this.validator];
       if (this.onNodeRequest)
         this.onNodeRequest(method, null, 0);
 
@@ -762,10 +766,10 @@ export class RPC {
         this.disconnectSocket();
         this.connectSocket();
       };
-      this.status = ServerStatus.Online;
+      this.status = ValidatorStatus.Online;
       return await this.fetch<number>('no-cache', 'subscribe', topics);
     } catch (exception) {
-      this.status = ServerStatus.Offline;
+      this.status = ValidatorStatus.Offline;
       if (this.onNodeError)
         this.onNodeError(method, exception);
     }
@@ -773,7 +777,7 @@ export class RPC {
     return null;
   }
   static async disconnectSocket(): Promise<boolean> {
-    this.status = ServerStatus.Offline;
+    this.status = ValidatorStatus.Offline;
     for (let id in this.requests.pending) {
       const response = this.requests.pending.get(id);
       if (response != null)
@@ -799,9 +803,9 @@ export class RPC {
     this.topics.transactions = transactions;
     this.topics.addresses = addresses;
   }
-  static applyServer(server: string | null): void {
-    this.server = server;
-    this.status = ServerStatus.Unknown;
+  static applyValidator(validator: string | null): void {
+    this.validator = validator;
+    this.status = ValidatorStatus.Unknown;
   }
   static applyImplementation(implementation: {
     onNodeMessage?: NodeMessage,

@@ -9,6 +9,8 @@ export type NodeMessage = (event: {
     type: string;
     result: any;
 }) => void;
+export type ValidatorStore = (value: string | null) => void;
+export type ValidatorLoad = () => string | null;
 export type CacheStore = (path: string, value?: any) => boolean;
 export type CacheLoad = (path: string) => any | null;
 export type CacheKeys = () => string[];
@@ -191,7 +193,7 @@ export declare enum NetworkType {
     Testnet = "testnet",
     Regtest = "regtest"
 }
-export declare enum ServerStatus {
+export declare enum ValidatorStatus {
     Unknown = 0,
     Offline = 1,
     Online = 2
@@ -217,8 +219,8 @@ export declare class EventResolver {
     static isSummaryStateEmpty(state: SummaryState, address?: string): boolean;
 }
 export declare class RPC {
-    static server: string | null;
-    static status: ServerStatus;
+    static validator: string | null;
+    static status: ValidatorStatus;
     static requests: {
         pending: Map<string, {
             method: string;
@@ -237,6 +239,8 @@ export declare class RPC {
     static onNodeRequest: NodeRequest | null;
     static onNodeResponse: NodeResponse | null;
     static onNodeError: NodeError | null;
+    static onValidatorStore: ValidatorStore | null;
+    static onValidatorLoad: ValidatorLoad | null;
     static onCacheStore: CacheStore | null;
     static onCacheLoad: CacheLoad | null;
     static onCacheKeys: CacheKeys | null;
@@ -248,7 +252,7 @@ export declare class RPC {
     static connectSocket(): Promise<number | null>;
     static disconnectSocket(): Promise<boolean>;
     static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void;
-    static applyServer(server: string | null): void;
+    static applyValidator(validator: string | null): void;
     static applyImplementation(implementation: {
         onNodeMessage?: NodeMessage;
         onNodeRequest?: NodeRequest;
