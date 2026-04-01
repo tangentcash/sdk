@@ -8,7 +8,7 @@ export declare class Readability {
     static toAssetSymbol(asset: AssetId): string;
     static toAssetFallback(asset: AssetId): string;
     static toAssetImage(asset: AssetId): string;
-    static toAssetName(asset: AssetId, chainOnly?: boolean): string;
+    static toAssetName(asset: AssetId, chainOnly?: boolean, tokenOnly?: boolean): string;
     static toTaggedAddress(tagAddress: string): {
         address: string;
         tag: string | null;

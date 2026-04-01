@@ -39,11 +39,11 @@ export class Readability {
     const target = this.toAssetSymbol(asset);
     return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
   }
-  static toAssetName(asset: AssetId, chainOnly?: boolean): string {
+  static toAssetName(asset: AssetId, chainOnly?: boolean, tokenOnly?: boolean): string {
     const token: string | null = chainOnly ? null : asset.token || null;
     const chain: string = asset.chain || 'Unknown';
     if (token != null)
-      return chain + ' ' + ((Assets as Record<string, string>)[token.toUpperCase()] || token);
+      return tokenOnly ? ((Assets as Record<string, string>)[token.toUpperCase()] || token) : (chain + ' ' + ((Assets as Record<string, string>)[token.toUpperCase()] || token));
 
     return (Assets as Record<string, string>)[chain.toUpperCase()] || chain;
   }

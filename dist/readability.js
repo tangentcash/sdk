@@ -29,11 +29,11 @@ class Readability {
         const target = this.toAssetSymbol(asset);
         return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
     }
-    static toAssetName(asset, chainOnly) {
+    static toAssetName(asset, chainOnly, tokenOnly) {
         const token = chainOnly ? null : asset.token || null;
         const chain = asset.chain || 'Unknown';
         if (token != null)
-            return chain + ' ' + (assets_json_1.default[token.toUpperCase()] || token);
+            return tokenOnly ? (assets_json_1.default[token.toUpperCase()] || token) : (chain + ' ' + (assets_json_1.default[token.toUpperCase()] || token));
         return assets_json_1.default[chain.toUpperCase()] || chain;
     }
     static toTaggedAddress(tagAddress) {
