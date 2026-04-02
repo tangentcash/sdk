@@ -64,7 +64,7 @@ export class Readability {
     return 'Non-standard';
   }
   static toFunction(method: string): string {
-    if (this.toFunctionFlags(method).payCap) {
+    if (this.toFunctionFlags(method).pipelinePay) {
       method = method.substring(1);
     }
 
@@ -81,9 +81,9 @@ export class Readability {
 
     return method;
   }
-  static toFunctionFlags(method: string): { payCap: boolean } {
+  static toFunctionFlags(method: string): { pipelinePay: boolean } {
     return {
-      payCap: method.startsWith('>')
+      pipelinePay: method.startsWith('>')
     }
   }
   static toFunctionName(method: string): string {

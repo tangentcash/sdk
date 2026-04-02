@@ -16,7 +16,7 @@ export declare class Readability {
     static toTransactionType(type: string | number): string;
     static toFunction(method: string): string;
     static toFunctionFlags(method: string): {
-        payCap: boolean;
+        pipelinePay: boolean;
     };
     static toFunctionName(method: string): string;
     static toSubscript(value: string): string;
