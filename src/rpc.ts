@@ -958,6 +958,9 @@ export class RPC {
   static getBlockTransactionsByNumber(number: number, unrolling?: number): Promise<any[] | null> {
     return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [number, unrolling] : [number]);
   }
+  static getFinalizedTransactions(offset: number, count: number, unrolling?: number): Promise<any[] | null> {
+    return this.fetch('no-cache', 'getfinalizedtransactions', unrolling ? [offset, count, unrolling] : [offset, count]);
+  }
   static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null> {
     const args = [address, offset, count];
     if (direction != null)

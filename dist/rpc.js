@@ -764,6 +764,9 @@ class RPC {
     static getBlockTransactionsByNumber(number, unrolling) {
         return this.fetch('cache', 'getblocktransactionsbynumber', unrolling != null ? [number, unrolling] : [number]);
     }
+    static getFinalizedTransactions(offset, count, unrolling) {
+        return this.fetch('no-cache', 'getfinalizedtransactions', unrolling ? [offset, count, unrolling] : [offset, count]);
+    }
     static getTransactionsByOwner(address, offset, count, direction, unrolling) {
         const args = [address, offset, count];
         if (direction != null)

@@ -309,6 +309,7 @@ export declare class RPC {
     static getMempoolTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getBlockTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getBlockTransactionsByNumber(number: number, unrolling?: number): Promise<any[] | null>;
+    static getFinalizedTransactions(offset: number, count: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
