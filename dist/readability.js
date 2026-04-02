@@ -51,6 +51,9 @@ class Readability {
         return 'Non-standard';
     }
     static toFunction(method) {
+        if (this.toFunctionFlags(method).payCap) {
+            method = method.substring(1);
+        }
         let start = method.indexOf(' ');
         if (start != -1) {
             while (start + 1 < method.length && !method[start].trim().length)
@@ -61,6 +64,11 @@ class Readability {
             }
         }
         return method;
+    }
+    static toFunctionFlags(method) {
+        return {
+            payCap: method.startsWith('>')
+        };
     }
     static toFunctionName(method) {
         method = this.toFunction(method)
