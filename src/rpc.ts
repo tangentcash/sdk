@@ -981,6 +981,9 @@ export class RPC {
   static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null> {
     return this.fetch('no-cache', 'getassetholders', [asset.handle, filter]);
   }
+  static getBlocks(number: number, count: number): Promise<string[] | null> {
+    return this.fetch('cache', 'getblocks', [number, count]);
+  }
   static getBlockByNumber(number: number, unrolling?: number): Promise<any | null> {
     return this.fetch('cache', 'getblockbynumber', unrolling != null ? [number, unrolling] : [number]);
   }

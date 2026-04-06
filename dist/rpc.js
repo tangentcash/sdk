@@ -787,6 +787,9 @@ class RPC {
     static getAssetHolders(asset, filter) {
         return this.fetch('no-cache', 'getassetholders', [asset.handle, filter]);
     }
+    static getBlocks(number, count) {
+        return this.fetch('cache', 'getblocks', [number, count]);
+    }
     static getBlockByNumber(number, unrolling) {
         return this.fetch('cache', 'getblockbynumber', unrolling != null ? [number, unrolling] : [number]);
     }
