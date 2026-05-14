@@ -11,9 +11,9 @@ export type NodeMessage = (event: {
 }) => void;
 export type ValidatorStore = (value: string | null) => void;
 export type ValidatorLoad = () => string | null;
-export type CacheStore = (path: string, value?: any) => boolean;
-export type CacheLoad = (path: string) => any | null;
-export type CacheKeys = () => string[];
+export type CacheStore = (path: string, value?: any) => boolean | Promise<boolean>;
+export type CacheLoad = (path: string) => any | null | Promise<any | null>;
+export type CacheKeys = () => string[] | Promise<string[]>;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 export declare enum EventType {
@@ -267,7 +267,7 @@ export declare class RPC {
         onCacheKeys?: CacheKeys;
     }): void;
     static requiresSecureTransport(address: string): boolean;
-    static clearCache(): void;
+    static clearCache(): Promise<void>;
     static forcedPolicy<T>(policy: 'cache' | 'no-cache', callback: () => Promise<T>): Promise<T>;
     static decodeTransaction(hexMessage: string): Promise<any>;
     static simulateTransaction(hexMessage: string): Promise<any | null>;

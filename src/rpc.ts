@@ -14,9 +14,9 @@ export type NodeResponse = (method: string, message: any, size: number) => void;
 export type NodeMessage = (event: { type: string, result: any }) => void;
 export type ValidatorStore = (value: string | null) => void;
 export type ValidatorLoad = () => string | null;
-export type CacheStore = (path: string, value?: any) => boolean;
-export type CacheLoad = (path: string) => any | null;
-export type CacheKeys = () => string[];
+export type CacheStore = (path: string, value?: any) => boolean | Promise<boolean>;
+export type CacheLoad = (path: string) => any | null | Promise<any | null>;
+export type CacheKeys = () => string[] | Promise<string[]>;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
 
@@ -629,7 +629,8 @@ export class RPC {
     };
     const content = JSON.stringify(body);
     if (this.onCacheLoad != null && policy == 'cache') {
-      const cache = this.onCacheLoad(hash);
+      let cache = this.onCacheLoad(hash);
+      cache = (cache instanceof Promise ? await cache : cache);
       if (cache != null)
         return this.fetchObject(cache);
     }
@@ -675,7 +676,8 @@ export class RPC {
 
       return result as T;
     } else if (this.onCacheLoad != null) {
-      const cache = this.onCacheLoad(hash);
+      let cache = this.onCacheLoad(hash);
+      cache = (cache instanceof Promise ? await cache : cache);
       if (cache != null)
         return this.fetchObject(cache);
     }
@@ -863,9 +865,10 @@ export class RPC {
     const ipv6Pattern = /^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$/;
     return !ipv4Pattern.test(address) && !ipv6Pattern.test(address);
   }
-  static clearCache(): void {
+  static async clearCache(): Promise<void> {
     if (this.onCacheKeys != null && this.onCacheStore != null) {
-      const keys = this.onCacheKeys();
+      let keys = this.onCacheKeys();
+      keys = (keys instanceof Promise ? await keys : keys);
       for (let key in keys) {
         this.onCacheStore(keys[key]);
       }

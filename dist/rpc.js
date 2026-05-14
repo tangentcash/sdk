@@ -458,7 +458,8 @@ class RPC {
         };
         const content = JSON.stringify(body);
         if (this.onCacheLoad != null && policy == 'cache') {
-            const cache = this.onCacheLoad(hash);
+            let cache = this.onCacheLoad(hash);
+            cache = (cache instanceof Promise ? await cache : cache);
             if (cache != null)
                 return this.fetchObject(cache);
         }
@@ -500,7 +501,8 @@ class RPC {
             return result;
         }
         else if (this.onCacheLoad != null) {
-            const cache = this.onCacheLoad(hash);
+            let cache = this.onCacheLoad(hash);
+            cache = (cache instanceof Promise ? await cache : cache);
             if (cache != null)
                 return this.fetchObject(cache);
         }
@@ -669,9 +671,10 @@ class RPC {
         const ipv6Pattern = /^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$/;
         return !ipv4Pattern.test(address) && !ipv6Pattern.test(address);
     }
-    static clearCache() {
+    static async clearCache() {
         if (this.onCacheKeys != null && this.onCacheStore != null) {
-            const keys = this.onCacheKeys();
+            let keys = this.onCacheKeys();
+            keys = (keys instanceof Promise ? await keys : keys);
             for (let key in keys) {
                 this.onCacheStore(keys[key]);
             }
