@@ -143,12 +143,6 @@ export declare class Signing {
     static deriveSecretKey(seed: Uint8Array): Seckey;
     static derivePublicKey(secretKey: Seckey): Pubkey;
     static derivePublicKeyHash(publicKey: Pubkey): Pubkeyhash;
-    static deriveCipherKeypair(secretKey: Seckey, nonce: Uint256): Promise<{
-        cipherSecretKey: Seckey;
-        cipherPublicKey: Pubkey;
-    } | null>;
-    static publicEncrypt(cipherPublicKey: Pubkey, plaintext: Uint8Array, entropy: Uint8Array): Promise<Uint8Array | null>;
-    static privateDecrypt(cipherSecretKey: Seckey, cipherPublicKey: Pubkey, ciphertext: Uint8Array): Promise<Uint8Array | null>;
     static decodeSecretKey(value: string): Seckey | null;
     static encodeSecretKey(secretKey: Seckey): string | null;
     static decodePublicKey(value: string): Pubkey | null;

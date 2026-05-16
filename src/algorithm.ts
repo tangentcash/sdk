@@ -1,5 +1,4 @@
 import secp256k1 from 'secp256k1';
-import sodium from 'libsodium-wrappers';
 import * as bip39 from '@scure/bip39';
 import { Base64 } from 'js-base64';
 import { wordlist } from '@scure/bip39/wordlists/english';
@@ -658,76 +657,6 @@ export class Signing {
     let publicKeyHash = new Pubkeyhash();
     publicKeyHash.data = Hashing.hash160(publicKey.data);
     return publicKeyHash;
-  }
-  static async deriveCipherKeypair(secretKey: Seckey, nonce: Uint256): Promise<{ cipherSecretKey: Seckey, cipherPublicKey: Pubkey } | null> {
-    try {
-      await sodium.ready;
-      const seed = Hashing.hash256(new Uint8Array([...secretKey.data, ...nonce.toUint8Array()]));
-      const keypair = sodium.crypto_box_seed_keypair(seed);
-      return {
-        cipherSecretKey: new Seckey(keypair.privateKey),
-        cipherPublicKey: new Pubkey(new Uint8Array([...keypair.publicKey, 0]))
-      }
-    } catch (ex) {
-      console.error(ex);
-      return null;
-    }
-  }
-  static async publicEncrypt(cipherPublicKey: Pubkey, plaintext: Uint8Array, entropy: Uint8Array): Promise<Uint8Array | null> {
-    if (!plaintext.length)
-      return null;
-
-    let salt = Hashing.hash512(entropy);
-    let body = new Uint8Array([...salt, ...plaintext]);
-    for (let i = salt.length; i < body.length; i++)
-      body[i] ^= salt[i % salt.length];
-    body = new Uint8Array([...body, ...Hashing.hash256(plaintext)]);
-
-    try {
-      await sodium.ready;
-
-      const seed = Hashing.hash256(entropy);
-      const ephemeralKeypair = sodium.crypto_box_seed_keypair(seed);
-      const nonceBytes = 24;
-      const state = sodium.crypto_generichash_init(null, nonceBytes);
-      sodium.crypto_generichash_update(state, ephemeralKeypair.publicKey);
-      sodium.crypto_generichash_update(state, cipherPublicKey.data.slice(0, 32));
-
-      const nonce = sodium.crypto_generichash_final(state, nonceBytes);
-      const ciphertext = sodium.crypto_box_easy(body, nonce, cipherPublicKey.data.slice(0, 32), ephemeralKeypair.privateKey);
-      return Uint8Array.from([...ephemeralKeypair.publicKey, ...ciphertext]);
-    } catch (ex) {
-      return null;
-    }
-  }
-  static async privateDecrypt(cipherSecretKey: Seckey, cipherPublicKey: Pubkey, ciphertext: Uint8Array): Promise<Uint8Array | null> {
-    try {
-      await sodium.ready;
-      const body = sodium.crypto_box_seal_open(ciphertext, cipherPublicKey.data.slice(0, 32), cipherSecretKey.data);
-      if (!body || body.length < 96)
-        return null;
-
-      let saltBodySize = body.length - 32;
-      let salt = body.slice(0, 64);
-      for (let i = salt.length; i < saltBodySize; i++)
-        body[i] ^= salt[i % salt.length];
-
-      let plaintextSize = body.length - 96;
-      let checksum = body.slice(saltBodySize);
-      let plaintext = body.slice(salt.length, salt.length + plaintextSize);
-      let candidate = Hashing.hash256(plaintext);
-      if (checksum.length !== candidate.length)
-        return null;
-      
-      for (let i = 0; i < checksum.length; i++) {
-        if (checksum[i] !== candidate[i])
-          return null;
-      }
-
-      return plaintext;
-    } catch {
-      return null;
-    }
   }
   static decodeSecretKey(value: string): Seckey | null {
     let result = Segwit.decode(Chain.props.SECKEY_PREFIX, value);
