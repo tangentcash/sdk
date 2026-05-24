@@ -111,8 +111,7 @@ export class Readability {
     if (numeric.isNaN())
       return 'N/A';
 
-    const places = numeric.decimalPlaces();
-    const text: string[] = (places ? numeric.toFormat(places) : ByteUtil.bigNumberToString(numeric)).split('.');
+    const text: string[] = ByteUtil.bigNumberToString(numeric).split('.');
     if (trailing && text.length < 2)
       text.push('0');
     

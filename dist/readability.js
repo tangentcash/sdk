@@ -93,8 +93,7 @@ class Readability {
         const numeric = new bignumber_js_1.default(bignumber_js_1.default.isBigNumber(value) ? value.toPrecision(12) : value);
         if (numeric.isNaN())
             return 'N/A';
-        const places = numeric.decimalPlaces();
-        const text = (places ? numeric.toFormat(places) : algorithm_1.ByteUtil.bigNumberToString(numeric)).split('.');
+        const text = algorithm_1.ByteUtil.bigNumberToString(numeric).split('.');
         if (trailing && text.length < 2)
             text.push('0');
         if (text.length > 1) {
