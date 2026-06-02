@@ -314,6 +314,7 @@ export declare class RPC {
     static getTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
+    static getReceiptByTransactionHash(hash: string): Promise<any | null>;
     static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null>;
     static getBlocks(number: number, count: number): Promise<string[] | null>;
     static getBlockByNumber(number: number, unrolling?: number): Promise<any | null>;

@@ -981,6 +981,9 @@ export class RPC {
   static getMempoolTransactionByHash(hash: string): Promise<any | null> {
     return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
   }
+  static getReceiptByTransactionHash(hash: string): Promise<any | null> {
+    return this.fetch('cache', 'getreceiptbytransactionhash', [hash]);
+  }
   static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null> {
     return this.fetch('no-cache', 'getassetholders', [asset.handle, filter]);
   }
