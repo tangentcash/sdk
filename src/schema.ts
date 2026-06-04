@@ -163,14 +163,14 @@ export namespace Transactions {
     'deploy': 'Deploy',
     'call': 'Call',
     'rollup': 'Rollup',
-    'route': 'Link bridge',
-    'bind': 'New bridge (legacy)',
-    'imbind': 'New bridge',
-    'setup': 'Setup validator',
+    'setup': 'Setup',
+    'route': 'Link wallet',
+    'bind': 'Link bridge (legacy)',
+    'imbind': 'Link bridge',
     'rebind': 'Renew bridge',
-    'withdraw': 'Bridge withdraw',
-    'broadcast': 'Bridge broadcast',
-    'anticast': 'Bridge protest',
-    'attestate': 'Bridge transaction'
+    'withdraw': 'Withdraw',
+    'broadcast': 'Broadcast',
+    'anticast': 'Protest',
+    'attestate': 'Bridge transfer'
   };
 }
