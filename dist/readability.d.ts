@@ -13,7 +13,7 @@ export declare class Readability {
         address: string;
         tag: string | null;
     };
-    static toTransactionType(type: string | number): string;
+    static hasTransactionType(type: string | number): boolean;
     static toFunction(method: string): string;
     static toFunctionFlags(method: string): {
         pipelinePay: boolean;

@@ -193,19 +193,19 @@ var Transactions;
     }
     Anticast.typename = 'anticast';
     Transactions.Anticast = Anticast;
-    Transactions.typenames = {
-        'transfer': 'Transfer',
-        'deploy': 'Deploy',
-        'call': 'Call',
-        'rollup': 'Rollup',
-        'setup': 'Setup',
-        'route': 'Link wallet',
-        'bind': 'Link bridge (legacy)',
-        'imbind': 'Link bridge',
-        'rebind': 'Renew bridge',
-        'withdraw': 'Withdraw',
-        'broadcast': 'Broadcast',
-        'anticast': 'Protest',
-        'attestate': 'Bridge transfer'
-    };
+    Transactions.types = [
+        'transfer',
+        'deploy',
+        'call',
+        'rollup',
+        'setup',
+        'route',
+        'bind',
+        'imbind',
+        'rebind',
+        'withdraw',
+        'broadcast',
+        'anticast',
+        'attestate'
+    ];
 })(Transactions || (exports.Transactions = Transactions = {}));

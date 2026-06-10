@@ -51,17 +51,17 @@ export class Readability {
     const [address, tag] = tagAddress.split('#');
     return { address: address, tag: tag || null };
   }
-  static toTransactionType(type: string | number): string {
+  static hasTransactionType(type: string | number): boolean {
     if (typeof type == 'string')
-      return Transactions.typenames[type] || 'Non-standard';
+      return Transactions.types.indexOf(type) != null;
 
-    for (let name in Transactions.typenames) {
+    for (let name in Transactions.types) {
       if (Hashing.hash32(ByteUtil.byteStringToUint8Array(name)) == type) {
-        return Transactions.typenames[name];
+        return true;
       }
     }
 
-    return 'Non-standard';
+    return false;
   }
   static toFunction(method: string): string {
     if (this.toFunctionFlags(method).pipelinePay) {

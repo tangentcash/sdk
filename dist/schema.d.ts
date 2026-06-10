@@ -103,5 +103,5 @@ export declare namespace Transactions {
         broadcastHash: string;
         getType(): string;
     }
-    const typenames: Record<string, string>;
+    const types: string[];
 }
