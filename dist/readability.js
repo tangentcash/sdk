@@ -40,15 +40,16 @@ class Readability {
         const [address, tag] = tagAddress.split('#');
         return { address: address, tag: tag || null };
     }
-    static hasTransactionType(type) {
+    static toTransactionType(type) {
         if (typeof type == 'string')
-            return schema_1.Transactions.types.indexOf(type) != null;
-        for (let name in schema_1.Transactions.types) {
-            if (algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(name)) == type) {
-                return true;
+            return schema_1.Transactions.types.find(x => x == type) || null;
+        for (let i = 0; i < schema_1.Transactions.types.length; i++) {
+            const maybeType = schema_1.Transactions.types[i];
+            if (algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array(maybeType)) == type) {
+                return maybeType;
             }
         }
-        return false;
+        return null;
     }
     static toFunction(method) {
         if (this.toFunctionFlags(method).pipelinePay) {
