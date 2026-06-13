@@ -128,6 +128,7 @@ export declare class Segwit {
     } | null;
 }
 export declare class Signing {
+    static wordlist: Set<string> | null;
     static messageHash(signableMessage: string): Uint256;
     static mnemonicgen(strength?: number): string;
     static keygen(): Seckey;
@@ -135,6 +136,7 @@ export declare class Signing {
     static recoverHash(hash: Uint256, signature: Hashsig): Pubkeyhash | null;
     static sign(hash: Uint256, secretKey: Seckey): Hashsig | null;
     static verify(hash: Uint256, publicKey: Pubkey, signature: Hashsig): boolean;
+    static verifyMnemonicWord(word: string): boolean;
     static verifyMnemonic(mnemonic: string): boolean;
     static verifySecretKey(secretKey: Seckey): boolean;
     static verifyPublicKey(publicKey: Pubkey): boolean;

@@ -612,6 +612,12 @@ class Signing {
             return false;
         }
     }
+    static verifyMnemonicWord(word) {
+        if (!this.wordlist) {
+            this.wordlist = new Set(english_1.wordlist);
+        }
+        return this.wordlist.has(word);
+    }
     static verifyMnemonic(mnemonic) {
         return bip39.validateMnemonic(mnemonic, english_1.wordlist);
     }
@@ -689,6 +695,7 @@ class Signing {
     }
 }
 exports.Signing = Signing;
+Signing.wordlist = null;
 class Hashing {
     static hash32(data) {
         const buffer = (0, sha1_1.sha1)(data);

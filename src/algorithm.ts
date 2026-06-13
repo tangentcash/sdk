@@ -558,6 +558,8 @@ export class Segwit {
 }
 
 export class Signing {
+  static wordlist: Set<string> | null = null;
+
   static messageHash(signableMessage: string): Uint256 {
     return new Uint256(Hashing.hash256(new Uint8Array([...new Uint256(Chain.props.MESSAGE_MAGIC).toUint8Array(), ...ByteUtil.byteStringToUint8Array(signableMessage)])));
   }
@@ -615,6 +617,12 @@ export class Signing {
     } catch {
       return false;
     }
+  }
+  static verifyMnemonicWord(word: string): boolean {
+    if (!this.wordlist) {
+      this.wordlist = new Set<string>(wordlist);
+    }
+    return this.wordlist.has(word);
   }
   static verifyMnemonic(mnemonic: string): boolean {
     return bip39.validateMnemonic(mnemonic, wordlist);
