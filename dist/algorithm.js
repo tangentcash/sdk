@@ -89,6 +89,7 @@ Chain.policy = {
     TOKEN_NAME: 'TAN',
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [7, 23],
+    GASLESS_SIZE_LIMIT: 512,
     BLOCK_TIME: 12000
 };
 Chain.size = {
