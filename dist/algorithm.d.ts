@@ -17,7 +17,8 @@ export declare class Chain {
         TOKEN_NAME: string;
         PRODUCTION_COMMITTEE: number;
         PARTICIPATION_COMMITTEE: number[];
-        GASLESS_SIZE_LIMIT: number;
+        MIN_GAS_PRICE: BigNumber;
+        ZERO_GAS_PRICE_SIZE_LIMIT: number;
         BLOCK_TIME: number;
     };
     static size: {
