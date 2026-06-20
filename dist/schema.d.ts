@@ -87,6 +87,9 @@ export declare namespace Transactions {
     }
     class Route extends Ledger.Commitment {
         static typename: string;
+        powChallengeExtension: string;
+        powChallengeBlockHash: string;
+        powChallengeSolution: string;
         bridgeHash: string;
         routingAddress: string;
         getType(): string;

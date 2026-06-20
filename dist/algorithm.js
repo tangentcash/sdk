@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ByteUtil = exports.Hashing = exports.Signing = exports.Segwit = exports.AssetId = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Hashsig = exports.Uint256 = exports.Chain = void 0;
+exports.ByteUtil = exports.Hashing = exports.Signing = exports.Pow256 = exports.Segwit = exports.AssetId = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Hashsig = exports.Uint256 = exports.Chain = void 0;
 const secp256k1_1 = __importDefault(require("secp256k1"));
 const bip39 = __importStar(require("@scure/bip39"));
 const js_base64_1 = require("js-base64");
@@ -63,7 +63,9 @@ Chain.mainnet = {
     PUBKEY_PREFIX: 'pub',
     ADDRESS_VERSION: 0x4,
     ADDRESS_PREFIX: 'tc',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 13,
+    POW_STEPS: 256
 };
 Chain.testnet = {
     NAME: 'testnet',
@@ -73,7 +75,9 @@ Chain.testnet = {
     PUBKEY_PREFIX: 'pubt',
     ADDRESS_VERSION: 0x5,
     ADDRESS_PREFIX: 'tct',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 13,
+    POW_STEPS: 256
 };
 Chain.regtest = {
     NAME: 'regtest',
@@ -83,7 +87,9 @@ Chain.regtest = {
     PUBKEY_PREFIX: 'pubrt',
     ADDRESS_VERSION: 0x6,
     ADDRESS_PREFIX: 'tcrt',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 1,
+    POW_STEPS: 256
 };
 Chain.policy = {
     TOKEN_NAME: 'TAN',
@@ -556,6 +562,48 @@ class Segwit {
     }
 }
 exports.Segwit = Segwit;
+class Pow256 {
+    static pad(value, size) {
+        const array = typeof value == 'number' ? new Uint256(value).toUint8Array() : value.toUint8Array();
+        return array.length >= size ? array.slice(array.length - size, array.length) : new Uint8Array([...new Array(array.length - size).fill(0), ...array]);
+    }
+    static async solve(blockHash, account, accountNonce, progressFrequency = 100, onProgress) {
+        const challenge = Uint8Array.from([...this.pad(blockHash, 32), ...this.pad(accountNonce, 8), ...account.data]);
+        const target = new Uint256(((2n << (256n - BigInt(Chain.props.POW_DIFFICULTY))) - 1n).toString());
+        const solution = { hash: new Uint256(), nonce: 0 };
+        const iterate = () => {
+            let hash = Hashing.hash512(Uint8Array.from([...challenge, ...Hashing.hash160(this.pad(++solution.nonce, 8))]));
+            for (let i = 0; i < Chain.props.POW_STEPS; i++)
+                hash = Hashing.hash256(hash);
+            solution.hash = new Uint256(hash);
+        };
+        while (!solution.nonce || solution.hash.gt(target)) {
+            try {
+                if (progressFrequency > 0 && solution.nonce % progressFrequency == 0) {
+                    await new Promise((resolve) => {
+                        iterate();
+                        resolve();
+                    });
+                    if (onProgress) {
+                        let stop = onProgress(solution.nonce);
+                        stop = (stop instanceof Promise ? await stop : stop);
+                        if (!stop) {
+                            return null;
+                        }
+                    }
+                }
+                else {
+                    iterate();
+                }
+            }
+            catch {
+                return null;
+            }
+        }
+        return solution.nonce;
+    }
+}
+exports.Pow256 = Pow256;
 class Signing {
     static messageHash(signableMessage) {
         return new Uint256(Hashing.hash256(new Uint8Array([...new Uint256(Chain.props.MESSAGE_MAGIC).toUint8Array(), ...ByteUtil.byteStringToUint8Array(signableMessage)])));

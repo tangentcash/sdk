@@ -8,6 +8,8 @@ export type ChainParams = {
     ADDRESS_VERSION: number;
     ADDRESS_PREFIX: string;
     MESSAGE_MAGIC: number;
+    POW_DIFFICULTY: number;
+    POW_STEPS: number;
 };
 export declare class Chain {
     static mainnet: ChainParams;
@@ -128,6 +130,10 @@ export declare class Segwit {
         program: Uint8Array;
         version: number;
     } | null;
+}
+export declare class Pow256 {
+    private static pad;
+    static solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: number, progressFrequency?: number, onProgress?: (progress: number) => boolean | Promise<boolean>): Promise<number | null>;
 }
 export declare class Signing {
     static wordlist: Set<string> | null;

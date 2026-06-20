@@ -136,6 +136,9 @@ export namespace Transactions {
 
   export class Route extends Ledger.Commitment {
     static typename: string = 'route';
+    powChallengeExtension: string = 'boolean?';
+    powChallengeBlockHash: string = 'uint256?';
+    powChallengeSolution: string = 'uint64?';
     bridgeHash: string = 'uint256';
     routingAddress: string = 'string';
 

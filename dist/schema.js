@@ -166,6 +166,9 @@ var Transactions;
     class Route extends Ledger.Commitment {
         constructor() {
             super(...arguments);
+            this.powChallengeExtension = 'boolean?';
+            this.powChallengeBlockHash = 'uint256?';
+            this.powChallengeSolution = 'uint64?';
             this.bridgeHash = 'uint256';
             this.routingAddress = 'string';
         }

@@ -20,7 +20,9 @@ export type ChainParams = {
   PUBKEY_PREFIX: string,
   ADDRESS_VERSION: number,
   ADDRESS_PREFIX: string,
-  MESSAGE_MAGIC: number
+  MESSAGE_MAGIC: number,
+  POW_DIFFICULTY: number,
+  POW_STEPS: number,
 }
 
 export class Chain {
@@ -32,7 +34,9 @@ export class Chain {
     PUBKEY_PREFIX: 'pub',
     ADDRESS_VERSION: 0x4,
     ADDRESS_PREFIX: 'tc',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 13,
+    POW_STEPS: 256
   };
   static testnet: ChainParams = {
     NAME: 'testnet',
@@ -42,7 +46,9 @@ export class Chain {
     PUBKEY_PREFIX: 'pubt',
     ADDRESS_VERSION: 0x5,
     ADDRESS_PREFIX: 'tct',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 13,
+    POW_STEPS: 256
   };
   static regtest: ChainParams = {
     NAME: 'regtest',
@@ -52,7 +58,9 @@ export class Chain {
     PUBKEY_PREFIX: 'pubrt',
     ADDRESS_VERSION: 0x6,
     ADDRESS_PREFIX: 'tcrt',
-    MESSAGE_MAGIC: 0x73d308e9
+    MESSAGE_MAGIC: 0x73d308e9,
+    POW_DIFFICULTY: 1,
+    POW_STEPS: 256
   };
   static policy = {
     TOKEN_NAME: 'TAN',
@@ -556,6 +564,46 @@ export class Segwit {
     } catch {
       return null;
     }
+  }
+}
+
+export class Pow256 {
+  private static pad(value: Uint256 | number, size: number) {
+    const array = typeof value == 'number' ? new Uint256(value).toUint8Array() : value.toUint8Array();
+    return array.length >= size ? array.slice(array.length - size, array.length) : new Uint8Array([...new Array(array.length - size).fill(0), ...array]);
+  }
+  static async solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: number, progressFrequency: number = 100, onProgress?: (progress: number) => boolean | Promise<boolean>): Promise<number | null> {
+    const challenge = Uint8Array.from([...this.pad(blockHash, 32), ...this.pad(accountNonce, 8), ...account.data]);
+    const target = new Uint256(((2n << (256n - BigInt(Chain.props.POW_DIFFICULTY))) - 1n).toString());
+    const solution: { hash: Uint256, nonce: number } = { hash: new Uint256(), nonce: 0 };
+    const iterate = () => {        
+      let hash = Hashing.hash512(Uint8Array.from([...challenge, ...Hashing.hash160(this.pad(++solution.nonce, 8))]));
+      for (let i = 0; i < Chain.props.POW_STEPS; i++)
+        hash = Hashing.hash256(hash);
+      solution.hash = new Uint256(hash);
+    };
+    while (!solution.nonce || solution.hash.gt(target)) {
+      try {
+        if (progressFrequency > 0 && solution.nonce % progressFrequency == 0) {
+          await new Promise<void>((resolve) => {
+            iterate();
+            resolve();
+          });
+          if (onProgress) {
+            let stop = onProgress(solution.nonce);
+            stop = (stop instanceof Promise ? await stop : stop);
+            if (!stop) {
+              return null;
+            }
+          }
+        } else {
+          iterate();
+        }
+      } catch {
+        return null;
+      }
+    }
+    return solution.nonce;
   }
 }
 
