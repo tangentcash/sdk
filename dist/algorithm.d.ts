@@ -133,7 +133,7 @@ export declare class Segwit {
 }
 export declare class Pow256 {
     private static pad;
-    static solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: number, progressFrequency?: number, onProgress?: (progress: number) => boolean | Promise<boolean>): Promise<number | null>;
+    static solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: number, onProgress?: (progress: number) => boolean | Promise<boolean>, progressFrequency?: number): Promise<number | null>;
 }
 export declare class Signing {
     static wordlist: Set<string> | null;

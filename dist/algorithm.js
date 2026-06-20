@@ -567,33 +567,23 @@ class Pow256 {
         const array = typeof value == 'number' ? new Uint256(value).toUint8Array() : value.toUint8Array();
         return array.length >= size ? array.slice(array.length - size, array.length) : new Uint8Array([...new Array(array.length - size).fill(0), ...array]);
     }
-    static async solve(blockHash, account, accountNonce, progressFrequency = 100, onProgress) {
+    static async solve(blockHash, account, accountNonce, onProgress, progressFrequency = 300) {
         const challenge = Uint8Array.from([...this.pad(blockHash, 32), ...this.pad(accountNonce, 8), ...account.data]);
         const target = new Uint256(((2n << (256n - BigInt(Chain.props.POW_DIFFICULTY))) - 1n).toString());
         const solution = { hash: new Uint256(), nonce: 0 };
-        const iterate = () => {
-            let hash = Hashing.hash512(Uint8Array.from([...challenge, ...Hashing.hash160(this.pad(++solution.nonce, 8))]));
-            for (let i = 0; i < Chain.props.POW_STEPS; i++)
-                hash = Hashing.hash256(hash);
-            solution.hash = new Uint256(hash);
-        };
         while (!solution.nonce || solution.hash.gt(target)) {
             try {
-                if (progressFrequency > 0 && solution.nonce % progressFrequency == 0) {
-                    await new Promise((resolve) => {
-                        iterate();
-                        resolve();
-                    });
-                    if (onProgress) {
-                        let stop = onProgress(solution.nonce);
-                        stop = (stop instanceof Promise ? await stop : stop);
-                        if (!stop) {
-                            return null;
-                        }
-                    }
+                let hash = Hashing.hash512(Uint8Array.from([...challenge, ...Hashing.hash160(this.pad(++solution.nonce, 8))]));
+                for (let i = 0; i < Chain.props.POW_STEPS; i++) {
+                    hash = Hashing.hash256(hash);
                 }
-                else {
-                    iterate();
+                solution.hash = new Uint256(hash);
+                if (onProgress && progressFrequency > 0 && solution.nonce % progressFrequency == 0) {
+                    let stop = onProgress(solution.nonce);
+                    stop = (stop instanceof Promise ? await stop : stop);
+                    if (!stop) {
+                        return null;
+                    }
                 }
             }
             catch {
