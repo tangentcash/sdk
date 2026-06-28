@@ -177,6 +177,7 @@ export enum ValidatorStatus {
 
 export class WalletKeychain {
   type: WalletType | null = null;
+  mnemonic: string[] | null = null;
   secretKey: Seckey | null = null;
   publicKey: Pubkey | null = null;
   publicKeyHash: Pubkeyhash | null = null;
@@ -185,6 +186,7 @@ export class WalletKeychain {
   isValid(): boolean {
     switch (this.type) {
       case WalletType.Mnemonic:
+        return this.mnemonic != null && this.secretKey != null && this.publicKey != null && this.publicKeyHash != null && this.address != null;
       case WalletType.SecretKey:
         return this.secretKey != null && this.publicKey != null && this.publicKeyHash != null && this.address != null;
       case WalletType.PublicKey:
@@ -211,6 +213,7 @@ export class WalletKeychain {
     if (!result)
       return null;
 
+    result.mnemonic = mnemonic;
     result.type = WalletType.Mnemonic;
     return result;
   }

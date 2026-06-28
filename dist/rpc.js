@@ -49,6 +49,7 @@ var ValidatorStatus;
 class WalletKeychain {
     constructor() {
         this.type = null;
+        this.mnemonic = null;
         this.secretKey = null;
         this.publicKey = null;
         this.publicKeyHash = null;
@@ -57,6 +58,7 @@ class WalletKeychain {
     isValid() {
         switch (this.type) {
             case WalletType.Mnemonic:
+                return this.mnemonic != null && this.secretKey != null && this.publicKey != null && this.publicKeyHash != null && this.address != null;
             case WalletType.SecretKey:
                 return this.secretKey != null && this.publicKey != null && this.publicKeyHash != null && this.address != null;
             case WalletType.PublicKey:
@@ -79,6 +81,7 @@ class WalletKeychain {
         const result = this.fromSecretKey(serialized);
         if (!result)
             return null;
+        result.mnemonic = mnemonic;
         result.type = WalletType.Mnemonic;
         return result;
     }

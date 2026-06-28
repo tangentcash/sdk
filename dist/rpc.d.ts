@@ -200,6 +200,7 @@ export declare enum ValidatorStatus {
 }
 export declare class WalletKeychain {
     type: WalletType | null;
+    mnemonic: string[] | null;
     secretKey: Seckey | null;
     publicKey: Pubkey | null;
     publicKeyHash: Pubkeyhash | null;
