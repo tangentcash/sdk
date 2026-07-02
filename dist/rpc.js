@@ -543,18 +543,12 @@ class RPC {
                     this.connectSocketInternal();
             }
             else {
-                resolve(0);
+                resolve(true);
             }
         });
     }
     static async connectSocketInternal() {
         const method = 'connect';
-        const topics = [this.topics.addresses.join(',')];
-        if (typeof this.topics.blocks == 'boolean')
-            topics.push(this.topics.blocks);
-        if (typeof this.topics.transactions == 'boolean')
-            topics.push(this.topics.transactions);
-        let response = null;
         try {
             if (!this.validator) {
                 if (!this.onValidatorLoad)
@@ -608,20 +602,18 @@ class RPC {
                 this.connectSocket();
             };
             this.status = ValidatorStatus.Online;
-            response = await this.fetch('no-cache', 'subscribe', topics);
         }
         catch (exception) {
             this.status = ValidatorStatus.Offline;
             if (this.onNodeError)
                 this.onNodeError(method, exception);
         }
-        if (this.awaitables != null) {
-            for (let i = 0; i < this.awaitables.length; i++) {
-                this.awaitables[i](response);
-            }
+        const success = this.status == ValidatorStatus.Online;
+        if (this.awaitables.length > 0) {
+            [...this.awaitables].forEach((callback) => callback(success));
             this.awaitables = [];
         }
-        return response;
+        return success;
     }
     static async disconnectSocket() {
         this.status = ValidatorStatus.Offline;
@@ -642,11 +634,6 @@ class RPC {
         this.socket.close();
         this.socket = null;
         return true;
-    }
-    static applyTopics(addresses, blocks, transactions) {
-        this.topics.blocks = blocks;
-        this.topics.transactions = transactions;
-        this.topics.addresses = addresses;
     }
     static applyValidator(validator) {
         this.validator = validator;
@@ -698,6 +685,17 @@ class RPC {
     }
     static callTransaction(asset, fromAddress, toAddress, method, args) {
         return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
+    }
+    static subscribeTopics(addresses, blocks, transactions) {
+        this.topics.blocks = blocks;
+        this.topics.transactions = transactions;
+        this.topics.addresses = addresses;
+        const topics = [this.topics.addresses.join(',')];
+        if (typeof this.topics.blocks == 'boolean')
+            topics.push(this.topics.blocks);
+        if (typeof this.topics.transactions == 'boolean')
+            topics.push(this.topics.transactions);
+        return this.fetch('no-cache', 'subscribe', topics);
     }
     static getWallet() {
         return this.fetch('no-cache', 'getwallet');

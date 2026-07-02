@@ -563,7 +563,7 @@ export class RPC {
     transactions: undefined,
     addresses: []
   };
-  static awaitables: ((tip: number | null) => void)[] = [];
+  static awaitables: ((active: boolean) => void)[] = [];
   static socket: WebSocket | null = null;
   static forcePolicy: null | 'cache' | 'no-cache' = null;
   static onNodeMessage: NodeMessage | null = null;
@@ -712,26 +712,19 @@ export class RPC {
     }
     return result;
   }
-  static connectSocket(): Promise<number | null> {
-    return new Promise<number | null>((resolve) => {
+  static connectSocket(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
       if (!this.socket) {
         this.awaitables.push(resolve);
         if (this.awaitables.length == 1)
           this.connectSocketInternal();
       } else {
-        resolve(0);
+        resolve(true);
       }
     });
   }
-  static async connectSocketInternal(): Promise<number | null> {
+  static async connectSocketInternal(): Promise<boolean> {
     const method = 'connect';
-    const topics: any[] = [this.topics.addresses.join(',')];
-    if (typeof this.topics.blocks == 'boolean')
-      topics.push(this.topics.blocks);
-    if (typeof this.topics.transactions == 'boolean')
-      topics.push(this.topics.transactions);
-
-    let response: number | null = null;
     try {
       if (!this.validator) {
         if (!this.onValidatorLoad)
@@ -788,21 +781,18 @@ export class RPC {
         this.connectSocket();
       };
       this.status = ValidatorStatus.Online;
-      response = await this.fetch<number>('no-cache', 'subscribe', topics);
     } catch (exception) {
       this.status = ValidatorStatus.Offline;
       if (this.onNodeError)
         this.onNodeError(method, exception);
     }
   
-    if (this.awaitables != null) {
-      for (let i = 0; i < this.awaitables.length; i++) {
-        this.awaitables[i](response);
-      }
+    const success = this.status == ValidatorStatus.Online;
+    if (this.awaitables.length > 0) {
+      [...this.awaitables].forEach((callback) => callback(success));
       this.awaitables = [];
     }
-    
-    return response;
+    return success;
   }
   static async disconnectSocket(): Promise<boolean> {
     this.status = ValidatorStatus.Offline;
@@ -825,11 +815,6 @@ export class RPC {
     this.socket.close();
     this.socket = null;
     return true;
-  }
-  static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void {
-    this.topics.blocks = blocks;
-    this.topics.transactions = transactions;
-    this.topics.addresses = addresses;
   }
   static applyValidator(validator: string | null): void {
     this.validator = validator;
@@ -892,6 +877,17 @@ export class RPC {
   }
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null> {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
+  }
+  static subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null> {
+    this.topics.blocks = blocks;
+    this.topics.transactions = transactions;
+    this.topics.addresses = addresses;
+    const topics: any[] = [this.topics.addresses.join(',')];
+    if (typeof this.topics.blocks == 'boolean')
+      topics.push(this.topics.blocks);
+    if (typeof this.topics.transactions == 'boolean')
+      topics.push(this.topics.transactions);
+    return this.fetch<number>('no-cache', 'subscribe', topics);
   }
   static getWallet(): Promise<{ secretKey: string, publicKey: string, publicKeyHash: string, address: string } | null> {
     return this.fetch('no-cache', 'getwallet');

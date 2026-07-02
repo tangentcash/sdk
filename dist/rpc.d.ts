@@ -234,7 +234,7 @@ export declare class RPC {
         transactions?: boolean;
         addresses: string[];
     };
-    static awaitables: ((tip: number | null) => void)[];
+    static awaitables: ((active: boolean) => void)[];
     static socket: WebSocket | null;
     static forcePolicy: null | 'cache' | 'no-cache';
     static onNodeMessage: NodeMessage | null;
@@ -251,10 +251,9 @@ export declare class RPC {
     static fetchObject(data: any): any;
     static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
-    static connectSocket(): Promise<number | null>;
-    static connectSocketInternal(): Promise<number | null>;
+    static connectSocket(): Promise<boolean>;
+    static connectSocketInternal(): Promise<boolean>;
     static disconnectSocket(): Promise<boolean>;
-    static applyTopics(addresses: string[], blocks?: boolean, transactions?: boolean): void;
     static applyValidator(validator: string | null): void;
     static applyImplementation(implementation: {
         onNodeMessage?: NodeMessage;
@@ -274,6 +273,7 @@ export declare class RPC {
     static simulateTransaction(hexMessage: string): Promise<any | null>;
     static submitTransaction(hexMessage: string): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null>;
+    static subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null>;
     static getWallet(): Promise<{
         secretKey: string;
         publicKey: string;
