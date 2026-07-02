@@ -555,10 +555,12 @@ export class RPC {
     count: 0
   };
   static topics: {
+    id: string,
     blocks?: boolean,
     transactions?: boolean,
     addresses: string[],
   } = {
+    id: '',
     blocks: undefined,
     transactions: undefined,
     addresses: []
@@ -878,7 +880,7 @@ export class RPC {
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null> {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
   }
-  static subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null> {
+  static async subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null> {
     this.topics.blocks = blocks;
     this.topics.transactions = transactions;
     this.topics.addresses = addresses;
@@ -887,7 +889,17 @@ export class RPC {
       topics.push(this.topics.blocks);
     if (typeof this.topics.transactions == 'boolean')
       topics.push(this.topics.transactions);
+    const id = topics.join(',');
+    if (id == this.topics.id)
+      return 0;
+    
+    this.topics.id = id;
     return this.fetch<number>('no-cache', 'subscribe', topics);
+  }
+  static async unsubscribeTopics(): Promise<void> {
+    if (this.topics.id.length > 0) {
+      await this.fetch('no-cache', 'unsubscribe');
+    }
   }
   static getWallet(): Promise<{ secretKey: string, publicKey: string, publicKeyHash: string, address: string } | null> {
     return this.fetch('no-cache', 'getwallet');

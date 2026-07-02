@@ -230,6 +230,7 @@ export declare class RPC {
         count: number;
     };
     static topics: {
+        id: string;
         blocks?: boolean;
         transactions?: boolean;
         addresses: string[];
@@ -274,6 +275,7 @@ export declare class RPC {
     static submitTransaction(hexMessage: string): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null>;
     static subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null>;
+    static unsubscribeTopics(): Promise<void>;
     static getWallet(): Promise<{
         secretKey: string;
         publicKey: string;
