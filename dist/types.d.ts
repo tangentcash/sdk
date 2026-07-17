@@ -10,8 +10,8 @@ export declare class Types {
     static Route: number;
     static Withdraw: number;
 }
-export declare namespace DEX {
-    namespace Spot {
+export declare namespace Spot {
+    namespace DEX {
         namespace Events {
             const Config: number;
             const Order: number;
@@ -41,6 +41,25 @@ export declare namespace DEX {
         const assetOf = "asset_tier asset_of(pconst@, const uint256&in)";
         const accountOf = "account_tier account_of(pconst@, const address&in, const uint256&in)";
         const accountAssetOf = "account_asset_tier account_asset_of(pconst@, const address&in, const uint256&in)";
+        const paramsOf = "config params_of(pconst@)";
+    }
+    namespace DLP {
+        namespace Events {
+            const Config: number;
+            const PoolRefOwner: number;
+        }
+        const construct = "void construct(pmut@, const address&in)";
+        const reconstruct = "void reconstruct(pmut@, const config&in)";
+        const reconstructDeployer = "void reconstruct_deployer(pmut@, const address&in)";
+        const reconstructReward = "void reconstruct_reward(pmut@, const real320&in)";
+        const reconstructPermit = "void reconstruct_permit(pmut@, const uint256&in, const uint256&in, bool)";
+        const transferLiquidity = "uint256 transfer_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in, const real320&in, const real320&in, const real320&in, const real320&in)";
+        const pullLiquidity = "void pull_liquidity(pmut@, const uint256&in, const uint256&in)";
+        const depositLiquidity = "void deposit_liquidity(pmut@, const uint256&in, const uint256&in)";
+        const withdrawLiquidity = "void withdraw_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in)";
+        const poolOf = "pool_state pool_of(pconst@, const uint256&in, const uint256&in)";
+        const shareOf = "pool_size share_of(pconst@, const uint256&in, const uint256&in, const address&in)";
+        const liquidityOf = "pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)";
         const paramsOf = "config params_of(pconst@)";
     }
 }

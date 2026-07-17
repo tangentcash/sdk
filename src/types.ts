@@ -14,8 +14,8 @@ export class Types {
   static Withdraw = Hashing.hash32(ByteUtil.byteStringToUint8Array(Transactions.Withdraw.typename));
 }
 
-export namespace DEX {
-  export namespace Spot {
+export namespace Spot {
+  export namespace DEX {
     export namespace Events {
       export const Config = Hashing.hash32(ByteUtil.byteStringToUint8Array('config'));
       export const Order = Hashing.hash32(ByteUtil.byteStringToUint8Array('order'));
@@ -23,7 +23,6 @@ export namespace DEX {
       export const Swap = Hashing.hash32(ByteUtil.byteStringToUint8Array('swap'));
       export const AssetTier = Hashing.hash32(ByteUtil.byteStringToUint8Array('asset_tier'));
     }
-
     export const construct = 'void construct(pmut@)';
     export const reconstruct = 'void reconstruct(pmut@, const config&in)';
     export const unifyAsset = 'void unify_asset(pmut@, const uint256&in, const string&in)';
@@ -46,6 +45,25 @@ export namespace DEX {
     export const assetOf = 'asset_tier asset_of(pconst@, const uint256&in)';
     export const accountOf = 'account_tier account_of(pconst@, const address&in, const uint256&in)';
     export const accountAssetOf = 'account_asset_tier account_asset_of(pconst@, const address&in, const uint256&in)';
+    export const paramsOf = 'config params_of(pconst@)';
+  }
+  export namespace DLP {
+    export namespace Events {
+      export const Config = Hashing.hash32(ByteUtil.byteStringToUint8Array('config'));
+      export const PoolRefOwner = Hashing.hash32(ByteUtil.byteStringToUint8Array('pool_ref_owner'));
+    }
+    export const construct = 'void construct(pmut@, const address&in)';
+    export const reconstruct = 'void reconstruct(pmut@, const config&in)';
+    export const reconstructDeployer = 'void reconstruct_deployer(pmut@, const address&in)';
+    export const reconstructReward = 'void reconstruct_reward(pmut@, const real320&in)';
+    export const reconstructPermit = 'void reconstruct_permit(pmut@, const uint256&in, const uint256&in, bool)';
+    export const transferLiquidity = 'uint256 transfer_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in, const real320&in, const real320&in, const real320&in, const real320&in)';
+    export const pullLiquidity = 'void pull_liquidity(pmut@, const uint256&in, const uint256&in)';
+    export const depositLiquidity = 'void deposit_liquidity(pmut@, const uint256&in, const uint256&in)';
+    export const withdrawLiquidity = 'void withdraw_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in)';
+    export const poolOf = 'pool_state pool_of(pconst@, const uint256&in, const uint256&in)';
+    export const shareOf = 'pool_size share_of(pconst@, const uint256&in, const uint256&in, const address&in)';
+    export const liquidityOf = 'pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)';
     export const paramsOf = 'config params_of(pconst@)';
   }
 }
