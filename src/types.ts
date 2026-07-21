@@ -50,6 +50,7 @@ export namespace Spot {
   export namespace DLP {
     export namespace Events {
       export const Config = Hashing.hash32(ByteUtil.byteStringToUint8Array('config'));
+      export const PoolRef = Hashing.hash32(ByteUtil.byteStringToUint8Array('pool_ref'));
       export const PoolRefOwner = Hashing.hash32(ByteUtil.byteStringToUint8Array('pool_ref_owner'));
     }
     export const construct = 'void construct(pmut@, const address&in)';
