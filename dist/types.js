@@ -57,8 +57,7 @@ var Spot;
         let Events;
         (function (Events) {
             Events.Config = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('config'));
-            Events.PoolRefBatch = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('pool_ref_batch'));
-            Events.PoolRefOwner = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('pool_ref_owner'));
+            Events.PoolRefEvent = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('pool_ref_event'));
         })(Events = DLP.Events || (DLP.Events = {}));
         DLP.construct = 'void construct(pmut@, const address&in)';
         DLP.reconstruct = 'void reconstruct(pmut@, const config&in)';

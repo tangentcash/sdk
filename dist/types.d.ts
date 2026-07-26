@@ -46,8 +46,7 @@ export declare namespace Spot {
     namespace DLP {
         namespace Events {
             const Config: number;
-            const PoolRefBatch: number;
-            const PoolRefOwner: number;
+            const PoolRefEvent: number;
         }
         const construct = "void construct(pmut@, const address&in)";
         const reconstruct = "void reconstruct(pmut@, const config&in)";
