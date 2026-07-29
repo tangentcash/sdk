@@ -247,6 +247,7 @@ export declare class RPC {
     static onCacheStore: CacheStore | null;
     static onCacheLoad: CacheLoad | null;
     static onCacheKeys: CacheKeys | null;
+    private static resetTopics;
     private static fetchData;
     private static fetchResult;
     static fetchObject(data: any): any;

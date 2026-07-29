@@ -404,6 +404,12 @@ class EventResolver {
 }
 exports.EventResolver = EventResolver;
 class RPC {
+    static resetTopics() {
+        this.topics.id = '';
+        this.topics.blocks = undefined;
+        this.topics.transactions = undefined;
+        this.topics.addresses = [];
+    }
     static fetchData(data) {
         if (!data.error)
             return this.fetchObject(data.result);
@@ -633,6 +639,7 @@ class RPC {
         this.socket.onclose = null;
         this.socket.close();
         this.socket = null;
+        this.resetTopics();
         return true;
     }
     static applyValidator(validator) {
@@ -701,10 +708,7 @@ class RPC {
     static async unsubscribeTopics() {
         if (this.topics.id.length > 0) {
             await this.fetch('no-cache', 'unsubscribe');
-            this.topics.id = '';
-            this.topics.blocks = undefined;
-            this.topics.transactions = undefined;
-            this.topics.addresses = [];
+            this.resetTopics();
         }
     }
     static getWallet() {

@@ -578,6 +578,12 @@ export class RPC {
   static onCacheLoad: CacheLoad | null = null;
   static onCacheKeys: CacheKeys | null = null;
 
+  private static resetTopics() {
+    this.topics.id = '';
+    this.topics.blocks = undefined;
+    this.topics.transactions = undefined;
+    this.topics.addresses = [];
+  }
   private static fetchData(data: any): any {
     if (!data.error)
       return this.fetchObject(data.result)
@@ -816,6 +822,7 @@ export class RPC {
     this.socket.onclose = null;
     this.socket.close();
     this.socket = null;
+    this.resetTopics();
     return true;
   }
   static applyValidator(validator: string | null): void {
@@ -896,10 +903,7 @@ export class RPC {
   static async unsubscribeTopics(): Promise<void> {
     if (this.topics.id.length > 0) {
       await this.fetch('no-cache', 'unsubscribe');
-      this.topics.id = '';
-      this.topics.blocks = undefined;
-      this.topics.transactions = undefined;
-      this.topics.addresses = [];
+      this.resetTopics();
     }
   }
   static getWallet(): Promise<{ secretKey: string, publicKey: string, publicKeyHash: string, address: string } | null> {
