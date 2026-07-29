@@ -687,23 +687,24 @@ class RPC {
         return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
     }
     static async subscribeTopics(addresses, blocks, transactions) {
-        this.topics.blocks = blocks;
-        this.topics.transactions = transactions;
-        this.topics.addresses = addresses;
-        const topics = [this.topics.addresses.join(',')];
-        if (typeof this.topics.blocks == 'boolean')
-            topics.push(this.topics.blocks);
-        if (typeof this.topics.transactions == 'boolean')
-            topics.push(this.topics.transactions);
+        const topics = [this.topics.addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
         const id = topics.join(',');
         if (id == this.topics.id)
             return 0;
+        const result = await this.fetch('no-cache', 'subscribe', topics);
         this.topics.id = id;
-        return this.fetch('no-cache', 'subscribe', topics);
+        this.topics.blocks = blocks;
+        this.topics.transactions = transactions;
+        this.topics.addresses = addresses;
+        return result;
     }
     static async unsubscribeTopics() {
         if (this.topics.id.length > 0) {
             await this.fetch('no-cache', 'unsubscribe');
+            this.topics.id = '';
+            this.topics.blocks = undefined;
+            this.topics.transactions = undefined;
+            this.topics.addresses = [];
         }
     }
     static getWallet() {
