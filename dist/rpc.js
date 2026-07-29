@@ -694,7 +694,7 @@ class RPC {
         return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
     }
     static async subscribeTopics(addresses, blocks, transactions) {
-        const topics = [this.topics.addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
+        const topics = [addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
         const id = topics.join(',');
         if (id == this.topics.id)
             return 0;

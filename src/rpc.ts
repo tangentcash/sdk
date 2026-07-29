@@ -888,7 +888,7 @@ export class RPC {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
   }
   static async subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null> {
-    const topics: any[] = [this.topics.addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
+    const topics: any[] = [addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
     const id = topics.join(',');
     if (id == this.topics.id)
       return 0;
