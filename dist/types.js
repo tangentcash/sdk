@@ -68,6 +68,7 @@ var Spot;
         DLP.pullLiquidity = 'void pull_liquidity(pmut@, const uint256&in, const uint256&in)';
         DLP.depositLiquidity = 'void deposit_liquidity(pmut@, const uint256&in, const uint256&in)';
         DLP.withdrawLiquidity = 'void withdraw_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in)';
+        DLP.withdrawReward = 'void withdraw_reward(pmut@)';
         DLP.poolOf = 'pool_state pool_of(pconst@, const uint256&in, const uint256&in)';
         DLP.shareOf = 'pool_size share_of(pconst@, const uint256&in, const uint256&in, const address&in)';
         DLP.liquidityOf = 'pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)';

@@ -57,6 +57,7 @@ export declare namespace Spot {
         const pullLiquidity = "void pull_liquidity(pmut@, const uint256&in, const uint256&in)";
         const depositLiquidity = "void deposit_liquidity(pmut@, const uint256&in, const uint256&in)";
         const withdrawLiquidity = "void withdraw_liquidity(pmut@, const uint256&in, const uint256&in, const real320&in, const real320&in)";
+        const withdrawReward = "void withdraw_reward(pmut@)";
         const poolOf = "pool_state pool_of(pconst@, const uint256&in, const uint256&in)";
         const shareOf = "pool_size share_of(pconst@, const uint256&in, const uint256&in, const address&in)";
         const liquidityOf = "pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)";
