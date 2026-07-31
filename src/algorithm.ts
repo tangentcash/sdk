@@ -875,8 +875,8 @@ export class LiquidityPool {
           maxPrice: perfectAmount0.gt(0) ? price.multipliedBy(new BigNumber(1).plus(new BigNumber(range).multipliedBy(amount0.dividedBy(perfectAmount0)))) : price
       }
   }
-  static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null) {
-    if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+  static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber | null, minPrice: BigNumber | null, maxPrice: BigNumber | null) {
+    if (liquidity?.gt(0) && minPrice?.gt(0) && maxPrice?.gt(0)) {
       const price0 = liquidity.multipliedBy(maxPrice).dividedBy(primaryValue.multipliedBy(maxPrice).plus(liquidity));
       const price1 = secondaryValue.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity);
       return price0.plus(price1).dividedBy(2);

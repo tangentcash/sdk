@@ -189,5 +189,5 @@ export declare class LiquidityPool {
         minPrice: BigNumber;
         maxPrice: BigNumber;
     };
-    static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber;
+    static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber | null, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber;
 }

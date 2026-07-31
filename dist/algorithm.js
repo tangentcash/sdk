@@ -865,7 +865,7 @@ class LiquidityPool {
         };
     }
     static toPrice(primaryValue, secondaryValue, liquidity, minPrice, maxPrice) {
-        if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+        if (liquidity?.gt(0) && minPrice?.gt(0) && maxPrice?.gt(0)) {
             const price0 = liquidity.multipliedBy(maxPrice).dividedBy(primaryValue.multipliedBy(maxPrice).plus(liquidity));
             const price1 = secondaryValue.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity);
             return price0.plus(price1).dividedBy(2);
