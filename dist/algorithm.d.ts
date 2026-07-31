@@ -183,6 +183,8 @@ export declare class LiquidityPool {
     static toLiquidity1(amount1: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber;
     static toAmount0(liquidity: BigNumber, price: BigNumber, maxPrice: BigNumber): BigNumber;
     static toAmount1(liquidity: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber;
+    static toPrice0(amount0: BigNumber, liquidity: BigNumber, maxPrice: BigNumber): BigNumber;
+    static toPrice1(amount1: BigNumber, liquidity: BigNumber, minPrice: BigNumber): BigNumber;
     static toPrimaryValue(secondaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null;
     static toSecondaryValue(primaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null;
     static toRange(amount0: BigNumber, amount1: BigNumber, price: BigNumber, range: number): {
