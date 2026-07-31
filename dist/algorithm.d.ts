@@ -178,3 +178,16 @@ export declare class ByteUtil {
     static uint8ArraySwapEndianness(data: Uint8Array): Uint8Array;
     static bigNumberToString(data: BigNumber): string;
 }
+export declare class LiquidityPool {
+    static toLiquidity0(amount0: BigNumber, price: BigNumber, maxPrice: BigNumber): BigNumber;
+    static toLiquidity1(amount1: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber;
+    static toAmount0(liquidity: BigNumber, price: BigNumber, maxPrice: BigNumber): BigNumber;
+    static toAmount1(liquidity: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber;
+    static toPrimaryValue(secondaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null;
+    static toSecondaryValue(primaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null;
+    static toRange(amount0: BigNumber, amount1: BigNumber, price: BigNumber, range: number): {
+        minPrice: BigNumber;
+        maxPrice: BigNumber;
+    };
+    static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber;
+}

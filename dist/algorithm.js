@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ByteUtil = exports.Hashing = exports.Signing = exports.Pow256 = exports.Segwit = exports.AssetId = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Hashsig = exports.Uint256 = exports.Chain = void 0;
+exports.LiquidityPool = exports.ByteUtil = exports.Hashing = exports.Signing = exports.Pow256 = exports.Segwit = exports.AssetId = exports.Pubkeyhash = exports.Pubkey = exports.Seckey = exports.Hashsig = exports.Uint256 = exports.Chain = void 0;
 const secp256k1_1 = __importDefault(require("secp256k1"));
 const bip39 = __importStar(require("@scure/bip39"));
 const js_base64_1 = require("js-base64");
@@ -810,3 +810,69 @@ class ByteUtil {
     }
 }
 exports.ByteUtil = ByteUtil;
+class LiquidityPool {
+    static toLiquidity0(amount0, price, maxPrice) {
+        return amount0.multipliedBy(price).multipliedBy(maxPrice).dividedBy(bignumber_js_1.default.max(0, maxPrice.minus(price))).dp(18);
+    }
+    static toLiquidity1(amount1, price, minPrice) {
+        return amount1.dividedBy(bignumber_js_1.default.max(0, price.minus(minPrice))).dp(18);
+    }
+    static toAmount0(liquidity, price, maxPrice) {
+        return liquidity.multipliedBy(bignumber_js_1.default.max(0, maxPrice.minus(price)).dividedBy(price).dividedBy(maxPrice)).dp(18);
+    }
+    static toAmount1(liquidity, price, minPrice) {
+        return liquidity.multipliedBy(bignumber_js_1.default.max(0, price.minus(minPrice))).dp(18);
+    }
+    static toPrimaryValue(secondaryValue, price, minPrice, maxPrice) {
+        if (!secondaryValue.gt(0))
+            return null;
+        if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+            const sqrtPrice = price.sqrt();
+            const sqrtMinPrice = minPrice.sqrt();
+            const sqrtMaxPrice = maxPrice.sqrt();
+            const liquidity = this.toLiquidity1(secondaryValue, sqrtPrice, sqrtMinPrice);
+            return this.toAmount0(liquidity, sqrtPrice, sqrtMaxPrice);
+        }
+        else {
+            return secondaryValue.dividedBy(price);
+        }
+    }
+    static toSecondaryValue(primaryValue, price, minPrice, maxPrice) {
+        if (!primaryValue.gt(0))
+            return null;
+        if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+            const sqrtPrice = price.sqrt();
+            const sqrtMinPrice = minPrice.sqrt();
+            const sqrtMaxPrice = maxPrice.sqrt();
+            const liquidity = this.toLiquidity0(primaryValue, sqrtPrice, sqrtMaxPrice);
+            return this.toAmount1(liquidity, sqrtPrice, sqrtMinPrice);
+        }
+        else {
+            return price.multipliedBy(primaryValue);
+        }
+    }
+    static toRange(amount0, amount1, price, range) {
+        const minPrice = price.multipliedBy(1 - range);
+        const maxPrice = price.multipliedBy(1 + range);
+        const bias0Amount0 = this.toPrimaryValue(amount1, price, minPrice, maxPrice) || new bignumber_js_1.default(0);
+        const bias1Amount1 = this.toSecondaryValue(amount0, price, minPrice, maxPrice) || new bignumber_js_1.default(0);
+        const perfectBias0 = bias0Amount0.multipliedBy(price).plus(amount1).gt(amount0.multipliedBy(price).plus(bias1Amount1));
+        const perfectAmount0 = perfectBias0 ? bias0Amount0 : amount0;
+        const perfectAmount1 = perfectBias0 ? amount1 : bias1Amount1;
+        return {
+            minPrice: perfectAmount1.gt(0) ? price.multipliedBy(new bignumber_js_1.default(1).minus(new bignumber_js_1.default(range).multipliedBy(amount1.dividedBy(perfectAmount1)))) : price,
+            maxPrice: perfectAmount0.gt(0) ? price.multipliedBy(new bignumber_js_1.default(1).plus(new bignumber_js_1.default(range).multipliedBy(amount0.dividedBy(perfectAmount0)))) : price
+        };
+    }
+    static toPrice(primaryValue, secondaryValue, liquidity, minPrice, maxPrice) {
+        if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+            const price0 = liquidity.multipliedBy(maxPrice).dividedBy(primaryValue.multipliedBy(maxPrice).plus(liquidity));
+            const price1 = secondaryValue.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity);
+            return price0.plus(price1).dividedBy(2);
+        }
+        else {
+            return secondaryValue.dividedBy(primaryValue);
+        }
+    }
+}
+exports.LiquidityPool = LiquidityPool;

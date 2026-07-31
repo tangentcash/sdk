@@ -820,3 +820,68 @@ export class ByteUtil {
     return text.substring(0, length === index + 1 ? index : length);
   }
 }
+
+export class LiquidityPool {
+  static toLiquidity0(amount0: BigNumber, price: BigNumber, maxPrice: BigNumber): BigNumber {
+    return amount0.multipliedBy(price).multipliedBy(maxPrice).dividedBy(BigNumber.max(0, maxPrice.minus(price))).dp(18);
+  }
+  static toLiquidity1(amount1: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber {
+    return amount1.dividedBy(BigNumber.max(0, price.minus(minPrice))).dp(18);
+  }
+  static toAmount0(liquidity: BigNumber, price: BigNumber, maxPrice: BigNumber): BigNumber {
+    return liquidity.multipliedBy(BigNumber.max(0, maxPrice.minus(price)).dividedBy(price).dividedBy(maxPrice)).dp(18);
+  }
+  static toAmount1(liquidity: BigNumber, price: BigNumber, minPrice: BigNumber): BigNumber {
+    return liquidity.multipliedBy(BigNumber.max(0, price.minus(minPrice))).dp(18);
+  }
+  static toPrimaryValue(secondaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null {
+    if (!secondaryValue.gt(0))
+      return null;
+
+    if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+      const sqrtPrice = price.sqrt();
+      const sqrtMinPrice = minPrice.sqrt();
+      const sqrtMaxPrice = maxPrice.sqrt();
+      const liquidity = this.toLiquidity1(secondaryValue, sqrtPrice, sqrtMinPrice);
+      return this.toAmount0(liquidity, sqrtPrice, sqrtMaxPrice);
+    } else {
+      return secondaryValue.dividedBy(price);
+    }
+  }
+  static toSecondaryValue(primaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null { 
+    if (!primaryValue.gt(0))
+      return null;
+
+    if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+      const sqrtPrice = price.sqrt();
+      const sqrtMinPrice = minPrice.sqrt();
+      const sqrtMaxPrice = maxPrice.sqrt();
+      const liquidity = this.toLiquidity0(primaryValue, sqrtPrice, sqrtMaxPrice);
+      return this.toAmount1(liquidity, sqrtPrice, sqrtMinPrice);
+    } else {
+      return price.multipliedBy(primaryValue);
+    }
+  }
+  static toRange(amount0: BigNumber, amount1: BigNumber, price: BigNumber, range: number): { minPrice: BigNumber; maxPrice: BigNumber } {
+      const minPrice = price.multipliedBy(1 - range);
+      const maxPrice = price.multipliedBy(1 + range);
+      const bias0Amount0 = this.toPrimaryValue(amount1, price, minPrice, maxPrice) || new BigNumber(0);
+      const bias1Amount1 = this.toSecondaryValue(amount0, price, minPrice, maxPrice) || new BigNumber(0);
+      const perfectBias0 = bias0Amount0.multipliedBy(price).plus(amount1).gt(amount0.multipliedBy(price).plus(bias1Amount1));
+      const perfectAmount0 = perfectBias0 ? bias0Amount0 : amount0;
+      const perfectAmount1 = perfectBias0 ? amount1 : bias1Amount1;
+      return {
+          minPrice: perfectAmount1.gt(0) ? price.multipliedBy(new BigNumber(1).minus(new BigNumber(range).multipliedBy(amount1.dividedBy(perfectAmount1)))) : price,
+          maxPrice: perfectAmount0.gt(0) ? price.multipliedBy(new BigNumber(1).plus(new BigNumber(range).multipliedBy(amount0.dividedBy(perfectAmount0)))) : price
+      }
+  }
+  static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null) {
+    if (minPrice?.gt(0) && maxPrice?.gt(0)) {
+      const price0 = liquidity.multipliedBy(maxPrice).dividedBy(primaryValue.multipliedBy(maxPrice).plus(liquidity));
+      const price1 = secondaryValue.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity);
+      return price0.plus(price1).dividedBy(2);
+    } else {
+      return secondaryValue.dividedBy(primaryValue);
+    }
+  }
+}
