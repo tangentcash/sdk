@@ -835,10 +835,10 @@ export class LiquidityPool {
     return liquidity.multipliedBy(BigNumber.max(0, price.minus(minPrice))).dp(18);
   }
   static toPrice0(amount0: BigNumber, liquidity: BigNumber, maxPrice: BigNumber) {
-    return liquidity.multipliedBy(maxPrice).dividedBy(amount0.multipliedBy(maxPrice).plus(liquidity));
+    return liquidity.multipliedBy(maxPrice).dividedBy(amount0.multipliedBy(maxPrice).plus(liquidity)).dp(18);
   }
   static toPrice1(amount1: BigNumber, liquidity: BigNumber, minPrice: BigNumber) {
-    return amount1.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity);
+    return amount1.plus(liquidity.multipliedBy(minPrice)).dividedBy(liquidity).dp(18);
   }
   static toPrimaryValue(secondaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null {
     if (!secondaryValue.gt(0))
@@ -851,10 +851,10 @@ export class LiquidityPool {
       const liquidity = this.toLiquidity1(secondaryValue, sqrtPrice, sqrtMinPrice);
       return this.toAmount0(liquidity, sqrtPrice, sqrtMaxPrice);
     } else {
-      return secondaryValue.dividedBy(price);
+      return secondaryValue.dividedBy(price).dp(18);
     }
   }
-  static toSecondaryValue(primaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null { 
+  static toSecondaryValue(primaryValue: BigNumber, price: BigNumber, minPrice: BigNumber | null, maxPrice: BigNumber | null): BigNumber | null {
     if (!primaryValue.gt(0))
       return null;
 
@@ -865,7 +865,7 @@ export class LiquidityPool {
       const liquidity = this.toLiquidity0(primaryValue, sqrtPrice, sqrtMaxPrice);
       return this.toAmount1(liquidity, sqrtPrice, sqrtMinPrice);
     } else {
-      return price.multipliedBy(primaryValue);
+      return price.multipliedBy(primaryValue).dp(18);
     }
   }
   static toRange(amount0: BigNumber, amount1: BigNumber, price: BigNumber, range: number): { minPrice: BigNumber; maxPrice: BigNumber } {
@@ -877,15 +877,15 @@ export class LiquidityPool {
       const perfectAmount0 = perfectBias0 ? bias0Amount0 : amount0;
       const perfectAmount1 = perfectBias0 ? amount1 : bias1Amount1;
       return {
-          minPrice: perfectAmount1.gt(0) ? price.multipliedBy(new BigNumber(1).minus(new BigNumber(range).multipliedBy(amount1.dividedBy(perfectAmount1)))) : price,
-          maxPrice: perfectAmount0.gt(0) ? price.multipliedBy(new BigNumber(1).plus(new BigNumber(range).multipliedBy(amount0.dividedBy(perfectAmount0)))) : price
+          minPrice: (perfectAmount1.gt(0) ? price.multipliedBy(new BigNumber(1).minus(new BigNumber(range).multipliedBy(amount1.dividedBy(perfectAmount1)))) : price).dp(18),
+          maxPrice: (perfectAmount0.gt(0) ? price.multipliedBy(new BigNumber(1).plus(new BigNumber(range).multipliedBy(amount0.dividedBy(perfectAmount0)))) : price).dp(18)
       }
   }
   static toPrice(primaryValue: BigNumber, secondaryValue: BigNumber, liquidity: BigNumber | null, minPrice: BigNumber | null, maxPrice: BigNumber | null) {
     if (liquidity?.gt(0) && minPrice?.gt(0) && maxPrice?.gt(0)) {
-      return this.toPrice0(primaryValue, liquidity, maxPrice).plus(this.toPrice1(secondaryValue, liquidity, minPrice)).dividedBy(2);
+      return this.toPrice0(primaryValue, liquidity, maxPrice).plus(this.toPrice1(secondaryValue, liquidity, minPrice)).dividedBy(2).dp(18);;
     } else {
-      return secondaryValue.dividedBy(primaryValue);
+      return secondaryValue.dividedBy(primaryValue).dp(18);
     }
   }
 }
