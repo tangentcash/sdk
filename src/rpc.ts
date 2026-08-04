@@ -8,10 +8,8 @@ BigNumber.config({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
 const WEBSOCKET_TIMEOUT = 24000;
 
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
-export type NodeError = (method: string, error: unknown) => void;
-export type NodeRequest = (method: string, message: any, size: number) => void;
-export type NodeResponse = (method: string, message: any, size: number) => void;
-export type NodeMessage = (event: { type: string, result: any }) => void;
+export type NodeMessage = (method: string, message: { args: any, error: unknown } | { args: any, result: any }, size: number) => void;
+export type NodeEvent = (event: { type: string, result: any }) => void;
 export type ValidatorStore = (value: string | null) => void;
 export type ValidatorLoad = () => string | null;
 export type CacheStore = (path: string, value?: any) => boolean | Promise<boolean>;
@@ -568,10 +566,8 @@ export class RPC {
   static awaitables: ((active: boolean) => void)[] = [];
   static socket: WebSocket | null = null;
   static forcePolicy: null | 'cache' | 'no-cache' = null;
+  static onNodeEvent: NodeEvent | null = null;
   static onNodeMessage: NodeMessage | null = null;
-  static onNodeRequest: NodeRequest | null = null;
-  static onNodeResponse: NodeResponse | null = null;
-  static onNodeError: NodeError | null = null;
   static onValidatorStore: ValidatorStore | null = null;
   static onValidatorLoad: ValidatorLoad | null = null;
   static onCacheStore: CacheStore | null = null;
@@ -652,9 +648,6 @@ export class RPC {
       if (!this.socket)
         throw new Error('connection not acquired');
 
-      if (this.onNodeRequest)
-        this.onNodeRequest(method, body, content.length);
-
       const data: [any, number] = await new Promise((resolve, reject) => {
         const context = { method: method, resolve: (_: any) => { } };
         const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
@@ -672,13 +665,12 @@ export class RPC {
         else
           context.resolve(new Error('connection reset'));
       });
-      if (this.onNodeResponse)
-        this.onNodeResponse(method, data[0], data[1]);
-      
       result = this.fetchResult(hash, data[0]);
+      if (this.onNodeMessage)
+        this.onNodeMessage(method, { args: body, result: data[0] }, content.length + data[1]);
     } catch (exception) {
-      if (this.onNodeError)
-        this.onNodeError(method, exception);
+      if (this.onNodeMessage)
+        this.onNodeMessage(method, { args: body, error: exception }, content.length);
     }
   
     if (result !== undefined) {
@@ -732,7 +724,6 @@ export class RPC {
     });
   }
   static async connectSocketInternal(): Promise<boolean> {
-    const method = 'connect';
     try {
       if (!this.validator) {
         if (!this.onValidatorLoad)
@@ -746,17 +737,13 @@ export class RPC {
       const target = new URL('tcp://' + this.validator);
       const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
       const location = [`ws${secure ? 's' : ''}://${this.validator}/`, this.validator];
-      if (this.onNodeRequest)
-        this.onNodeRequest(method, null, 0);
-
-      let connection = await new Promise<WebSocket>((resolve, reject) => {
+      const connection = await new Promise<WebSocket>((resolve, reject) => {
         const socket = new WebSocket(location[0]);
         socket.onopen = () => resolve(socket);
         socket.onerror = (error) => reject(new Error('websocket connection error - ' + error.type));
       });
-      if (this.onNodeResponse)
-        this.onNodeResponse(method, null, 0);
-
+      if (this.onNodeMessage)
+        this.onNodeMessage('relay', { args: null, result: null }, 0);
       this.socket = connection;
       this.socket.onopen = null;
       this.socket.onerror = null;
@@ -771,10 +758,8 @@ export class RPC {
             if (typeof data.notification == 'object') {
               const notification = data.notification;
               if (notification != null && typeof notification.type == 'string' && typeof notification.result != 'undefined') {
-                if (this.onNodeMessage)
-                  this.onNodeMessage(notification);
-                if (this.onNodeResponse)
-                  this.onNodeResponse('notification', data, message.length);
+                if (this.onNodeEvent)
+                  this.onNodeEvent(notification);
               }
             } else if (typeof data.result != 'undefined' && data.id != null) {
               const response = this.requests.pending.get(data.id.toString());
@@ -791,8 +776,8 @@ export class RPC {
       this.status = ValidatorStatus.Online;
     } catch (exception) {
       this.status = ValidatorStatus.Offline;
-      if (this.onNodeError)
-        this.onNodeError(method, exception);
+      if (this.onNodeMessage)
+        this.onNodeMessage('relay', { args: null, error: exception }, 0);
     }
   
     const success = this.status == ValidatorStatus.Online;
@@ -813,9 +798,7 @@ export class RPC {
     this.requests.pending.clear();
     if (!this.socket)
       return true;
-    else if (this.onNodeResponse)
-      this.onNodeResponse('disconnect', null, 0);
- 
+    
     this.socket.onopen = null;
     this.socket.onerror = null;
     this.socket.onmessage = null;
@@ -832,20 +815,16 @@ export class RPC {
       this.onValidatorStore(validator);
   }
   static applyImplementation(implementation: {
+    onNodeEvent?: NodeEvent,
     onNodeMessage?: NodeMessage,
-    onNodeRequest?: NodeRequest,
-    onNodeResponse?: NodeResponse,
-    onNodeError?: NodeError,
     onValidatorStore?: ValidatorStore,
     onValidatorLoad?: ValidatorLoad,
     onCacheStore?: CacheStore,
     onCacheLoad?: CacheLoad,
     onCacheKeys?: CacheKeys,
   }): void {
+    this.onNodeEvent = implementation.onNodeEvent || null;
     this.onNodeMessage = implementation.onNodeMessage || null;
-    this.onNodeRequest = implementation.onNodeRequest || null;
-    this.onNodeResponse = implementation.onNodeResponse || null;
-    this.onNodeError = implementation.onNodeError || null;
     this.onValidatorStore = implementation.onValidatorStore || null;
     this.onValidatorLoad = implementation.onValidatorLoad || null;
     this.onCacheStore = implementation.onCacheStore || null;

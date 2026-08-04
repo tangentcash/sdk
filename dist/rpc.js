@@ -477,8 +477,6 @@ class RPC {
             await this.connectSocket();
             if (!this.socket)
                 throw new Error('connection not acquired');
-            if (this.onNodeRequest)
-                this.onNodeRequest(method, body, content.length);
             const data = await new Promise((resolve, reject) => {
                 const context = { method: method, resolve: (_) => { } };
                 const timeout = setTimeout(() => context.resolve(new Error('connection timed out')), WEBSOCKET_TIMEOUT);
@@ -496,13 +494,13 @@ class RPC {
                 else
                     context.resolve(new Error('connection reset'));
             });
-            if (this.onNodeResponse)
-                this.onNodeResponse(method, data[0], data[1]);
             result = this.fetchResult(hash, data[0]);
+            if (this.onNodeMessage)
+                this.onNodeMessage(method, { args: body, result: data[0] }, content.length + data[1]);
         }
         catch (exception) {
-            if (this.onNodeError)
-                this.onNodeError(method, exception);
+            if (this.onNodeMessage)
+                this.onNodeMessage(method, { args: body, error: exception }, content.length);
         }
         if (result !== undefined) {
             if (result instanceof Error)
@@ -554,7 +552,6 @@ class RPC {
         });
     }
     static async connectSocketInternal() {
-        const method = 'connect';
         try {
             if (!this.validator) {
                 if (!this.onValidatorLoad)
@@ -566,15 +563,13 @@ class RPC {
             const target = new URL('tcp://' + this.validator);
             const secure = (target.port == '443' || this.requiresSecureTransport(target.hostname));
             const location = [`ws${secure ? 's' : ''}://${this.validator}/`, this.validator];
-            if (this.onNodeRequest)
-                this.onNodeRequest(method, null, 0);
-            let connection = await new Promise((resolve, reject) => {
+            const connection = await new Promise((resolve, reject) => {
                 const socket = new WebSocket(location[0]);
                 socket.onopen = () => resolve(socket);
                 socket.onerror = (error) => reject(new Error('websocket connection error - ' + error.type));
             });
-            if (this.onNodeResponse)
-                this.onNodeResponse(method, null, 0);
+            if (this.onNodeMessage)
+                this.onNodeMessage('relay', { args: null, result: null }, 0);
             this.socket = connection;
             this.socket.onopen = null;
             this.socket.onerror = null;
@@ -588,10 +583,8 @@ class RPC {
                         if (typeof data.notification == 'object') {
                             const notification = data.notification;
                             if (notification != null && typeof notification.type == 'string' && typeof notification.result != 'undefined') {
-                                if (this.onNodeMessage)
-                                    this.onNodeMessage(notification);
-                                if (this.onNodeResponse)
-                                    this.onNodeResponse('notification', data, message.length);
+                                if (this.onNodeEvent)
+                                    this.onNodeEvent(notification);
                             }
                         }
                         else if (typeof data.result != 'undefined' && data.id != null) {
@@ -611,8 +604,8 @@ class RPC {
         }
         catch (exception) {
             this.status = ValidatorStatus.Offline;
-            if (this.onNodeError)
-                this.onNodeError(method, exception);
+            if (this.onNodeMessage)
+                this.onNodeMessage('relay', { args: null, error: exception }, 0);
         }
         const success = this.status == ValidatorStatus.Online;
         if (this.awaitables.length > 0) {
@@ -631,8 +624,6 @@ class RPC {
         this.requests.pending.clear();
         if (!this.socket)
             return true;
-        else if (this.onNodeResponse)
-            this.onNodeResponse('disconnect', null, 0);
         this.socket.onopen = null;
         this.socket.onerror = null;
         this.socket.onmessage = null;
@@ -649,10 +640,8 @@ class RPC {
             this.onValidatorStore(validator);
     }
     static applyImplementation(implementation) {
+        this.onNodeEvent = implementation.onNodeEvent || null;
         this.onNodeMessage = implementation.onNodeMessage || null;
-        this.onNodeRequest = implementation.onNodeRequest || null;
-        this.onNodeResponse = implementation.onNodeResponse || null;
-        this.onNodeError = implementation.onNodeError || null;
         this.onValidatorStore = implementation.onValidatorStore || null;
         this.onValidatorLoad = implementation.onValidatorLoad || null;
         this.onCacheStore = implementation.onCacheStore || null;
@@ -837,10 +826,8 @@ RPC.topics = {
 RPC.awaitables = [];
 RPC.socket = null;
 RPC.forcePolicy = null;
+RPC.onNodeEvent = null;
 RPC.onNodeMessage = null;
-RPC.onNodeRequest = null;
-RPC.onNodeResponse = null;
-RPC.onNodeError = null;
 RPC.onValidatorStore = null;
 RPC.onValidatorLoad = null;
 RPC.onCacheStore = null;

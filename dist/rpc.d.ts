@@ -2,10 +2,14 @@ import BigNumber from "bignumber.js";
 import { AssetId, Pubkey, Pubkeyhash, Seckey, Hashsig, Uint256 } from "./algorithm";
 import { Ledger } from "./schema";
 export type FetchAllCallback<T> = (offset: number, count: number) => Promise<T[] | null>;
-export type NodeError = (method: string, error: unknown) => void;
-export type NodeRequest = (method: string, message: any, size: number) => void;
-export type NodeResponse = (method: string, message: any, size: number) => void;
-export type NodeMessage = (event: {
+export type NodeMessage = (method: string, message: {
+    args: any;
+    error: unknown;
+} | {
+    args: any;
+    result: any;
+}, size: number) => void;
+export type NodeEvent = (event: {
     type: string;
     result: any;
 }) => void;
@@ -238,10 +242,8 @@ export declare class RPC {
     static awaitables: ((active: boolean) => void)[];
     static socket: WebSocket | null;
     static forcePolicy: null | 'cache' | 'no-cache';
+    static onNodeEvent: NodeEvent | null;
     static onNodeMessage: NodeMessage | null;
-    static onNodeRequest: NodeRequest | null;
-    static onNodeResponse: NodeResponse | null;
-    static onNodeError: NodeError | null;
     static onValidatorStore: ValidatorStore | null;
     static onValidatorLoad: ValidatorLoad | null;
     static onCacheStore: CacheStore | null;
@@ -258,10 +260,8 @@ export declare class RPC {
     static disconnectSocket(): Promise<boolean>;
     static applyValidator(validator: string | null): void;
     static applyImplementation(implementation: {
+        onNodeEvent?: NodeEvent;
         onNodeMessage?: NodeMessage;
-        onNodeRequest?: NodeRequest;
-        onNodeResponse?: NodeResponse;
-        onNodeError?: NodeError;
         onValidatorStore?: ValidatorStore;
         onValidatorLoad?: ValidatorLoad;
         onCacheStore?: CacheStore;
