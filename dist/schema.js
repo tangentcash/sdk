@@ -170,6 +170,9 @@ var Transactions;
             this.powChallengeBlockHash = 'uint256?';
             this.powChallengeSolution = 'uint64?';
             this.bridgeHash = 'uint256';
+            this.ownershipChallengeExtension = 'boolean?';
+            this.ownershipChallengePublicKey = 'string?';
+            this.ownershipChallengeSignature = 'string?';
             this.routingAddress = 'string';
         }
         getType() { return Route.typename; }

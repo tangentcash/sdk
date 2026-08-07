@@ -91,6 +91,9 @@ export declare namespace Transactions {
         powChallengeBlockHash: string;
         powChallengeSolution: string;
         bridgeHash: string;
+        ownershipChallengeExtension: string;
+        ownershipChallengePublicKey: string;
+        ownershipChallengeSignature: string;
         routingAddress: string;
         getType(): string;
     }

@@ -140,6 +140,9 @@ export namespace Transactions {
     powChallengeBlockHash: string = 'uint256?';
     powChallengeSolution: string = 'uint64?';
     bridgeHash: string = 'uint256';
+    ownershipChallengeExtension: string = 'boolean?';
+    ownershipChallengePublicKey: string = 'string?';
+    ownershipChallengeSignature: string = 'string?';
     routingAddress: string = 'string';
 
     getType() { return Route.typename; }
