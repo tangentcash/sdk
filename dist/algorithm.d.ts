@@ -150,7 +150,7 @@ export declare class Signing {
     static verifyPublicKey(publicKey: Pubkey): boolean;
     static verifyAddress(address: string): boolean;
     static deriveSecretKeyFromMnemonic(mnemonic: string): Seckey | null;
-    static deriveSecretKey(seed: Uint8Array): Seckey;
+    static deriveSecretKey(entropy: Uint8Array): Seckey;
     static derivePublicKey(secretKey: Seckey): Pubkey;
     static derivePublicKeyHash(publicKey: Pubkey): Pubkeyhash;
     static decodeSecretKey(value: string): Seckey | null;

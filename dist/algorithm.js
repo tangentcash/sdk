@@ -646,7 +646,17 @@ class Signing {
     }
     static verify(hash, publicKey, signature) {
         try {
-            return secp256k1_1.default.ecdsaVerify(signature.data.slice(0, 64), hash.toUint8Array(), publicKey.data);
+            const compactSignature = signature.data.slice(0, 64);
+            const normalizedSignature = secp256k1_1.default.signatureNormalize(compactSignature);
+            if (compactSignature.length != normalizedSignature.length) {
+                return false;
+            }
+            for (let i = 0; i < compactSignature.length; i++) {
+                if (compactSignature[i] != normalizedSignature[i]) {
+                    return false;
+                }
+            }
+            return secp256k1_1.default.ecdsaVerify(compactSignature, hash.toUint8Array(), publicKey.data);
         }
         catch {
             return false;
@@ -682,16 +692,12 @@ class Signing {
     }
     static deriveSecretKeyFromMnemonic(mnemonic) {
         let seed = Uint8Array.from(bip39.mnemonicToSeedSync(mnemonic));
-        return this.deriveSecretKey(seed);
+        return this.deriveSecretKey(Hashing.hash256(seed));
     }
-    static deriveSecretKey(seed) {
-        let secretKey = new Seckey();
-        secretKey.data = seed;
-        while (true) {
+    static deriveSecretKey(entropy) {
+        let secretKey = new Seckey(entropy);
+        while (!this.verifySecretKey(secretKey))
             secretKey.data = Hashing.hash256(secretKey.data);
-            if (this.verifySecretKey(secretKey))
-                break;
-        }
         return secretKey;
     }
     static derivePublicKey(secretKey) {
