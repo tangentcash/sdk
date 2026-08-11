@@ -452,13 +452,24 @@ class RPC {
         }
         return data;
     }
-    static async fetch(policy, method, args) {
+    static async fetch(policy, method, args, preflightCache) {
         if (this.forcePolicy != null) {
             policy = this.forcePolicy;
             this.forcePolicy = null;
         }
-        const id = (++this.requests.count).toString();
         const hash = algorithm_1.ByteUtil.uint8ArrayToHexString(algorithm_1.Hashing.hash512(algorithm_1.ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
+        if (this.onCacheLoad != null && (policy == 'cache' || preflightCache)) {
+            let cache = this.onCacheLoad(hash);
+            cache = (cache instanceof Promise ? await cache : cache);
+            if (cache != null) {
+                const cachedValue = this.fetchObject(cache);
+                if (preflightCache)
+                    preflightCache(cachedValue);
+                if (policy == 'cache')
+                    return cachedValue;
+            }
+        }
+        const id = (++this.requests.count).toString();
         const body = {
             jsonrpc: '2.0',
             id: id,
@@ -466,12 +477,6 @@ class RPC {
             params: Array.isArray(args) ? args : []
         };
         const content = JSON.stringify(body);
-        if (this.onCacheLoad != null && policy == 'cache') {
-            let cache = this.onCacheLoad(hash);
-            cache = (cache instanceof Promise ? await cache : cache);
-            if (cache != null)
-                return this.fetchObject(cache);
-        }
         let result = undefined;
         try {
             await this.connectSocket();

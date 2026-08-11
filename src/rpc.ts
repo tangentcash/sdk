@@ -17,6 +17,7 @@ export type CacheLoad = (path: string) => any | null | Promise<any | null>;
 export type CacheKeys = () => string[] | Promise<string[]>;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
+export type PreflightCallback = (cache: any) => any;
 
 export enum EventType {
   Error,
@@ -620,14 +621,26 @@ export class RPC {
     }
     return data;
   }
-  static async fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null> {
+  static async fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[], preflightCache?: PreflightCallback): Promise<T | null> {
     if (this.forcePolicy != null) {
       policy = this.forcePolicy;
       this.forcePolicy = null;
     }
 
-    const id = (++this.requests.count).toString();
     const hash = ByteUtil.uint8ArrayToHexString(Hashing.hash512(ByteUtil.utf8StringToUint8Array(JSON.stringify([method, args || []]))));
+    if (this.onCacheLoad != null && (policy == 'cache' || preflightCache)) {
+      let cache = this.onCacheLoad(hash);
+      cache = (cache instanceof Promise ? await cache : cache);
+      if (cache != null) {
+        const cachedValue = this.fetchObject(cache);
+        if (preflightCache)
+          preflightCache(cachedValue);
+        if (policy == 'cache')
+          return cachedValue;
+      }
+    }
+
+    const id = (++this.requests.count).toString();
     const body = {
       jsonrpc: '2.0',
       id: id,
@@ -635,13 +648,6 @@ export class RPC {
       params: Array.isArray(args) ? args : []
     };
     const content = JSON.stringify(body);
-    if (this.onCacheLoad != null && policy == 'cache') {
-      let cache = this.onCacheLoad(hash);
-      cache = (cache instanceof Promise ? await cache : cache);
-      if (cache != null)
-        return this.fetchObject(cache);
-    }
-
     let result = undefined;
     try {
       await this.connectSocket();

@@ -20,6 +20,7 @@ export type CacheLoad = (path: string) => any | null | Promise<any | null>;
 export type CacheKeys = () => string[] | Promise<string[]>;
 export type PromiseCallback = (data: any) => void;
 export type ClearCallback = () => any;
+export type PreflightCallback = (cache: any) => any;
 export declare enum EventType {
     Error = 0,
     Transfer = 1,
@@ -253,7 +254,7 @@ export declare class RPC {
     private static fetchData;
     private static fetchResult;
     static fetchObject(data: any): any;
-    static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[]): Promise<T | null>;
+    static fetch<T>(policy: 'cache' | 'no-cache', method: string, args?: any[], preflightCache?: PreflightCallback): Promise<T | null>;
     static fetchAll<T>(callback: FetchAllCallback<T>): Promise<T[] | null>;
     static connectSocket(): Promise<boolean>;
     static connectSocketInternal(): Promise<boolean>;
