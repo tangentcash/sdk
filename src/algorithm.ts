@@ -572,7 +572,7 @@ export class Pow256 {
     const array = typeof value == 'number' ? new Uint256(value).toUint8Array() : value.toUint8Array();
     return array.length >= size ? array.slice(array.length - size, array.length) : new Uint8Array([...new Array(array.length - size).fill(0), ...array]);
   }
-  static async solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: number, onProgress?: (progress: number) => boolean | Promise<boolean>, progressFrequency: number = 300): Promise<number | null> {
+  static async solve(blockHash: Uint256, account: Pubkeyhash, accountNonce: Uint256 | number, onProgress?: (progress: number) => boolean | Promise<boolean>, progressFrequency: number = 300): Promise<number | null> {
     const challenge = Uint8Array.from([...this.pad(blockHash, 32), ...this.pad(accountNonce, 8), ...account.data]);
     const target = new Uint256(((2n << (256n - BigInt(Chain.props.POW_DIFFICULTY))) - 1n).toString());
     const solution: { hash: Uint256, nonce: number } = { hash: new Uint256(), nonce: 0 };
