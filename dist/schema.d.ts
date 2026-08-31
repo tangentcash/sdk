@@ -106,6 +106,8 @@ export declare namespace Transactions {
     }
     class Anticast extends Ledger.Transaction {
         static typename: string;
+        attestateExtension: string;
+        attestateHash: string;
         broadcastHash: string;
         getType(): string;
     }

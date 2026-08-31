@@ -159,6 +159,8 @@ export namespace Transactions {
 
   export class Anticast extends Ledger.Transaction {
     static typename: string = 'anticast';
+    attestateExtension: string = 'boolean?';
+    attestateHash: string = 'uint256?';
     broadcastHash: string = 'uint256';
 
     getType() { return Anticast.typename; }

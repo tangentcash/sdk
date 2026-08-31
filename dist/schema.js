@@ -193,6 +193,8 @@ var Transactions;
     class Anticast extends Ledger.Transaction {
         constructor() {
             super(...arguments);
+            this.attestateExtension = 'boolean?';
+            this.attestateHash = 'uint256?';
             this.broadcastHash = 'uint256';
         }
         getType() { return Anticast.typename; }
