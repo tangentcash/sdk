@@ -11,6 +11,7 @@
     "./readability": "./dist/readability.js",
     "./types": "./dist/types.js",
     "./rpc": "./dist/rpc.js",
+    "./assetlist": "./dist/assetlist.js",
     "./whitelist": "./dist/whitelist.js"
   },
   "scripts": {

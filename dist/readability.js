@@ -7,18 +7,11 @@ exports.Readability = void 0;
 exports.lerp = lerp;
 const algorithm_1 = require("./algorithm");
 const schema_1 = require("./schema");
-const assets_json_1 = __importDefault(require("./assets.json"));
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 function lerp(a, b, t) {
     return a * (1 - t) + b * t;
 }
 class Readability {
-    static toAssetQuery(asset) {
-        const token = asset.token || null;
-        const chain = asset.chain || 'Unknown';
-        const name = assets_json_1.default[token?.toUpperCase() || chain?.toUpperCase()];
-        return name ? name + ' ' + (token || chain) : (token || chain);
-    }
     static toAssetSymbol(asset) {
         return asset.token || asset.chain || '?';
     }
@@ -28,13 +21,6 @@ class Readability {
     static toAssetImage(asset) {
         const target = this.toAssetSymbol(asset);
         return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
-    }
-    static toAssetName(asset, chainOnly, tokenOnly) {
-        const token = chainOnly ? null : asset.token || null;
-        const chain = asset.chain || 'Unknown';
-        if (token != null)
-            return tokenOnly ? (assets_json_1.default[token.toUpperCase()] || token) : (chain + ' ' + (assets_json_1.default[token.toUpperCase()] || token));
-        return assets_json_1.default[chain.toUpperCase()] || chain;
     }
     static toTaggedAddress(tagAddress) {
         const [address, tag] = tagAddress.split('#');

@@ -1,5 +1,5 @@
-import { AssetId, ByteUtil, Hashing } from "./algorithm"; import { Transactions } from "./schema";
-import Assets from './assets.json';
+import { AssetId, ByteUtil, Hashing } from "./algorithm";
+import { Transactions } from "./schema";
 import BigNumber from "bignumber.js";
 
 export function lerp(a: number, b: number, t: number): number {
@@ -23,12 +23,6 @@ export class Readability {
     "USD": "$"
   };
 
-  static toAssetQuery(asset: AssetId): string {
-    const token: string | null = asset.token || null;
-    const chain: string = asset.chain || 'Unknown';
-    const name: string | null = (Assets as Record<string, string>)[token?.toUpperCase() || chain?.toUpperCase()];
-    return name ? name + ' ' + (token || chain) : (token || chain);
-  }
   static toAssetSymbol(asset: AssetId): string {
     return asset.token || asset.chain || '?';
   }
@@ -38,14 +32,6 @@ export class Readability {
   static toAssetImage(asset: AssetId): string {
     const target = this.toAssetSymbol(asset);
     return target.length > 0 && target != '?' ? '/cryptocurrency/' + target.toLowerCase() + '.svg' : '';
-  }
-  static toAssetName(asset: AssetId, chainOnly?: boolean, tokenOnly?: boolean): string {
-    const token: string | null = chainOnly ? null : asset.token || null;
-    const chain: string = asset.chain || 'Unknown';
-    if (token != null)
-      return tokenOnly ? ((Assets as Record<string, string>)[token.toUpperCase()] || token) : (chain + ' ' + ((Assets as Record<string, string>)[token.toUpperCase()] || token));
-
-    return (Assets as Record<string, string>)[chain.toUpperCase()] || chain;
   }
   static toTaggedAddress(tagAddress: string): { address: string, tag: string | null } {
     const [address, tag] = tagAddress.split('#');

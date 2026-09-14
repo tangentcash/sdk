@@ -4,11 +4,9 @@ export declare function lerp(a: number, b: number, t: number): number;
 export declare class Readability {
     static subscripts: Record<string, string>;
     static prefixes: Record<string, string>;
-    static toAssetQuery(asset: AssetId): string;
     static toAssetSymbol(asset: AssetId): string;
     static toAssetFallback(asset: AssetId): string;
     static toAssetImage(asset: AssetId): string;
-    static toAssetName(asset: AssetId, chainOnly?: boolean, tokenOnly?: boolean): string;
     static toTaggedAddress(tagAddress: string): {
         address: string;
         tag: string | null;
