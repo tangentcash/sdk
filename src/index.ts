@@ -5,5 +5,4 @@ export * from './text';
 export * from './readability';
 export * from './types';
 export * from './rpc';
-export * from './auth';
 export * from './whitelist';
