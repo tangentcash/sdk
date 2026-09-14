@@ -1,7 +1,7 @@
 import { AssetId } from "./algorithm";
 import BigNumber from "bignumber.js";
 export declare function lerp(a: number, b: number, t: number): number;
-export declare class Readability {
+export declare class UiUtil {
     static subscripts: Record<string, string>;
     static prefixes: Record<string, string>;
     static toAssetSymbol(asset: AssetId): string;

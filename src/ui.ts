@@ -6,7 +6,7 @@ export function lerp(a: number, b: number, t: number): number {
   return a * (1 - t) + b * t;
 }
 
-export class Readability {
+export class UiUtil {
   static subscripts: Record<string, string> = {
     '0': '₀',
     '1': '₁',

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Readability = void 0;
+exports.UiUtil = void 0;
 exports.lerp = lerp;
 const algorithm_1 = require("./algorithm");
 const schema_1 = require("./schema");
@@ -11,7 +11,7 @@ const bignumber_js_1 = __importDefault(require("bignumber.js"));
 function lerp(a, b, t) {
     return a * (1 - t) + b * t;
 }
-class Readability {
+class UiUtil {
     static toAssetSymbol(asset) {
         return asset.token || asset.chain || '?';
     }
@@ -187,8 +187,8 @@ class Readability {
         return prevNumeric.gt(0) ? nextNumeric.minus(prevNumeric).dividedBy(prevNumeric).multipliedBy(100) : new bignumber_js_1.default(0);
     }
 }
-exports.Readability = Readability;
-Readability.subscripts = {
+exports.UiUtil = UiUtil;
+UiUtil.subscripts = {
     '0': '₀',
     '1': '₁',
     '2': '₂',
@@ -200,6 +200,6 @@ Readability.subscripts = {
     '8': '₉',
     '9': '₉'
 };
-Readability.prefixes = {
+UiUtil.prefixes = {
     "USD": "$"
 };
