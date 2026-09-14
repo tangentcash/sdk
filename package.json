@@ -2,8 +2,17 @@
   "name": "tangentsdk",
   "version": "1.0.0",
   "description": "TypeScript SDK for Tangent Cash",
-  "main": "dist/index.js",
   "license": "MIT",
+  "exports": {
+    "./algorithm": "./dist/algorithm.js",
+    "./schema": "./dist/schema.js",
+    "./serialization": "./dist/serialization.js",
+    "./text": "./dist/text.js",
+    "./readability": "./dist/readability.js",
+    "./types": "./dist/types.js",
+    "./rpc": "./dist/rpc.js",
+    "./whitelist": "./dist/whitelist.js"
+  },
   "scripts": {
     "make": "tsc && node build"
   },
