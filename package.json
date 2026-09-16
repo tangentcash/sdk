@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "description": "TypeScript SDK for Tangent Cash",
   "license": "MIT",
+  "module": "dist/index.js",
   "exports": {
-    ".": { "types:": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./algorithm": { "types:": "./dist/algorithm.d.ts", "import": "./dist/algorithm.js" },
-    "./schema": { "types:": "./dist/schema.d.ts", "import": "./dist/schema.js" },
-    "./serialization": { "types:": "./dist/serialization.d.ts", "import": "./dist/serialization.js" },
-    "./text": { "types:": "./dist/text.d.ts", "import": "./dist/text.js" },
-    "./ui": { "types:": "./dist/ui.d.ts", "import": "./dist/ui.js" },
-    "./types": { "types:": "./dist/types.d.ts", "import": "./dist/types.js" },
-    "./rpc": { "types:": "./dist/rpc.d.ts", "import": "./dist/rpc.js" },
-    "./assetlist": { "types:": "./dist/assetlist.d.ts", "import": "./dist/assetlist.js" },
-    "./whitelist": { "types:": "./dist/whitelist.d.ts", "import": "./dist/whitelist.js" }
+    "./algorithm": "./dist/algorithm.js",
+    "./schema": "./dist/schema.js",
+    "./serialization": "./dist/serialization.js",
+    "./text": "./dist/text.js",
+    "./ui": "./dist/ui.js",
+    "./types": "./dist/types.js",
+    "./rpc": "./dist/rpc.js",
+    "./assetlist": "./dist/assetlist.js",
+    "./whitelist": "./dist/whitelist.js"
   },
   "scripts": {
     "make": "tsc && node build"
