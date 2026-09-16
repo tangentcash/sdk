@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "TypeScript SDK for Tangent Cash",
   "license": "MIT",
-  "module": "dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./algorithm": "./dist/algorithm.js",
     "./schema": "./dist/schema.js",
