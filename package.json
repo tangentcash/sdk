@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "description": "TypeScript SDK for Tangent Cash",
   "license": "MIT",
-  "main": "dist/index.js",
   "exports": {
-    "./algorithm": "./dist/algorithm.js",
-    "./schema": "./dist/schema.js",
-    "./serialization": "./dist/serialization.js",
-    "./text": "./dist/text.js",
-    "./ui": "./dist/ui.js",
-    "./types": "./dist/types.js",
-    "./rpc": "./dist/rpc.js",
-    "./assetlist": "./dist/assetlist.js",
-    "./whitelist": "./dist/whitelist.js"
+    ".": { "types:": "./dist/index.d.js", "import": "./dist/index.js" },
+    "./algorithm": { "types:": "./dist/algorithm.d.js", "import": "./dist/algorithm.js" },
+    "./schema": { "types:": "./dist/schema.d.js", "import": "./dist/schema.js" },
+    "./serialization": { "types:": "./dist/serialization.d.js", "import": "./dist/serialization.js" },
+    "./text": { "types:": "./dist/text.d.js", "import": "./dist/text.js" },
+    "./ui": { "types:": "./dist/ui.d.js", "import": "./dist/ui.js" },
+    "./types": { "types:": "./dist/types.d.js", "import": "./dist/types.js" },
+    "./rpc": { "types:": "./dist/rpc.d.js", "import": "./dist/rpc.js" },
+    "./assetlist": { "types:": "./dist/assetlist.d.js", "import": "./dist/assetlist.js" },
+    "./whitelist": { "types:": "./dist/whitelist.d.js", "import": "./dist/whitelist.js" }
   },
   "scripts": {
     "make": "tsc && node build"
