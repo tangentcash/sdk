@@ -63,4 +63,7 @@ export declare namespace Spot {
         const liquidityOf = "pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)";
         const paramsOf = "config params_of(pconst@)";
     }
+    namespace UAP {
+        const payUnifiedAsset = "void pay_unified_asset(pmut@, const uint256&in, const uint256&in, const address&in)";
+    }
 }

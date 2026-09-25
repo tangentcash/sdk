@@ -74,4 +74,8 @@ var Spot;
         DLP.liquidityOf = 'pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)';
         DLP.paramsOf = 'config params_of(pconst@)';
     })(DLP = Spot.DLP || (Spot.DLP = {}));
+    let UAP;
+    (function (UAP) {
+        UAP.payUnifiedAsset = 'void pay_unified_asset(pmut@, const uint256&in, const uint256&in, const address&in)';
+    })(UAP = Spot.UAP || (Spot.UAP = {}));
 })(Spot || (exports.Spot = Spot = {}));
