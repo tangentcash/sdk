@@ -67,7 +67,7 @@ export class Chain {
     PRODUCTION_COMMITTEE: 12,
     PARTICIPATION_COMMITTEE: [7, 23],
     MIN_GAS_PRICE: new BigNumber('0.0000000001'),
-    ZERO_GAS_PRICE_SIZE_LIMIT: 512,
+    ZERO_GAS_PRICE_SIZE_LIMIT: 640,
     BLOCK_TIME: 12000
   };
   static size = {
