@@ -35,8 +35,9 @@ export declare enum EventType {
     BridgeParticipant = 10,
     WitnessAccount = 11,
     WitnessTransaction = 12,
-    RollupReceipt = 13,
-    Unknown = 14
+    DelegateReceipt = 13,
+    RollupReceipt = 14,
+    Unknown = 15
 }
 export type EventData = {
     type: EventType.Error;
@@ -97,6 +98,10 @@ export type EventData = {
     type: EventType.WitnessTransaction;
     asset: AssetId;
     stateHash: string;
+} | {
+    type: EventType.DelegateReceipt;
+    transactionHash: string;
+    relativeGasUse: BigNumber;
 } | {
     type: EventType.RollupReceipt;
     transactionHash: string;

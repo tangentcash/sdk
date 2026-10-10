@@ -24,8 +24,9 @@ var EventType;
     EventType[EventType["BridgeParticipant"] = 10] = "BridgeParticipant";
     EventType[EventType["WitnessAccount"] = 11] = "WitnessAccount";
     EventType[EventType["WitnessTransaction"] = 12] = "WitnessTransaction";
-    EventType[EventType["RollupReceipt"] = 13] = "RollupReceipt";
-    EventType[EventType["Unknown"] = 14] = "Unknown";
+    EventType[EventType["DelegateReceipt"] = 13] = "DelegateReceipt";
+    EventType[EventType["RollupReceipt"] = 14] = "RollupReceipt";
+    EventType[EventType["Unknown"] = 15] = "Unknown";
 })(EventType || (exports.EventType = EventType = {}));
 var WalletType;
 (function (WalletType) {
@@ -312,6 +313,17 @@ class EventResolver {
                         else
                             result.witness.transactions[asset.handle] = { asset: asset, stateHashes: [hash] };
                         result.events.push({ type: EventType.WitnessTransaction, asset: asset, stateHash: hash });
+                    }
+                    break;
+                }
+                case types_1.Types.Delegate: {
+                    if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
+                        const [transactionHash, relativeGasUse] = event.args;
+                        result.receipts[new algorithm_1.Uint256(transactionHash.toString()).toHex()] = {
+                            executionIndex: 0,
+                            relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()),
+                        };
+                        result.events.push({ type: EventType.DelegateReceipt, transactionHash: transactionHash, relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()) });
                     }
                     break;
                 }

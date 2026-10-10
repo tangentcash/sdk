@@ -33,6 +33,7 @@ export enum EventType {
   BridgeParticipant,
   WitnessAccount,
   WitnessTransaction,
+  DelegateReceipt,
   RollupReceipt,
   Unknown
 }
@@ -96,6 +97,10 @@ export type EventData = {
   type: EventType.WitnessTransaction,
   asset: AssetId,
   stateHash: string
+} | {
+  type: EventType.DelegateReceipt,
+  transactionHash: string,
+  relativeGasUse: BigNumber
 } | {
   type: EventType.RollupReceipt,
   transactionHash: string,
@@ -456,6 +461,17 @@ export class EventResolver {
             else
               result.witness.transactions[asset.handle] = { asset: asset, stateHashes: [hash] };
             result.events.push({ type: EventType.WitnessTransaction, asset: asset, stateHash: hash });
+          }
+          break;
+        }
+        case Types.Delegate: {
+          if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
+            const [transactionHash, relativeGasUse] = event.args;
+            result.receipts[new Uint256(transactionHash.toString()).toHex()] = {
+              executionIndex: 0,
+              relativeGasUse: new BigNumber(relativeGasUse.toString()),
+            };
+            result.events.push({ type: EventType.DelegateReceipt, transactionHash: transactionHash, relativeGasUse: new BigNumber(relativeGasUse.toString()) });
           }
           break;
         }
