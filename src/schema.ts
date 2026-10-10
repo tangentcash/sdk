@@ -103,6 +103,12 @@ export namespace Transactions {
     getType() { return Call.typename; }
   }
 
+  export class Delegate extends Ledger.Transaction {
+    static typename: string = 'delegate';
+
+    getType() { return Delegate.typename; }
+  }
+
   export class Rollup extends Ledger.Transaction {
     static typename: string = 'rollup';
 
@@ -170,6 +176,7 @@ export namespace Transactions {
     'transfer',   
     'deploy',
     'call',
+    'delegate',
     'rollup',
     'setup',
     'route',
