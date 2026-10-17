@@ -131,11 +131,6 @@ var Transactions;
     }
     Call.typename = 'call';
     Transactions.Call = Call;
-    class Delegate extends Ledger.Transaction {
-        getType() { return Delegate.typename; }
-    }
-    Delegate.typename = 'delegate';
-    Transactions.Delegate = Delegate;
     class Rollup extends Ledger.Transaction {
         getType() { return Rollup.typename; }
     }
@@ -210,7 +205,6 @@ var Transactions;
         'transfer',
         'deploy',
         'call',
-        'delegate',
         'rollup',
         'setup',
         'route',

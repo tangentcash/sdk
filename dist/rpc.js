@@ -24,9 +24,10 @@ var EventType;
     EventType[EventType["BridgeParticipant"] = 10] = "BridgeParticipant";
     EventType[EventType["WitnessAccount"] = 11] = "WitnessAccount";
     EventType[EventType["WitnessTransaction"] = 12] = "WitnessTransaction";
-    EventType[EventType["DelegateReceipt"] = 13] = "DelegateReceipt";
-    EventType[EventType["RollupReceipt"] = 14] = "RollupReceipt";
-    EventType[EventType["Unknown"] = 15] = "Unknown";
+    EventType[EventType["CallLink"] = 13] = "CallLink";
+    EventType[EventType["CallSend"] = 14] = "CallSend";
+    EventType[EventType["RollupReceipt"] = 15] = "RollupReceipt";
+    EventType[EventType["Unknown"] = 16] = "Unknown";
 })(EventType || (exports.EventType = EventType = {}));
 var WalletType;
 (function (WalletType) {
@@ -316,14 +317,14 @@ class EventResolver {
                     }
                     break;
                 }
-                case types_1.Types.Delegate: {
-                    if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
-                        const [transactionHash, relativeGasUse] = event.args;
-                        result.receipts[new algorithm_1.Uint256(transactionHash.toString()).toHex()] = {
-                            executionIndex: 0,
-                            relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()),
-                        };
-                        result.events.push({ type: EventType.DelegateReceipt, transactionHash: transactionHash, relativeGasUse: new bignumber_js_1.default(relativeGasUse.toString()) });
+                case types_1.Types.Call: {
+                    if (event.args.length == 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && new algorithm_1.Uint256(event.args[0]).toInteger() == types_1.Types.Route && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && typeof event.args[3] == 'string') {
+                        const [_, bridgeHash, assetId, routingAddress] = event.args;
+                        result.events.push({ type: EventType.CallLink, bridgeHash: bridgeHash.toString(), asset: new algorithm_1.AssetId(assetId), routingAddress: routingAddress.toString() });
+                    }
+                    else if (event.args.length == 5 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && new algorithm_1.Uint256(event.args[0]).toInteger() == types_1.Types.Withdraw && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && typeof event.args[3] == 'string' && (isNumber(event.args[4]) || typeof event.args[4] == 'string')) {
+                        const [_, bridgeHash, assetId, routingAddress, value] = event.args;
+                        result.events.push({ type: EventType.CallSend, bridgeHash: bridgeHash.toString(), asset: new algorithm_1.AssetId(assetId), routingAddress: routingAddress.toString(), value: new bignumber_js_1.default(value.toString()) });
                     }
                     break;
                 }
@@ -804,6 +805,9 @@ class RPC {
     }
     static getTransactionByHash(hash, unrolling) {
         return this.fetch('cache', 'gettransactionbyhash', unrolling != null ? [hash, unrolling] : [hash]);
+    }
+    static getMempoolPreattestations(asset, offset, count, filters) {
+        return this.fetch('cache', 'getmempoolpreattestations', filters ? [asset.handle, offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [asset.handle, offset, count]);
     }
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);

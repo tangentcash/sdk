@@ -35,9 +35,10 @@ export declare enum EventType {
     BridgeParticipant = 10,
     WitnessAccount = 11,
     WitnessTransaction = 12,
-    DelegateReceipt = 13,
-    RollupReceipt = 14,
-    Unknown = 15
+    CallLink = 13,
+    CallSend = 14,
+    RollupReceipt = 15,
+    Unknown = 16
 }
 export type EventData = {
     type: EventType.Error;
@@ -99,9 +100,16 @@ export type EventData = {
     asset: AssetId;
     stateHash: string;
 } | {
-    type: EventType.DelegateReceipt;
-    transactionHash: string;
-    relativeGasUse: BigNumber;
+    type: EventType.CallLink;
+    bridgeHash: string;
+    asset: AssetId;
+    routingAddress: string;
+} | {
+    type: EventType.CallSend;
+    bridgeHash: string;
+    asset: AssetId;
+    routingAddress: string;
+    value: BigNumber;
 } | {
     type: EventType.RollupReceipt;
     transactionHash: string;
@@ -323,6 +331,11 @@ export declare class RPC {
     static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
+    static getMempoolPreattestations(asset: AssetId, offset: number, count: number, filters?: {
+        transactionIds: string[];
+        addresses: string[];
+        memoAccounts: string[];
+    }): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
     static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null>;
     static getBlocks(number: number, count: number): Promise<string[] | null>;

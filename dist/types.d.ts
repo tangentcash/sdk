@@ -5,7 +5,7 @@ export declare class Types {
     static BridgeBalance: number;
     static WitnessAccount: number;
     static WitnessTransaction: number;
-    static Delegate: number;
+    static Call: number;
     static Rollup: number;
     static Setup: number;
     static Route: number;

@@ -70,10 +70,6 @@ export declare namespace Transactions {
         args: string;
         getType(): string;
     }
-    class Delegate extends Ledger.Transaction {
-        static typename: string;
-        getType(): string;
-    }
     class Rollup extends Ledger.Transaction {
         static typename: string;
         getType(): string;

@@ -33,7 +33,8 @@ export enum EventType {
   BridgeParticipant,
   WitnessAccount,
   WitnessTransaction,
-  DelegateReceipt,
+  CallLink,
+  CallSend,
   RollupReceipt,
   Unknown
 }
@@ -98,9 +99,16 @@ export type EventData = {
   asset: AssetId,
   stateHash: string
 } | {
-  type: EventType.DelegateReceipt,
-  transactionHash: string,
-  relativeGasUse: BigNumber
+  type: EventType.CallLink,
+  bridgeHash: string,
+  asset: AssetId,
+  routingAddress: string
+} | {
+  type: EventType.CallSend,
+  bridgeHash: string,
+  asset: AssetId,
+  routingAddress: string
+  value: BigNumber
 } | {
   type: EventType.RollupReceipt,
   transactionHash: string,
@@ -454,7 +462,6 @@ export class EventResolver {
           if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
             const [assetId, stateHash] = event.args;
             const asset = new AssetId(assetId);
-
             const hash = new Uint256(stateHash.toString()).toHex();
             if (result.witness.transactions[asset.handle] != null)
               result.witness.transactions[asset.handle].stateHashes.push(hash);
@@ -464,14 +471,13 @@ export class EventResolver {
           }
           break;
         }
-        case Types.Delegate: {
-          if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
-            const [transactionHash, relativeGasUse] = event.args;
-            result.receipts[new Uint256(transactionHash.toString()).toHex()] = {
-              executionIndex: 0,
-              relativeGasUse: new BigNumber(relativeGasUse.toString()),
-            };
-            result.events.push({ type: EventType.DelegateReceipt, transactionHash: transactionHash, relativeGasUse: new BigNumber(relativeGasUse.toString()) });
+        case Types.Call: {
+          if (event.args.length == 4 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && new Uint256(event.args[0]).toInteger() == Types.Route && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && typeof event.args[3] == 'string') {
+            const [_, bridgeHash, assetId, routingAddress] = event.args;
+            result.events.push({ type: EventType.CallLink, bridgeHash: bridgeHash.toString(), asset: new AssetId(assetId), routingAddress: routingAddress.toString() });
+          } else if (event.args.length == 5 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && new Uint256(event.args[0]).toInteger() == Types.Withdraw && (isNumber(event.args[1]) || typeof event.args[1] == 'string') && (isNumber(event.args[2]) || typeof event.args[2] == 'string') && typeof event.args[3] == 'string' && (isNumber(event.args[4]) || typeof event.args[4] == 'string')) {
+            const [_, bridgeHash, assetId, routingAddress, value] = event.args;
+            result.events.push({ type: EventType.CallSend, bridgeHash: bridgeHash.toString(), asset: new AssetId(assetId), routingAddress: routingAddress.toString(), value: new BigNumber(value.toString()) });
           }
           break;
         }
@@ -994,6 +1000,9 @@ export class RPC {
   }
   static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null> {
     return this.fetch('cache', 'gettransactionbyhash', unrolling != null ? [hash, unrolling] : [hash]);
+  }
+  static getMempoolPreattestations(asset: AssetId, offset: number, count: number, filters?: { transactionIds: string[], addresses: string[], memoAccounts: string[] }): Promise<any | null> {
+    return this.fetch('cache', 'getmempoolpreattestations', filters ? [asset.handle, offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [asset.handle, offset, count]);
   }
   static getMempoolTransactionByHash(hash: string): Promise<any | null> {
     return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
