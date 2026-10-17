@@ -331,7 +331,7 @@ export declare class RPC {
     static getTransactionsByOwner(address: string, offset: number, count: number, direction?: number, unrolling?: number): Promise<any[] | null>;
     static getTransactionsByHash(hash: string, unrolling?: number): Promise<any[] | null>;
     static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null>;
-    static getMempoolPreattestations(asset: AssetId, offset: number, count: number, filters?: {
+    static getMempoolPreattestations(offset: number, count: number, filters?: {
         transactionIds: string[];
         addresses: string[];
         memoAccounts: string[];

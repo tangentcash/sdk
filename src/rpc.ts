@@ -1001,8 +1001,8 @@ export class RPC {
   static getTransactionByHash(hash: string, unrolling?: number): Promise<any | null> {
     return this.fetch('cache', 'gettransactionbyhash', unrolling != null ? [hash, unrolling] : [hash]);
   }
-  static getMempoolPreattestations(asset: AssetId, offset: number, count: number, filters?: { transactionIds: string[], addresses: string[], memoAccounts: string[] }): Promise<any | null> {
-    return this.fetch('cache', 'getmempoolpreattestations', filters ? [asset.handle, offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [asset.handle, offset, count]);
+  static getMempoolPreattestations(offset: number, count: number, filters?: { transactionIds: string[], addresses: string[], memoAccounts: string[] }): Promise<any | null> {
+    return this.fetch('cache', 'getmempoolpreattestations', filters ? [offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [offset, count]);
   }
   static getMempoolTransactionByHash(hash: string): Promise<any | null> {
     return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);

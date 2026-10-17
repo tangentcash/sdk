@@ -806,8 +806,8 @@ class RPC {
     static getTransactionByHash(hash, unrolling) {
         return this.fetch('cache', 'gettransactionbyhash', unrolling != null ? [hash, unrolling] : [hash]);
     }
-    static getMempoolPreattestations(asset, offset, count, filters) {
-        return this.fetch('cache', 'getmempoolpreattestations', filters ? [asset.handle, offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [asset.handle, offset, count]);
+    static getMempoolPreattestations(offset, count, filters) {
+        return this.fetch('cache', 'getmempoolpreattestations', filters ? [offset, count, filters.transactionIds.join(','), filters.addresses.join(','), filters.memoAccounts.join(',')] : [offset, count]);
     }
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
