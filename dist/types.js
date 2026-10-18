@@ -75,6 +75,29 @@ var Spot;
         DLP.liquidityOf = 'pool_size liquidity_of(pconst@, const uint256&in, const uint256&in)';
         DLP.paramsOf = 'config params_of(pconst@)';
     })(DLP = Spot.DLP || (Spot.DLP = {}));
+    let AMS;
+    (function (AMS) {
+        let Events;
+        (function (Events) {
+            Events.Config = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('config'));
+            Events.FeeRef = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('fee_ref'));
+            Events.BookingRef = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('booking_ref'));
+            Events.SwapRef = algorithm_1.Hashing.hash32(algorithm_1.ByteUtil.byteStringToUint8Array('swap_ref'));
+        })(Events = AMS.Events || (AMS.Events = {}));
+        AMS.construct = 'void construct(pmut@, const address&in)';
+        AMS.reconstruct = 'void reconstruct(pmut@, const config&in)';
+        AMS.reconstructFee = 'void reconstruct_fee(pmut@, const uint256&in, const real320&in)';
+        AMS.reconstructLink = 'void reconstruct_link(pmut@, const uint256&in, const string&in)';
+        AMS.bookDeposit = 'void book_deposit(pmut@, const uint256&in, const real320&in, const string&in)';
+        AMS.spendDeposit = 'void spend_deposit(pmut@, const uint256&in, const uint256&in, const string&in, const array<swap>&in, const array<swap>&in, const string&in)';
+        AMS.reviveDeposit = 'void revive_deposit(pmut@, const uint256&in, const uint256&in)';
+        AMS.repayDeposit = 'void repay_deposit(pmut@, const uint256&in)';
+        AMS.feeOf = 'real320 fee_of(pconst@, const uint256&in)';
+        AMS.depositSpent = 'bool deposit_spent(pconst@, const uint256&in)';
+        AMS.bookingAlive = 'bool booking_alive(pconst@, const uint256&in, const real320&in)';
+        AMS.bookingOf = 'booking booking_of(pconst@, const uint256&in, const real320&in)';
+        AMS.paramsOf = 'config params_of(pconst@)';
+    })(AMS = Spot.AMS || (Spot.AMS = {}));
     let UAP;
     (function (UAP) {
         UAP.payUnifiedAsset = 'void pay_unified_asset(pmut@, const uint256&in, const uint256&in, const address&in)';
