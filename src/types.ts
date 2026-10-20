@@ -71,19 +71,17 @@ export namespace Spot {
   export namespace AMS {
     export namespace Events {
       export const Config = Hashing.hash32(ByteUtil.byteStringToUint8Array('config'));
-      export const FeeRef = Hashing.hash32(ByteUtil.byteStringToUint8Array('fee_ref'));
       export const BookingRef = Hashing.hash32(ByteUtil.byteStringToUint8Array('booking_ref'));
       export const SwapRef = Hashing.hash32(ByteUtil.byteStringToUint8Array('swap_ref'));
+      export const SpentBooking = Hashing.hash32(ByteUtil.byteStringToUint8Array('spent_booking'));
     }
     export const construct = 'void construct(pmut@, const address&in)';
     export const reconstruct = 'void reconstruct(pmut@, const config&in)';
-    export const reconstructFee = 'void reconstruct_fee(pmut@, const uint256&in, const real320&in)';
     export const reconstructLink = 'void reconstruct_link(pmut@, const uint256&in, const string&in)';
     export const bookDeposit = 'void book_deposit(pmut@, const uint256&in, const real320&in, const string&in)';
     export const spendDeposit = 'void spend_deposit(pmut@, const uint256&in, const uint256&in, const string&in, const array<swap>&in, const array<swap>&in, const string&in)';
-    export const reviveDeposit = 'void revive_deposit(pmut@, const uint256&in, const uint256&in)';
+    export const reviveDeposit = 'void respend_deposit(pmut@, const uint256&in, const uint256&in, const uint256&in, const string&in, const string&in)';
     export const repayDeposit = 'void repay_deposit(pmut@, const uint256&in)';
-    export const feeOf = 'real320 fee_of(pconst@, const uint256&in)';
     export const depositSpent = 'bool deposit_spent(pconst@, const uint256&in)';
     export const bookingAlive = 'bool booking_alive(pconst@, const uint256&in, const real320&in)';
     export const bookingOf = 'booking booking_of(pconst@, const uint256&in, const real320&in)';

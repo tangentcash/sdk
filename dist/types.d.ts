@@ -67,19 +67,17 @@ export declare namespace Spot {
     namespace AMS {
         namespace Events {
             const Config: number;
-            const FeeRef: number;
             const BookingRef: number;
             const SwapRef: number;
+            const SpentBooking: number;
         }
         const construct = "void construct(pmut@, const address&in)";
         const reconstruct = "void reconstruct(pmut@, const config&in)";
-        const reconstructFee = "void reconstruct_fee(pmut@, const uint256&in, const real320&in)";
         const reconstructLink = "void reconstruct_link(pmut@, const uint256&in, const string&in)";
         const bookDeposit = "void book_deposit(pmut@, const uint256&in, const real320&in, const string&in)";
         const spendDeposit = "void spend_deposit(pmut@, const uint256&in, const uint256&in, const string&in, const array<swap>&in, const array<swap>&in, const string&in)";
-        const reviveDeposit = "void revive_deposit(pmut@, const uint256&in, const uint256&in)";
+        const reviveDeposit = "void respend_deposit(pmut@, const uint256&in, const uint256&in, const uint256&in, const string&in, const string&in)";
         const repayDeposit = "void repay_deposit(pmut@, const uint256&in)";
-        const feeOf = "real320 fee_of(pconst@, const uint256&in)";
         const depositSpent = "bool deposit_spent(pconst@, const uint256&in)";
         const bookingAlive = "bool booking_alive(pconst@, const uint256&in, const real320&in)";
         const bookingOf = "booking booking_of(pconst@, const uint256&in, const real320&in)";
