@@ -99,7 +99,7 @@ class Stream {
             --size;
         return size > 0 ? this.writeBinaryString(value.slice(0, size)) : this.writeString('');
     }
-    writeDecimal(value) {
+    writeDecimal(value, padded) {
         if (value.isNaN()) {
             let type = Viewable.DecimalNaN;
             this.write(new Uint8Array([type]));
@@ -111,10 +111,10 @@ class Stream {
             return this;
         }
         let numeric = algorithm_1.ByteUtil.bigNumberToString(value).split('.');
-        let type = numeric.length > 1 ? (value.isNegative() ? Viewable.DecimalNeg2 : Viewable.DecimalPos2) : (value.isNegative() ? Viewable.DecimalNeg1 : Viewable.DecimalPos1);
+        let type = numeric.length > 1 || padded ? (value.isNegative() ? Viewable.DecimalNeg2 : Viewable.DecimalPos2) : (value.isNegative() ? Viewable.DecimalNeg1 : Viewable.DecimalPos1);
         this.write(new Uint8Array([type]));
         this.writeInteger(new algorithm_1.Uint256(numeric[0].replace('-', '')));
-        if (numeric.length > 1)
+        if (numeric.length > 1 || padded)
             this.writeInteger(new algorithm_1.Uint256(numeric[1].split('').reverse().join('')));
         return this;
     }

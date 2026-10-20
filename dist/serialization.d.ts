@@ -29,7 +29,7 @@ export declare class Stream {
     writeString(value: string): Stream;
     writeBinaryString(value: Uint8Array): Stream;
     writeBinaryStringOptimized(value: Uint8Array): Stream;
-    writeDecimal(value: BigNumber): Stream;
+    writeDecimal(value: BigNumber, padded?: boolean): Stream;
     writeInteger(value: Uint256 | number): Stream;
     writeBoolean(value: boolean): Stream;
     writeTypeslessInteger(value: Uint256): Stream;
