@@ -112,7 +112,7 @@ export class Stream {
     this.write(new Uint8Array([type]));
     this.writeInteger(new Uint256(numeric[0].replace('-', '')));
     if (numeric.length > 1 || padded)
-      this.writeInteger(new Uint256(numeric[1].split('').reverse().join('')));
+      this.writeInteger(numeric.length > 1 ? new Uint256(numeric[1].split('').reverse().join('')) : new Uint256(0));
     return this;
   }
   writeInteger(value: Uint256 | number): Stream {
