@@ -342,6 +342,7 @@ export declare class RPC {
     static getBlockByNumber(number: number, unrolling?: number): Promise<any | null>;
     static getBlockByHash(hash: string, unrolling?: number): Promise<any | null>;
     static getBlockTipNumber(): Promise<BigNumber | string | null>;
+    static getBlockTipHash(): Promise<string | null>;
     static getGasPrice(asset: AssetId, percentile?: number): Promise<{
         price: BigNumber;
         paid: boolean;

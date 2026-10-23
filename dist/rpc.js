@@ -827,6 +827,9 @@ class RPC {
     static getBlockTipNumber() {
         return this.fetch('no-cache', 'getblocktipnumber', []);
     }
+    static getBlockTipHash() {
+        return this.fetch('no-cache', 'getblocktiphash', []);
+    }
     static getGasPrice(asset, percentile) {
         return this.fetch('no-cache', 'getgasprice', percentile != null ? [asset.handle, percentile] : [asset.handle]);
     }
