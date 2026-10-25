@@ -793,7 +793,7 @@ class RPC {
         return this.fetch('no-cache', 'getfinalizedtransactions', unrolling ? [offset, count, unrolling] : [offset, count]);
     }
     static getTransactionsByOwner(address, offset, count, direction, unrolling) {
-        const args = [address, offset, count];
+        const args = [Array.isArray(address) ? address.join(',') : address, offset, count];
         if (direction != null)
             args.push(direction);
         if (unrolling != null)
