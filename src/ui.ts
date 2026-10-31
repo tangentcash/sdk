@@ -135,9 +135,10 @@ export class UiUtil {
     return null;
   }
   static toFunction(method: string): string {
-    if (this.toFunctionFlags(method).pipelinePay) {
-      method = method.substring(1);
-    }
+    let prefix = 0;
+    while (prefix < method.length && (method[prefix] == '>' || method[prefix] == '@' || method[prefix] == '^'))
+      ++prefix;
+    method = method.substring(prefix);
 
     let start = method.indexOf(' ');
     if (start != -1) {
@@ -152,10 +153,32 @@ export class UiUtil {
 
     return method;
   }
-  static toFunctionFlags(method: string): { pipelinePay: boolean } {
-    return {
-      pipelinePay: method.startsWith('>')
+  static toFunctionFlags(method: string): { pipelinePay: boolean, requireRoute: boolean, requireWithdraw: boolean } | null {
+    const result = (flags: number) => ({
+      pipelinePay: (flags & 1) != 0,
+      requireRoute: (flags & 2) != 0,
+      requireWithdraw: (flags & 4) != 0
+    });
+
+    let flags = 0;
+    for (let offset = 0; offset < method.length; ++offset) {
+      let bit = 0;
+      switch (method[offset]) {
+        case '>': bit = 1; break;
+        case '@': bit = 2; break;
+        case '^': bit = 4; break;
+        default: return result(flags);
+      }
+
+      if (flags & bit)
+        return null;
+
+      flags |= bit;
+      if ((flags & 6) == 6)
+        return null;
     }
+
+    return result(flags);
   }
   static toFunctionName(method: string): string {
     method = this.toFunction(method)

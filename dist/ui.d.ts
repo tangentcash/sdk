@@ -15,7 +15,9 @@ export declare class UiUtil {
     static toFunction(method: string): string;
     static toFunctionFlags(method: string): {
         pipelinePay: boolean;
-    };
+        requireRoute: boolean;
+        requireWithdraw: boolean;
+    } | null;
     static toFunctionName(method: string): string;
     static toSubscript(value: string): string;
     static toValue(asset: AssetId | null, value: string | number | BigNumber | null, delta: boolean, trailing: boolean): string;
