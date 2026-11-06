@@ -812,6 +812,19 @@ class RPC {
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
     }
+    static getFeeQuotes(asset) {
+        return this.fetch('no-cache', 'getfeequotes', [asset.handle]).then((result) => {
+            if (Array.isArray(result?.quotes)) {
+                for (let i = 0; i < result.quotes.length; i++) {
+                    result.quotes[i].asset = new algorithm_1.AssetId(result.quotes[i].asset?.id);
+                }
+            }
+            return result;
+        });
+    }
+    static getWitnessAsset(asset) {
+        return this.fetch('cache', 'getwitnessasset', [asset.handle]);
+    }
     static getAssetHolders(asset, filter) {
         return this.fetch('no-cache', 'getassetholders', [asset.handle, filter]);
     }

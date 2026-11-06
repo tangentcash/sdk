@@ -337,6 +337,16 @@ export declare class RPC {
         memoAccounts: string[];
     }): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
+    static getFeeQuotes(asset: AssetId): Promise<{
+        median_fee: BigNumber;
+        quotes: {
+            signature: string;
+            asset: AssetId;
+            expiry_block_number: BigNumber;
+            fee: BigNumber;
+        }[];
+    } | null>;
+    static getWitnessAsset(asset: AssetId): Promise<any>;
     static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null>;
     static getBlocks(number: number, count: number): Promise<string[] | null>;
     static getBlockByNumber(number: number, unrolling?: number): Promise<any | null>;
