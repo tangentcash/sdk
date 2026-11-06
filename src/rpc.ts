@@ -1007,7 +1007,7 @@ export class RPC {
   static getMempoolTransactionByHash(hash: string): Promise<any | null> {
     return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
   }
-  static getFeeQuotes(asset: AssetId): Promise<{ median_fee: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
+  static getFeeQuotes(asset: AssetId): Promise<{ index: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
     return this.fetch('no-cache', 'getfeequotes', [asset.handle]).then((result: any) => {
       if (Array.isArray(result?.quotes)) {
         for (let i = 0; i < result.quotes.length; i++) {

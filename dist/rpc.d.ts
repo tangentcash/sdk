@@ -338,7 +338,7 @@ export declare class RPC {
     }): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
     static getFeeQuotes(asset: AssetId): Promise<{
-        median_fee: BigNumber;
+        index: BigNumber;
         quotes: {
             signature: string;
             asset: AssetId;
