@@ -90,7 +90,7 @@ var Spot;
         AMS.bookDeposit = 'void book_deposit(pmut@, const uint256&in, const real320&in, const string&in)';
         AMS.spendDeposit = 'void spend_deposit(pmut@, const uint256&in, const uint256&in, const string&in, const array<swap>&in, const array<swap>&in, const send_quota&in, const string&in)';
         AMS.respendDeposit = 'void respend_deposit(pmut@, const uint256&in, const uint256&in, const uint256&in, const string&in, const send_quota&in, const string&in)';
-        AMS.repayDeposit = 'void repay_deposit(pmut@, const uint256&in)';
+        AMS.repayDeposit = 'void repay_deposit(pmut@, const uint256&in, const uint256&in)';
         AMS.depositSpent = 'bool deposit_spent(pconst@, const uint256&in)';
         AMS.bookingAlive = 'bool booking_alive(pconst@, const uint256&in, const real320&in)';
         AMS.bookingOf = 'booking booking_of(pconst@, const uint256&in, const real320&in)';

@@ -77,7 +77,7 @@ export declare namespace Spot {
         const bookDeposit = "void book_deposit(pmut@, const uint256&in, const real320&in, const string&in)";
         const spendDeposit = "void spend_deposit(pmut@, const uint256&in, const uint256&in, const string&in, const array<swap>&in, const array<swap>&in, const send_quota&in, const string&in)";
         const respendDeposit = "void respend_deposit(pmut@, const uint256&in, const uint256&in, const uint256&in, const string&in, const send_quota&in, const string&in)";
-        const repayDeposit = "void repay_deposit(pmut@, const uint256&in)";
+        const repayDeposit = "void repay_deposit(pmut@, const uint256&in, const uint256&in)";
         const depositSpent = "bool deposit_spent(pconst@, const uint256&in)";
         const bookingAlive = "bool booking_alive(pconst@, const uint256&in, const real320&in)";
         const bookingOf = "booking booking_of(pconst@, const uint256&in, const real320&in)";
