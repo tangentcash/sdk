@@ -290,6 +290,7 @@ export declare class RPC {
     static submitTransaction(hexMessage: string): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null>;
     static estimateBridgeFee(asset: AssetId): Promise<{
+        tip: BigNumber;
         index: BigNumber;
         quotes: {
             signature: string;

@@ -894,7 +894,7 @@ export class RPC {
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null> {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
   }
-  static estimateBridgeFee(asset: AssetId): Promise<{ index: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
+  static estimateBridgeFee(asset: AssetId): Promise<{ tip: BigNumber, index: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
     return this.fetch('no-cache', 'estimatebridgefee', [asset.handle]).then((result: any) => {
       if (Array.isArray(result?.quotes)) {
         for (let i = 0; i < result.quotes.length; i++) {
