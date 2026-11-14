@@ -182,6 +182,10 @@ var Transactions;
     class Withdraw extends Ledger.Transaction {
         constructor() {
             super(...arguments);
+            this.quoteExtension = 'boolean?';
+            this.quoteExtensionSignature = 'hashsig?';
+            this.quoteExtensionFeeRate = 'decimal?';
+            this.quoteExtensionBlockNumber = 'uint64?';
             this.bridgeHash = 'uint256';
             this.address = 'string';
             this.value = 'decimal';

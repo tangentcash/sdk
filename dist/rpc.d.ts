@@ -289,6 +289,15 @@ export declare class RPC {
     static simulateTransaction(hexMessage: string): Promise<any | null>;
     static submitTransaction(hexMessage: string): Promise<string | null>;
     static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null>;
+    static estimateBridgeFee(asset: AssetId): Promise<{
+        index: BigNumber;
+        quotes: {
+            signature: string;
+            asset: AssetId;
+            expiry_block_number: BigNumber;
+            fee: BigNumber;
+        }[];
+    } | null>;
     static subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null>;
     static unsubscribeTopics(): Promise<void>;
     static getWallet(): Promise<{
@@ -337,15 +346,6 @@ export declare class RPC {
         memoAccounts: string[];
     }): Promise<any | null>;
     static getMempoolTransactionByHash(hash: string): Promise<any | null>;
-    static getFeeQuotes(asset: AssetId): Promise<{
-        index: BigNumber;
-        quotes: {
-            signature: string;
-            asset: AssetId;
-            expiry_block_number: BigNumber;
-            fee: BigNumber;
-        }[];
-    } | null>;
     static getWitnessAsset(asset: AssetId): Promise<any>;
     static getAssetHolders(asset: AssetId, filter: BigNumber | string | number): Promise<number | null>;
     static getBlocks(number: number, count: number): Promise<string[] | null>;

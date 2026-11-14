@@ -150,6 +150,10 @@ export namespace Transactions {
 
   export class Withdraw extends Ledger.Transaction {
     static typename: string = 'withdraw';
+    quoteExtension: string = 'boolean?';
+    quoteExtensionSignature: string = 'hashsig?';
+    quoteExtensionFeeRate: string = 'decimal?';
+    quoteExtensionBlockNumber: string = 'uint64?';
     bridgeHash: string = 'uint256';
     address: string = 'string';
     value: string = 'decimal';

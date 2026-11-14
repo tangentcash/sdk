@@ -700,6 +700,16 @@ class RPC {
     static callTransaction(asset, fromAddress, toAddress, method, args) {
         return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
     }
+    static estimateBridgeFee(asset) {
+        return this.fetch('no-cache', 'estimatebridgefee', [asset.handle]).then((result) => {
+            if (Array.isArray(result?.quotes)) {
+                for (let i = 0; i < result.quotes.length; i++) {
+                    result.quotes[i].asset = new algorithm_1.AssetId(result.quotes[i].asset?.id);
+                }
+            }
+            return result;
+        });
+    }
     static async subscribeTopics(addresses, blocks, transactions) {
         const topics = [addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
         const id = topics.join(',');
@@ -811,16 +821,6 @@ class RPC {
     }
     static getMempoolTransactionByHash(hash) {
         return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
-    }
-    static getFeeQuotes(asset) {
-        return this.fetch('no-cache', 'getfeequotes', [asset.handle]).then((result) => {
-            if (Array.isArray(result?.quotes)) {
-                for (let i = 0; i < result.quotes.length; i++) {
-                    result.quotes[i].asset = new algorithm_1.AssetId(result.quotes[i].asset?.id);
-                }
-            }
-            return result;
-        });
     }
     static getWitnessAsset(asset) {
         return this.fetch('cache', 'getwitnessasset', [asset.handle]);

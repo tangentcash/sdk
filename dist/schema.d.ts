@@ -99,6 +99,10 @@ export declare namespace Transactions {
     }
     class Withdraw extends Ledger.Transaction {
         static typename: string;
+        quoteExtension: string;
+        quoteExtensionSignature: string;
+        quoteExtensionFeeRate: string;
+        quoteExtensionBlockNumber: string;
         bridgeHash: string;
         address: string;
         value: string;

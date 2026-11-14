@@ -894,6 +894,16 @@ export class RPC {
   static callTransaction(asset: AssetId, fromAddress: string, toAddress: string, method: string, args: any[]): Promise<any | null> {
     return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
   }
+  static estimateBridgeFee(asset: AssetId): Promise<{ index: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
+    return this.fetch('no-cache', 'estimatebridgefee', [asset.handle]).then((result: any) => {
+      if (Array.isArray(result?.quotes)) {
+        for (let i = 0; i < result.quotes.length; i++) {
+          result.quotes[i].asset = new AssetId(result.quotes[i].asset?.id);
+        }
+      }
+      return result;
+    }) as any;
+  }
   static async subscribeTopics(addresses: string[], blocks?: boolean, transactions?: boolean): Promise<number | null> {
     const topics: any[] = [addresses.join(','), blocks, transactions].filter((v) => v !== undefined);
     const id = topics.join(',');
@@ -1006,16 +1016,6 @@ export class RPC {
   }
   static getMempoolTransactionByHash(hash: string): Promise<any | null> {
     return this.fetch('cache', 'getmempooltransactionbyhash', [hash]);
-  }
-  static getFeeQuotes(asset: AssetId): Promise<{ index: BigNumber, quotes: { signature: string, asset: AssetId, expiry_block_number: BigNumber, fee: BigNumber }[] } | null> {
-    return this.fetch('no-cache', 'getfeequotes', [asset.handle]).then((result: any) => {
-      if (Array.isArray(result?.quotes)) {
-        for (let i = 0; i < result.quotes.length; i++) {
-          result.quotes[i].asset = new AssetId(result.quotes[i].asset?.id);
-        }
-      }
-      return result;
-    }) as any;
   }
   static getWitnessAsset(asset: AssetId): Promise<any> {
     return this.fetch('cache', 'getwitnessasset', [asset.handle]);
