@@ -700,8 +700,8 @@ class RPC {
     static callTransaction(asset, fromAddress, toAddress, method, args) {
         return this.fetch('no-cache', 'calltransaction', [asset.handle, fromAddress, toAddress, method, ...args]);
     }
-    static estimateBridgeFee(asset) {
-        return this.fetch('no-cache', 'estimatebridgefee', [asset.handle]).then((result) => {
+    static estimateBridgeFee(asset, amount) {
+        return this.fetch('no-cache', 'estimatebridgefee', amount != null && amount.length > 0 ? [asset.handle, amount] : [asset.handle]).then((result) => {
             if (Array.isArray(result?.quotes)) {
                 for (let i = 0; i < result.quotes.length; i++) {
                     result.quotes[i].asset = new algorithm_1.AssetId(result.quotes[i].asset?.id);
