@@ -35,10 +35,11 @@ export declare enum EventType {
     BridgeParticipant = 10,
     WitnessAccount = 11,
     WitnessTransaction = 12,
-    CallLink = 13,
-    CallSend = 14,
-    RollupReceipt = 15,
-    Unknown = 16
+    WitnessAsset = 13,
+    CallLink = 14,
+    CallSend = 15,
+    RollupReceipt = 16,
+    Unknown = 17
 }
 export type EventData = {
     type: EventType.Error;
@@ -97,6 +98,10 @@ export type EventData = {
     addresses: string[];
 } | {
     type: EventType.WitnessTransaction;
+    asset: AssetId;
+    stateHash: string;
+} | {
+    type: EventType.WitnessAsset;
     asset: AssetId;
     stateHash: string;
 } | {
@@ -163,6 +168,10 @@ export type SummaryState = {
             aliases: string[];
         }>;
         transactions: Record<string, {
+            asset: AssetId;
+            stateHashes: string[];
+        }>;
+        assets: Record<string, {
             asset: AssetId;
             stateHashes: string[];
         }>;

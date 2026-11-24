@@ -88,6 +88,10 @@ var States;
     }
     WitnessTransaction.typename = 'witness_transaction';
     States.WitnessTransaction = WitnessTransaction;
+    class WitnessAsset {
+    }
+    WitnessAsset.typename = 'witness_asset';
+    States.WitnessAsset = WitnessAsset;
 })(States || (exports.States = States = {}));
 var Transactions;
 (function (Transactions) {

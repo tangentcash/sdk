@@ -47,6 +47,9 @@ export declare namespace States {
     class WitnessTransaction {
         static typename: string;
     }
+    class WitnessAsset {
+        static typename: string;
+    }
 }
 export declare namespace Transactions {
     namespace Transfer {

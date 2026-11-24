@@ -33,6 +33,7 @@ export enum EventType {
   BridgeParticipant,
   WitnessAccount,
   WitnessTransaction,
+  WitnessAsset,
   CallLink,
   CallSend,
   RollupReceipt,
@@ -99,6 +100,10 @@ export type EventData = {
   asset: AssetId,
   stateHash: string
 } | {
+  type: EventType.WitnessAsset,
+  asset: AssetId,
+  stateHash: string
+} | {
   type: EventType.CallLink,
   bridgeHash: string,
   asset: AssetId,
@@ -136,8 +141,9 @@ export type SummaryState = {
     migrations: Record<string, boolean>
   },
   witness: {
-    accounts: Record<string, { asset: AssetId, purpose: 'routing' | 'bridge' | 'witness', aliases: string[] }>
-    transactions: Record<string, { asset: AssetId, stateHashes: string[] }>
+    accounts: Record<string, { asset: AssetId, purpose: 'routing' | 'bridge' | 'witness', aliases: string[] }>,
+    transactions: Record<string, { asset: AssetId, stateHashes: string[] }>,
+    assets: Record<string, { asset: AssetId, stateHashes: string[] }>
   },
   receipts: Record<string, { executionIndex: number, relativeGasUse: BigNumber }>,
   errors: string[],
@@ -292,7 +298,8 @@ export class EventResolver {
       },
       witness: {
         accounts: { },
-        transactions: { }
+        transactions: { },
+        assets: { }
       },
       receipts: { },
       errors: [],
@@ -468,6 +475,19 @@ export class EventResolver {
             else
               result.witness.transactions[asset.handle] = { asset: asset, stateHashes: [hash] };
             result.events.push({ type: EventType.WitnessTransaction, asset: asset, stateHash: hash });
+          }
+          break;
+        }
+        case Types.WitnessAsset: {
+          if (event.args.length == 2 && (isNumber(event.args[0]) || typeof event.args[0] == 'string') && (isNumber(event.args[1]) || typeof event.args[1] == 'string')) {
+            const [assetId, stateHash] = event.args;
+            const asset = new AssetId(assetId);
+            const hash = new Uint256(stateHash.toString()).toHex();
+            if (result.witness.assets[asset.handle] != null)
+              result.witness.assets[asset.handle].stateHashes.push(hash);
+            else
+              result.witness.assets[asset.handle] = { asset: asset, stateHashes: [hash] };
+            result.events.push({ type: EventType.WitnessAsset, asset: asset, stateHash: hash });
           }
           break;
         }

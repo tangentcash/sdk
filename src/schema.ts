@@ -67,6 +67,10 @@ export namespace States {
   export class WitnessTransaction {
     static typename: string = 'witness_transaction';
   }
+
+  export class WitnessAsset {
+    static typename: string = 'witness_asset';
+  }
 }
 
 export namespace Transactions {
